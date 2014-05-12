@@ -74,5 +74,8 @@ DESTDIR = $$DEFAULT_BIN_DIR
 #  QMAKE_RPATH=
 #}
 
+OTHER_FILES += \
+    LICENSE \
+    README.md
 
 
