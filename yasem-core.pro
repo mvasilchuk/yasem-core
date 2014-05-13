@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+VERSION = 1.0.0
+
 QT       += core gui widgets network
 
 CONFIG += c++11
