@@ -3,7 +3,9 @@
 
 #include "enums.h"
 #include "logger.h"
-#include "network.h"
+#include "core-network.h"
+
+#include <functional>
 
 #include <QObject>
 #include <QSettings>
@@ -41,7 +43,7 @@ public:
 
     virtual QSettings* settings() = 0;
     virtual QList<DiskInfo*> disks() = 0;
-    virtual Network* network() = 0;
+    virtual CoreNetwork* network() = 0;
     virtual QThread* mainThread() = 0;
 
 protected:
@@ -52,6 +54,7 @@ private:
     void operator=(Core const&);
 signals:
     void loggerChanged(Logger* logger);
+    void methodNotImplemented(const QString &name);
 
 public slots:
     virtual void onClose() = 0;

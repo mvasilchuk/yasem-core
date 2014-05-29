@@ -1,5 +1,5 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef CORENETWORK_H
+#define CORENETWORK_H
 
 #include <QtNetwork/QNetworkInterface>
 #include <QList>
@@ -7,10 +7,10 @@
 namespace yasem
 {
 
-class Network {
+class CoreNetwork {
 
 public:
-    virtual ~Network() {}
+    virtual ~CoreNetwork() {}
     virtual bool isConnected() = 0;
     virtual bool isLanConnected() = 0;
     virtual bool isWifiConnected() = 0;
@@ -20,4 +20,4 @@ public:
 
 }
 
-#endif // NETWORK_H
+#endif // CORENETWORK_H

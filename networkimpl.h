@@ -1,14 +1,14 @@
 #ifndef NETWORKIMPL_H
 #define NETWORKIMPL_H
 
-#include "network.h"
+#include "core-network.h"
 
 #include <QObject>
 
 namespace yasem
 {
 
-class NetworkImpl : public QObject, public Network
+class NetworkImpl : public QObject, public CoreNetwork
 {
     Q_OBJECT
 public:

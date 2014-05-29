@@ -6,6 +6,7 @@
 #include "stbprofileplugin.h"
 #include "datasource.h"
 
+
 #include <functional>
 
 #include <QtPlugin>

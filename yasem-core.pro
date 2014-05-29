@@ -46,7 +46,6 @@ HEADERS += \
     profilemanageimpl.h \
     stbprofileplugin.h \
     datasource.h \
-    network.h \
     networkimpl.h \
     stbprofile.h \
     customkeyevent.h \
@@ -60,7 +59,8 @@ HEADERS += \
     browserplugin.h \
     pluginthread.h \
     mediasignalsender.h \
-    profileconfig.h
+    profileconfig.h \
+    core-network.h
 
 
 

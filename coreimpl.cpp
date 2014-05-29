@@ -82,7 +82,7 @@ QList<DiskInfo *> CoreImpl::disks()
     return disksList;
 }
 
-Network* CoreImpl::network()
+CoreNetwork* CoreImpl::network()
 {
     return networkObj;
 }

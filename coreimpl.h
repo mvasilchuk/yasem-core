@@ -26,14 +26,14 @@ public slots:
 protected:
     Core* coreInstance;
     QSettings* appSettings;
-    Network* networkObj;
+    CoreNetwork* networkObj;
     QList<DiskInfo *> disksList;
 
     // Core interface
 public slots:
     void mountPointChanged();
     QList<DiskInfo *> disks();
-    Network* network();
+    CoreNetwork* network();
     QThread* mainThread();
 };
 

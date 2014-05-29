@@ -39,7 +39,6 @@ void ProfileManageImpl::addProfile(Profile *profile)
 
 void ProfileManageImpl::setActiveProfile(Profile *profile)
 {
-    STUB();
     Q_ASSERT(profile);
     foreach (Profile* item, profilesList) {
         if(item == profile)
@@ -157,7 +156,6 @@ QMap<QString, StbProfilePlugin *> ProfileManageImpl::getRegisteredClasses()
 
 StbProfilePlugin *ProfileManageImpl::getProfilePluginByClassId(const QString &classId)
 {
-    STUB();
     for(auto iterator = profileClasses.begin(); iterator != profileClasses.end(); iterator++)
     {
         if(iterator.key() == classId)
