@@ -69,10 +69,6 @@ public:
 
     virtual void configureKeyMap() = 0;
 
-    QHash<QString, QString> userAgents;
-    QHash<QString, QSize> portalResolutions;
-    QHash<QString, QSize> videoResolutions;
-
     bool hasFlag(ProfileFlag flag)
     {
         return (flags & flag) == flag;
@@ -113,6 +109,10 @@ public:
     }
 
     virtual QString portal() = 0;
+    QString getSubmodelName()
+    {
+        return submodelNames.value(subModel);
+    }
 
 protected:
     QString id;
@@ -120,9 +120,13 @@ protected:
     ProfileFlag flags;
     QString image;
     StbPlugin* profilePlugin;
-    QString subModel;
     Datasource* datasourceObj;
     ProfileConfig profileConfig;
+    int subModel;
+    QHash<QString, QString> userAgents;
+    QHash<QString, QSize> portalResolutions;
+    QHash<QString, QSize> videoResolutions;
+    QHash<int, QString> submodelNames;
 
 signals:
 
