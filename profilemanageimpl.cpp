@@ -46,7 +46,7 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
             activeProfile = profile;
             Core::instance()->settings()->setValue("active_profile", profile->getId());
 
-            INFO(QString("Active profile: %1").arg(profile->getId()));
+            qDebug() << QString("Active profile: %1").arg(profile->getId());
 
             profile->getProfilePlugin()->init();
             profile->start();
@@ -58,7 +58,7 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
         }
     }
 
-    WARN(QString("Cannot change profile '%1': not found!").arg(profile->getId()));
+    qWarning() << QString("Cannot change profile '%1': not found!").arg(profile->getId());
 }
 
 bool ProfileManageImpl::removeProfile(Profile *profile)
@@ -78,11 +78,11 @@ void ProfileManageImpl::loadProfiles()
     qDebug() << "Looking for profiles in" << profilePath;
     if(!profilesDir.cd(profilePath))
     {
-        ERROR(QString("Cannot go to profiles dir: %1   ").arg(profilesDir.dirName()).append(Core::instance()->settings()->fileName()));
+        ERROR() << QString("Cannot go to profiles dir: %1   ").arg(profilesDir.dirName()).append(Core::instance()->settings()->fileName());
         return;
     }
 
-    DEBUG(QString("Searching for profiles in %1").arg(profilesDir.path()));
+    DEBUG() << QString("Searching for profiles in %1").arg(profilesDir.path());
 
     profilesDir.setNameFilters(QStringList() << "*.ini");
 
@@ -90,7 +90,7 @@ void ProfileManageImpl::loadProfiles()
 
     foreach (QString fileName, profilesDir.entryList(QDir::Files | QDir::NoSymLinks | QDir::Readable))
     {
-        DEBUG(QString("Loading profile from %1").arg(fileName));
+        DEBUG() << QString("Loading profile from %1").arg(fileName);
         QSettings s(profilesDir.path().append("/").append(fileName), QSettings::IniFormat);
 
         s.beginGroup("profile");
@@ -99,7 +99,7 @@ void ProfileManageImpl::loadProfiles()
 
         if(profilePlugin == NULL)
         {
-            WARN(QString("Plugin for profile classid '%1' not found!").arg(classId));
+            qWarning() << QString("Plugin for profile classid '%1' not found!").arg(classId);
             continue;
         }
 
@@ -121,7 +121,7 @@ Profile* ProfileManageImpl::createProfile(const QString &classId, const QString 
     DatasourcePlugin* dsPlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole("datasource"));
 
     Q_ASSERT(classId != "");
-    STUB_WITH_LIST(QStringList() << baseName << classId);
+    DEBUG() << baseName << classId;
     StbProfilePlugin* profilePlugin = getProfilePluginByClassId(classId);
     Q_ASSERT(profilePlugin != NULL);
     Profile* profile = profilePlugin->createProfile();
@@ -142,11 +142,11 @@ void ProfileManageImpl::registerProfileClassId(const QString &classId, StbProfil
 {
     if(!profileClasses.contains(classId))
     {
-        INFO(QString("Registered '%1' as profile class ID").arg(classId));
+        qDebug() << "Registered" << classId << "as profile class ID";
         profileClasses.insert(classId, profilePlugin);
     }
     else
-        WARN(QString("Profile class ID '%1' has bee already registered!").arg(classId));
+        WARN() << "Profile class ID" << classId <<  "has bee already registered!";
 }
 
 QMap<QString, StbProfilePlugin *> ProfileManageImpl::getRegisteredClasses()
@@ -162,7 +162,7 @@ StbProfilePlugin *ProfileManageImpl::getProfilePluginByClassId(const QString &cl
             return iterator.value();
     }
 
-    WARN(QString("Profile plugin '%1' not found!").arg(classId));
+    qWarning() << QString("Profile plugin '%1' not found!").arg(classId);
     return NULL;
 }
 
@@ -176,7 +176,7 @@ Profile *ProfileManageImpl::findById(const QString &id)
         }
     }
 
-    ERROR(QString("Profile '%1' not found!").arg(id));
+    ERROR() << QString("Profile '%1' not found!").arg(id);
     return NULL;
 }
 

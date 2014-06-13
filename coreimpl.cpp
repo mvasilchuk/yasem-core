@@ -25,7 +25,7 @@ QSettings *CoreImpl::settings()
 
 void CoreImpl::onClose()
 {
-    LOG("onClose");
+    LOG() << "onClose";
     PluginManager::instance()->deinitPlugins();
 }
 
@@ -40,7 +40,7 @@ void CoreImpl::mountPointChanged()
 
     if (!dfProcess.waitForFinished())
     {
-        WARN("Not finished!");
+        qWarning() << "Not finished!";
         return;
     }
 
@@ -63,7 +63,7 @@ void CoreImpl::mountPointChanged()
             info->mountPoint = matcher.captured(6);
             disksList.append(info);
 
-            DEBUG(info->toString());
+            DEBUG() << info->toString();
         }
     }
 

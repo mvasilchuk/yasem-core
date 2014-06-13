@@ -10,7 +10,6 @@ QT       += core gui widgets network
 
 CONFIG += c++11
 
-QMAKE_CXXFLAGS += -pedantic -Wall -Wextra
 #-Wunused-parameter -Wstrict-overflow=5 -Wundef -Wshadow -Wcast-qual -Wcast-align -Wconversion -Wsign-conversion -Wmissing-declarations -Wredundant-decls -Wdisabled-optimization -Woverloaded-virtual -Wctor-dtor-privacy -Wold-style-cast
 
 TARGET = yasem
@@ -31,7 +30,8 @@ SOURCES += main.cpp \
     consolelogger.cpp \
     profilemanageimpl.cpp \
     networkimpl.cpp \
-    pluginthread.cpp
+    pluginthread.cpp \
+    loggercore.cpp
 
 HEADERS += \
     pluginmanager.h \
@@ -60,7 +60,8 @@ HEADERS += \
     pluginthread.h \
     mediasignalsender.h \
     profileconfig.h \
-    core-network.h
+    core-network.h \
+    loggercore.h
 
 
 

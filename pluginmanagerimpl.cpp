@@ -33,15 +33,15 @@ PluginManagerImpl::PluginManagerImpl()
 
 PLUGIN_ERROR_CODES PluginManagerImpl::listPlugins()
 {
-    DEBUG("Looking for plugins...");
+    DEBUG() << "Looking for plugins...";
     QSettings* settings = Core::instance()->settings();
 
     QStringList pluginsToLoad = settings->value("plugins", "").toString().split(",");
 
-    DEBUG(QString("pluginsToLoad: %1").arg(QVariant(pluginsToLoad).toString()));
+    DEBUG() << "pluginsToLoad:" << pluginsToLoad;
 
 
-    DEBUG("PluginManager::listPlugins()");
+    DEBUG() << "PluginManager::listPlugins()";
     QStringList pluginIds;
     plugins.clear();
 
@@ -58,17 +58,17 @@ PLUGIN_ERROR_CODES PluginManagerImpl::listPlugins()
     #endif
     if(!pluginsDir.cd(getPluginDir()))
     {
-        ERROR(QString("Cannot go to plugins dir: %1").arg(getPluginDir()));
+        ERROR() << "Cannot go to plugins dir:" << getPluginDir();
         return PLUGIN_ERROR_DIR_NOT_FOUND;
     }
 
-    INFO(QString("Blacklisted plugins: %1").arg(blacklistedPlugins.join(", ")));
+    qDebug() << "Blacklisted plugins:" << blacklistedPlugins;
 
-    DEBUG(QString("Searching for plugins in %1").arg(pluginsDir.path()));
+    DEBUG() << "Searching for plugins in" << pluginsDir.path();
 
     foreach (QString fileName, pluginsDir.entryList(QDir::Files | QDir::NoSymLinks | QDir::Readable))
     {
-        DEBUG(QString("Found file: %1").arg(fileName));
+        qDebug() << "Found file:" << fileName;
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
 
         QObject* obj = pluginLoader.instance();
@@ -97,14 +97,12 @@ PLUGIN_ERROR_CODES PluginManagerImpl::listPlugins()
                     plugin->state = PLUGIN_STATE_LOADED;
                     plugin->flags = parseFlags(metadata.value("flags").toString());
 
-                    DEBUG(QString("FLAGS:").append(QString::number(plugin->flags)));
-
                     //qDebug() << "CLASS count: "
                     //            << ((QPluginLoader*)plugin)->metaObject()->className();
 
                     if(blacklistedPlugins.contains(plugin->id))
                     {
-                        INFO(QString("Plugin %1 is ignored and won't be loaded.").arg(plugin->id));
+                        qDebug() << QString("Plugin %1 is ignored and won't be loaded.").arg(plugin->id);
                         continue;
                     }
 
@@ -117,7 +115,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::listPlugins()
                         dependenciesNames.append(plugin->dependencies.at(index)->role);
                     }
 
-                    DEBUG(QString("Plugin loaded: %1. Dependencies: [%2]").arg(plugin->name).arg(dependenciesNames.join(", ")));
+                    qDebug() << "Plugin loaded:" << plugin->name << ". Dependencies:" << dependenciesNames;
 
                     // Trying to register plugin as profile plugin
                     StbProfilePlugin* profilePlugin = dynamic_cast<StbProfilePlugin*>(plugin);
@@ -146,7 +144,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::listPlugins()
 
 QList<Plugin*> PluginManagerImpl::getPlugins(const QString &role = "")
 {
-    DEBUG(QString("getPlugins(%1)").arg(role));
+    DEBUG() << QString("getPlugins(%1)").arg(role);
     if(role == "")
         return plugins;
 
@@ -172,7 +170,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
     for(int index=0; index < dependencyLevel; index++)
         depLevel.append("--");
 
-    QString spacing = depLevel.size() > 0 ? depLevel.join("-").append(" ") : "";
+    QString spacing = depLevel.size() > 0 ? depLevel.join("-") : "";
     if(plugin->state == PLUGIN_STATE_INITIALIZED)
     {
         //INFO(QString("Plugin '%1' is already initialized").arg(plugin->name));
@@ -184,9 +182,9 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
     if(plugin->id == NULL || plugin->id == "")
         return PLUGIN_ERROR_NO_PLUGIN_ID;
 
-    DEBUG(spacing + QString("Plugin '%1' initialization...").arg(plugin->id));
+    DEBUG() << spacing << "Plugin" << plugin->id << "initialization...";
+    DEBUG() << spacing << "Loading dependencies for" << plugin->id << "...";
 
-    DEBUG(spacing + QString("Loading dependencies for '%1'...").arg(plugin->id));
     if(plugin->dependencies.size() > 0)
     {
         plugin->state = PLUGIN_STATE_WAITING_FOR_DEPENDENCY;
@@ -210,16 +208,16 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
 
             if(cyclic)
             {
-                WARN(QString("Cyclic dependency in '%1' with role '%2'").arg(plugin->id).arg(dependency->role));
+                WARN() << "Cyclic dependency in" << plugin->id << "with role" << dependency->role;
                 continue;
             }
 
-            DEBUG(spacing + QString("Trying to load dependency '%1' for '%2'").arg(dependency->role).arg(plugin->name));
+            DEBUG() << spacing << "Trying to load dependency" << dependency->role << " for" << plugin->name;
 
             Plugin* dependencyPlugin = PluginManager::instance()->getByRole(dependency->role);
             if(dependencyPlugin == NULL)
             {
-                WARN(spacing + QString("Dependency '%1' for '%2' not found!").arg(dependency->role).arg(plugin->id));
+                WARN() << "Dependency" << dependency->role << "for" << plugin->id << "not found!";
                 if(dependency->required)
                 {
                     result = PLUGIN_ERROR_DEPENDENCY_MISSING;
@@ -227,7 +225,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
                 }
                 else
                 {
-                    LOG(spacing + QString("Skipping '%1' as not required").arg(dependency->role));
+                    LOG() << spacing << "Skipping" << dependency->role << "as not required";
                     continue;
                 }
             }
@@ -236,7 +234,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
 
             if(dependencyPlugin->state == PLUGIN_STATE_WAITING_FOR_DEPENDENCY)
             {
-                WARN(QString("Cyclic dependency in plugin '%1' with '%2'").arg(plugin->id).arg(dependencyPlugin->id));
+                WARN() << "Cyclic dependency in plugin" << plugin->id << "with" << dependencyPlugin->id;
                 continue;
             }
 
@@ -245,13 +243,13 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
             PLUGIN_ERROR_CODES code = PluginManager::instance()->initPlugin(dependencyPlugin, dependencyLevel+1);
             if(code != PLUGIN_ERROR_NO_ERROR)
             {
-                WARN(spacing + QString("Error %1 occured while initializing plugin '%2' dependency '%3'").arg(code).arg(plugin->name).arg(dependency->role));
+                WARN() << "Error" << code << "occured while initializing plugin" << plugin->name << "dependency" << dependency->role;
                 plugin->state = PLUGIN_STATE_INITIALIZED;
                 result = PLUGIN_ERROR_DEPENDENCY_MISSING;
             }
             else
             {
-                DEBUG(spacing + QString("Dependency '%1' initialized").arg(dependency->role));
+                DEBUG() << spacing << "Dependency" << dependency->role << "initialized";
             }
         }
 
@@ -260,23 +258,23 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
         {
             case PLUGIN_ERROR_NO_ERROR:
             {
-                DEBUG(spacing + QString("Dependencies for '%1' have been loaded.").arg(plugin->id));
+                DEBUG() << spacing << "Dependencies for" << plugin->id << "have been loaded.";
                 break;
             }
             case PLUGIN_ERROR_DEPENDENCY_MISSING:
             {
-                WARN(spacing + QString("Plugin '%1' won't be loaded because of missing dependencies!").arg(plugin->id));
+                WARN() << "Plugin" << plugin->id << "won't be loaded because of missing dependencies!";
                 return PLUGIN_ERROR_DEPENDENCY_MISSING;
             }
             default:
             {
-                WARN(spacing + QString("Plugin '%1' unknown initialization code %2").arg(plugin->id).arg(result));
+                WARN() << "Plugin" << plugin->id << "unknown initialization code" << result;
                 return PLUGIN_ERROR_UNKNOWN_ERROR;
             }
         }
     }
     else
-        INFO(spacing + QString("No dependencies for '%1' have been found").arg(plugin->id));
+        WARN() << "No dependencies for" << plugin->id << "have been found";
 
 
     #ifdef THREAD_SAFE_PLUGINS
@@ -297,11 +295,12 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
 
     if(initValue != PLUGIN_ERROR_NO_ERROR)
     {
-        WARN(spacing + QString("Plugin initialization failed. Code: %1").arg(initValue));
+        WARN() <<"Plugin initialization failed. Code:" << initValue;
+        throw new std::exception();
         plugin->state = PLUGIN_STATE_DISABLED;
         return PLUGIN_ERROR_NOT_INITIALIZED;
     }
-    DEBUG(spacing + QString("Plugin '%1' 'initialized").arg(plugin->id));
+    DEBUG() << spacing << "Plugin" << plugin->id << "initialized";
 
     plugin->state = PLUGIN_STATE_INITIALIZED;
     return PLUGIN_ERROR_NO_ERROR;
@@ -309,7 +308,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
 
 PLUGIN_ERROR_CODES  PluginManagerImpl::deinitPlugin(Plugin *plugin)
 {
-    DEBUG(QString("deinitPlugin(%1)").arg(plugin->name));
+    DEBUG() << "deinitPlugin(" << plugin->name << ")";
 
     PLUGIN_ERROR_CODES result = plugin->deinitialize();
     if(result == PLUGIN_ERROR_NO_ERROR)
@@ -459,7 +458,7 @@ void PluginManagerImpl::loadProfiles()
 
 PLUGIN_ERROR_CODES PluginManagerImpl::initPlugins()
 {
-    DEBUG("initPlugins()");
+    DEBUG() << "initPlugins()";
     for(int index = 0; index < plugins.size(); index++)
     {
         Plugin* plugin = plugins.at(index);
@@ -471,7 +470,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugins()
 
 PLUGIN_ERROR_CODES PluginManagerImpl::deinitPlugins()
 {
-    DEBUG("deinitPlugins()");
+    DEBUG() << "deinitPlugins()";
     for(int index = 0; index < plugins.size(); index++)
     {
         deinitPlugin(plugins.at(index));

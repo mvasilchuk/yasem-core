@@ -1,29 +1,30 @@
 #include "coreimpl.h"
-#include "consolelogger.h"
 #include "pluginmanagerimpl.h"
 #include "profilemanageimpl.h"
-#include "macros.h"
+#include "loggercore.h"
 
 #include <QApplication>
+#include <QDebug>
 #include <signal.h>
 #include <stdio.h>
 
-#ifdef Q_WS_LINUX
+#ifdef Q_OS_LINUX
 #include <execinfo.h>
 #include <unistd.h>
-#endif //Q_WS_LINUX
+#endif //Q_OS_LINUX
 
-#ifdef Q_WS_LINUX
+#ifdef Q_OS_LINUX
+
+#define CALLSTACK_SIZE 2048
 
 void printCallStack()
 {
     //print call stack (needs #include <execinfo.h>)
-    int callstack_size = 2048;
-    void* callstack[callstack_size];
-    int i, frames = backtrace(callstack, callstack_size);
+    void* callstack[CALLSTACK_SIZE];
+    int i, frames = backtrace(callstack, CALLSTACK_SIZE);
     char** strs = backtrace_symbols(callstack, frames);
     for(i = 0; i < frames; i++){
-        printf("%s\n", strs[i]);
+        printf("%d: %s\n", i, strs[i]);
     }
     free(strs);
 }
@@ -43,7 +44,10 @@ void signalHandler(int signal)
             abort();
             exit(1);
         break;
-        default: printf("APPLICATION EXITING\r\n"); break;
+        default:
+            printf("APPLICATION EXITING\r\n");
+            printCallStack();
+            break;
     }
     QCoreApplication::quit();
 }
@@ -81,25 +85,26 @@ void stopErrorRedirect(int stdout_fd)
     close(stdout_fd);
 }
 
-#endif //Q_WS_LINUX
+#endif //Q_OS_LINUX
 
 
 using namespace yasem;
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
 
-    #ifdef Q_WS_LINUX
+    qInstallMessageHandler(LoggerCore::MessageHandler);
+
+    QApplication a(argc, argv);
+    int execCode;
+
+    #ifdef Q_OS_LINUX
     //int stdout_fd = startErrorRedirect();
     setupSignalHandlers();
-    #endif //Q_WS_LINUX
+    #endif //Q_OS_LINUX
 
     Core::setInstance(new CoreImpl());
     a.setProperty("Core", QVariant::fromValue(Core::instance()));
-
-    Logger::setInstance(new ConsoleLogger(Core::instance()));
-    a.setProperty("Logger", QVariant::fromValue(Logger::instance()));
 
     ProfileManager::setInstance(new ProfileManageImpl());
     a.setProperty("ProfileManager", QVariant::fromValue(ProfileManager::instance()));
@@ -107,7 +112,7 @@ int main(int argc, char *argv[])
 
     Core::instance()->mountPointChanged();
 
-    Logger::debug(NULL, "Starting application...");
+    qDebug() << "Starting application...";
 
     PluginManager::setInstance(new PluginManagerImpl());
     a.setProperty("PluginManager", QVariant::fromValue(PluginManager::instance()));
@@ -118,22 +123,25 @@ int main(int argc, char *argv[])
         PLUGIN_ERROR_CODES initResult = PluginManager::instance()->initPlugins();
         if(initResult != PLUGIN_ERROR_NO_ERROR)
         {
-            Logger::fatal(NULL, QString("Cannot initialize plugins. Error code %1").arg(initResult));
+            qCritical() << "Cannot initialize plugins. Error code" << initResult;
             return listResult;
         }
     }
     else
     {
-        Logger::fatal(NULL, QString("Cannot list plugins. Error code %1").arg(listResult));
+        qCritical() << "Cannot list plugins. Error code" << listResult;
         return listResult;
     }
 
     //QObject::connect(&a, &QCoreApplication::aboutToQuit, Core::instance(), &Core::onClose);
-    int execCode = a.exec();
-    Logger::debug(NULL, QObject::trUtf8("Closing application... code: %1").arg(execCode));
 
-    #ifdef Q_WS_LINUX
+    execCode = a.exec();
+    qDebug() <<  "Closing application... code:"  << execCode;
+
+    #ifdef Q_OS_LINUX
     //stopErrorRedirect(stdout_fd);
-    #endif //Q_WS_LINUX
+    #endif //Q_OS_LINUX
+
+
     return execCode;
 }
