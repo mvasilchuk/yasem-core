@@ -13,11 +13,11 @@
 #define LOG_TYPE_FIXME 1011
 #define LOG_TYPE_BUG 1015
 
-#define LOG_PREFIX_STUB "$STUB$"
-#define LOG_PREFIX_LOG "$LOG$"
-#define LOG_PREFIX_INFO "$INFO$"
-#define LOG_PREFIX_WTF "$WTF$"
-#define LOG_PREFIX_FIXME "$FIXME$"
+static const char* LOG_PREFIX_STUB = "$STUB$";
+static const char* LOG_PREFIX_LOG = "$LOG$";
+static const char* LOG_PREFIX_INFO = "$INFO$";
+static const char* LOG_PREFIX_WTF = "$WTF$";
+static const char* LOG_PREFIX_FIXME = "$FIXME$";
 
 LoggerCore::LoggerCore(QObject *parent) :
     QObject(parent)
@@ -95,7 +95,7 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         }
         case LOG_TYPE_STUB:
         {
-            fprintf(stdout, "[STUB ] %s: %s\n", context.function, message);
+            fprintf(stdout, "[STUB ] %s%s%s\n", context.function, strlen(message) > 0 ? ": " : "", message);
             break;
         }
         case LOG_TYPE_LOG:

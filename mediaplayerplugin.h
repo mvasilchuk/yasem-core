@@ -62,12 +62,11 @@ public:
 
 
     virtual int bufferLoad() = 0; //persents
-    virtual long mediaLength() = 0; // ms
 
     virtual qint64 position() = 0; //ms
     virtual void position(qint64 pos) = 0;
 
-    virtual qint64 duration() = 0;
+    virtual qint64 duration() = 0; // ms
 
     virtual int volume() = 0;
     virtual void volume(int vol) = 0;

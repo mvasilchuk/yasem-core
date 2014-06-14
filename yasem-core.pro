@@ -31,7 +31,8 @@ SOURCES += main.cpp \
     profilemanageimpl.cpp \
     networkimpl.cpp \
     pluginthread.cpp \
-    loggercore.cpp
+    loggercore.cpp \
+    yasemapplication.cpp
 
 HEADERS += \
     pluginmanager.h \
@@ -61,7 +62,8 @@ HEADERS += \
     mediasignalsender.h \
     profileconfig.h \
     core-network.h \
-    loggercore.h
+    loggercore.h \
+    yasemapplication.h
 
 
 

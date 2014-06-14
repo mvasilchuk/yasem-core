@@ -2,8 +2,8 @@
 #include "pluginmanagerimpl.h"
 #include "profilemanageimpl.h"
 #include "loggercore.h"
+#include "yasemapplication.h"
 
-#include <QApplication>
 #include <QDebug>
 #include <signal.h>
 #include <stdio.h>
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
     qInstallMessageHandler(LoggerCore::MessageHandler);
 
-    QApplication a(argc, argv);
+    YasemApplication a(argc, argv);
     int execCode;
 
     #ifdef Q_OS_LINUX
