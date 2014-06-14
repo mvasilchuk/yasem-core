@@ -122,5 +122,9 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         {
             fprintf(stdout, "[OTHER] (%s:%u | %s): %s\n", context.file, context.line, context.function, message);
         }
+
     }
+
+    fflush(stdout);
+    fflush(stderr);
 }

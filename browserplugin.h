@@ -37,6 +37,8 @@ public:
     virtual void setInnerSize(int width, int height) = 0;
     virtual void setInnerSize(const QSize &size) = 0;
     QSize getInnerSize() { return innerSize; }
+    virtual void fullscreen(bool setFFullscreen) = 0;
+    virtual bool fullscreen() = 0;
 
     virtual QUrl url() = 0;
     virtual QString browserRootDir() = 0;
