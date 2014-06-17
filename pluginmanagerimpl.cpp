@@ -182,8 +182,8 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
     if(plugin->id == NULL || plugin->id == "")
         return PLUGIN_ERROR_NO_PLUGIN_ID;
 
-    DEBUG() << spacing << "Plugin" << plugin->id << "initialization...";
-    DEBUG() << spacing << "Loading dependencies for" << plugin->id << "...";
+    DEBUG() << qPrintable(spacing) << "Plugin" << plugin->id << "initialization...";
+    DEBUG() << qPrintable(spacing) << "Loading dependencies for" << plugin->id << "...";
 
     if(plugin->dependencies.size() > 0)
     {
@@ -212,7 +212,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
                 continue;
             }
 
-            DEBUG() << spacing << "Trying to load dependency" << dependency->role << " for" << plugin->name;
+            DEBUG() << qPrintable(spacing) << "Trying to load dependency" << dependency->role << " for" << plugin->name;
 
             Plugin* dependencyPlugin = PluginManager::instance()->getByRole(dependency->role);
             if(dependencyPlugin == NULL)
@@ -225,7 +225,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
                 }
                 else
                 {
-                    LOG() << spacing << "Skipping" << dependency->role << "as not required";
+                    LOG() << qPrintable(spacing) << "Skipping" << dependency->role << "as not required";
                     continue;
                 }
             }
@@ -249,7 +249,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
             }
             else
             {
-                DEBUG() << spacing << "Dependency" << dependency->role << "initialized";
+                DEBUG() << qPrintable(spacing) << "Dependency" << dependency->role << "initialized";
             }
         }
 
@@ -258,7 +258,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
         {
             case PLUGIN_ERROR_NO_ERROR:
             {
-                DEBUG() << spacing << "Dependencies for" << plugin->id << "have been loaded.";
+                DEBUG() << qPrintable(spacing) << "Dependencies for" << plugin->id << "have been loaded.";
                 break;
             }
             case PLUGIN_ERROR_DEPENDENCY_MISSING:
@@ -274,7 +274,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
         }
     }
     else
-        WARN() << "No dependencies for" << plugin->id << "have been found";
+        DEBUG() << "No dependencies for" << plugin->id << "have been found";
 
 
     #ifdef THREAD_SAFE_PLUGINS
@@ -300,7 +300,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
         plugin->state = PLUGIN_STATE_DISABLED;
         return PLUGIN_ERROR_NOT_INITIALIZED;
     }
-    DEBUG() << spacing << "Plugin" << plugin->id << "initialized";
+    DEBUG() << qPrintable(spacing) << "Plugin" << plugin->id << "initialized";
 
     plugin->state = PLUGIN_STATE_INITIALIZED;
     return PLUGIN_ERROR_NO_ERROR;
