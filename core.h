@@ -4,6 +4,7 @@
 #include "enums.h"
 #include "logger.h"
 #include "core-network.h"
+#include "diskinfo.h"
 
 #include <functional>
 
@@ -45,10 +46,14 @@ public:
     virtual QList<DiskInfo*> disks() = 0;
     virtual CoreNetwork* network() = 0;
     virtual QThread* mainThread() = 0;
+    virtual QHash<QString, RC_KEY> getKeycodeHashes() = 0;
 
 protected:
     Core(){}
     Core(Core const&);
+
+    QHash<QString, RC_KEY> keycode_hashes;
+
 private:
 
     void operator=(Core const&);
@@ -61,20 +66,7 @@ public slots:
     virtual void mountPointChanged() = 0;
 };
 
-class DiskInfo {
-public:
-    QString blockDevice;
-    QString mountPoint;
-    int percentComplete;
-    qint64 size;
-    qint64 used;
-    qint64 available;
 
-    virtual QString toString()
-    {
-        return QString("disk: [%1, %2, %3, %4, %5, %6]").arg(blockDevice).arg(mountPoint).arg(size).arg(used).arg(available).arg(percentComplete);
-    }
-};
 }
 
 #endif // CORE_H

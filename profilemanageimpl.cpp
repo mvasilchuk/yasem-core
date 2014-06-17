@@ -5,6 +5,7 @@
 #include "datasource.h"
 #include "datasourceplugin.h"
 #include "stbplugin.h"
+#include "browserplugin.h"
 
 #include <QFile>
 #include <QDir>
@@ -46,9 +47,12 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
             activeProfile = profile;
             Core::instance()->settings()->setValue("active_profile", profile->getId());
 
-            qDebug() << QString("Active profile: %1").arg(profile->getId());
+            qDebug() << QString("Active profile: %1").arg(profile->getName());
 
             profile->getProfilePlugin()->init();
+
+            loadProfileKeymap(profile);
+
             profile->start();
 
             profileStack.push(profile);
@@ -59,6 +63,134 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
     }
 
     qWarning() << QString("Cannot change profile '%1': not found!").arg(profile->getId());
+}
+
+void ProfileManageImpl::loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString classId)
+{
+    QFile file(keymap.fileName());
+    if(!file.exists())
+    {
+        QFileInfo fileInfo(file);
+        QDir dir = fileInfo.absoluteDir();
+
+        if(!dir.exists())
+        {
+            DEBUG() << "Creating directory" << dir.absolutePath();
+            if(dir.mkpath(dir.absolutePath()))
+            {
+                DEBUG() << "Directory created";
+            }
+            else
+            {
+                ERROR() << "Directory not created!";
+                return;
+            }
+        }
+
+        if(!file.open(QFile::WriteOnly))
+        {
+            ERROR() << "Cannot open file" << file.fileName() << "to write into!";
+            return;
+        }
+
+        DEBUG() << "keymap file" << keymap.fileName() << "doesn't exists. Copying from resourses";
+
+        QString defaultKeymapName = QString(":/defaults/keymaps/%1/default.ini").arg(classId);
+        QFile res(defaultKeymapName);
+        if(res.open(QIODevice::ReadOnly|QIODevice::Text))
+        {
+            QByteArray content = res.readAll();
+
+            if(file.isWritable())
+            {
+                file.write(content);
+                file.flush();
+            }
+            else
+            {
+                ERROR() << "Keymap file" << file.fileName() << "is  not writable!";
+                return;
+            }
+
+        }
+        else
+        {
+            ERROR() << "Cannot load default keymap from resourses. File:" << defaultKeymapName;
+            return;
+        }
+    }
+}
+
+void ProfileManageImpl::loadProfileKeymap(Profile *profile)
+{
+    DEBUG() << "Loading keymap for profile" << profile->getName();
+    QString classId = profile->getProfilePlugin()->getProfileClassId();
+
+    QSettings keymap(QSettings::IniFormat, QSettings::UserScope, QString(CONFIG_DIR).append("/keymaps/%1/default").arg(classId));
+
+    loadDefaultKeymapFileIfNotExists(keymap, classId);
+
+    keymap.sync();
+    QHash<QString, RC_KEY> keycode_hashes = Core::instance()->getKeycodeHashes();
+
+    keymap.beginGroup("keymap");
+    QStringList keys = keymap.allKeys();
+
+    BrowserPlugin* browser = profile->getProfilePlugin()->browser();
+    browser->clearKeyEvents();
+
+    for(QString key: keys)
+    {
+        QString value = keymap.value(key).toString();
+        QStringList data = value.split("|");
+
+        int code = -1;
+        int which = -1;
+        bool alt = false;
+        bool ctrl = false;
+        bool shift = false;
+
+        for(QString element: data)
+        {
+            QStringList val = element.split(":");
+
+            if(val.length() != 2)
+            {
+                WARN() << "Value length for keymap element" << element << "is" << val.length();
+                continue;
+            }
+
+            QString key_name = val.at(0);
+            QString key_value = val.at(1);
+
+            if(key_name == "code")
+                code = QString(key_value).toInt();
+            else if(key_name == "which")
+                which = QString(key_value).toInt();
+            else if(key_name == "alt")
+                which = (key_value == "true");
+            else if(key_name == "ctrl")
+                ctrl = (key_value == "true");
+            else if(key_name == "shift")
+                shift = (key_value == "true");
+            else
+                WARN() << "Undefined key" << key_name << "->" <<  key_value << "in keymap record" << value;
+
+            if(which == -1)
+                which = code;
+        }
+
+        RC_KEY keycode_value = keycode_hashes.value(key);
+
+        if(keycode_value == RC_KEY_NO_KEY)
+            WARN() << "Key value for" << key << "not found!";
+        else
+            browser->registerKeyEvent(keycode_value, code, which, alt, ctrl, shift);
+
+    }
+    keymap.endGroup();
+
+    DEBUG() << "Keymap loaded";
 }
 
 bool ProfileManageImpl::removeProfile(Profile *profile)

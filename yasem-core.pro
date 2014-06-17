@@ -32,7 +32,8 @@ SOURCES += main.cpp \
     networkimpl.cpp \
     pluginthread.cpp \
     loggercore.cpp \
-    yasemapplication.cpp
+    yasemapplication.cpp \
+    diskinfo.cpp
 
 HEADERS += \
     pluginmanager.h \
@@ -63,7 +64,8 @@ HEADERS += \
     profileconfig.h \
     core-network.h \
     loggercore.h \
-    yasemapplication.h
+    yasemapplication.h \
+    diskinfo.h
 
 
 

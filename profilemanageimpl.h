@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QHash>
+#include <QFile>
 
 namespace yasem
 {
@@ -37,9 +38,11 @@ public:
     Profile *findById(const QString &id);
     Profile* backToPreviousProifile();
 
+    void loadProfileKeymap(Profile *profile);
 protected:
     QString createUniqueName(const QString &classId, const QString &baseName);
 
+    void loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString classId);
 };
 
 }

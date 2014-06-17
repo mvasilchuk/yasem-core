@@ -20,6 +20,7 @@ public:
     QSettings *settings();
 
     // Core interface
+    QHash<QString, RC_KEY> getKeycodeHashes();
 public slots:
     void onClose();
 
@@ -30,6 +31,7 @@ protected:
     QList<DiskInfo *> disksList;
 
     // Core interface
+    void fillKeymapHashTable();
 public slots:
     void mountPointChanged();
     QList<DiskInfo *> disks();

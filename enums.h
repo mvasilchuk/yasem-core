@@ -65,8 +65,7 @@ enum RC_KEY_EVENT_TYPE {
 };
 
 enum RC_KEY {
-    RC_KEY_NO_KEY = -1,
-    RC_KEY_EXIT = 0,
+    RC_KEY_NO_KEY = 0,
     RC_KEY_OK = 1,
 
     RC_KEY_RIGHT = 2,
@@ -118,7 +117,8 @@ enum RC_KEY {
     RC_KEY_NUMBER_6 = 39,
     RC_KEY_NUMBER_7 = 40,
     RC_KEY_NUMBER_8 = 41,
-    RC_KEY_NUMBER_9 = 42
+    RC_KEY_NUMBER_9 = 42,
+    RC_KEY_EXIT = 99
 };
 
 enum CMD_ARGUMENTS {
