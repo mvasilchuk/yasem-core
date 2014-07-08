@@ -14,14 +14,12 @@ CONFIG += c++11
 
 TARGET = yasem
 CONFIG   += console
+TEMPLATE = app
 #CONFIG   -= app_bundle
 
 TRANSLATIONS = lang/en_US.qm \
     lang/ru_RU.qm \
     lang/uk_UA.qm
-
-
-TEMPLATE = app
 
 
 SOURCES += main.cpp \
@@ -66,6 +64,8 @@ HEADERS += \
     loggercore.h \
     yasemapplication.h \
     diskinfo.h
+
+
 
 
 

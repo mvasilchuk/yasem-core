@@ -90,6 +90,7 @@ public:
     bool saveJsonConfig(const QString& jsonConfig)
     {
         Q_ASSERT(datasource());
+        DEBUG() << jsonConfig;
         QJsonArray arr = QJsonDocument::fromJson(jsonConfig.toUtf8()).array();
         foreach(QJsonValue item, arr)
         {

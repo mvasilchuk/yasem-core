@@ -1,3 +1,4 @@
+
 #include "coreimpl.h"
 #include "pluginmanagerimpl.h"
 #include "profilemanageimpl.h"
@@ -9,29 +10,10 @@
 #include <stdio.h>
 
 #ifdef Q_OS_LINUX
-#include <execinfo.h>
 #include <unistd.h>
-#endif //Q_OS_LINUX
-
-#ifdef Q_OS_LINUX
-
-#define CALLSTACK_SIZE 2048
-
-void printCallStack()
-{
-    //print call stack (needs #include <execinfo.h>)
-    void* callstack[CALLSTACK_SIZE];
-    int i, frames = backtrace(callstack, CALLSTACK_SIZE);
-    char** strs = backtrace_symbols(callstack, frames);
-    for(i = 0; i < frames; i++){
-        printf("%d: %s\n", i, strs[i]);
-    }
-    free(strs);
-}
 
 void signalHandler(int signal)
 {
-
     //print received signal
     switch(signal){
         case SIGINT: printf("SIGINT\r\n"); break;
@@ -40,13 +22,13 @@ void signalHandler(int signal)
         case SIGSTOP: printf("SIGSTOP\r\n"); break;
         case SIGTERM: printf("SIGTERM\r\n"); break;
         case SIGSEGV: printf("SIGSEGV\r\n");
-            printCallStack();
+            yasem::Core::printCallStack();
             abort();
             exit(1);
         break;
         default:
             printf("APPLICATION EXITING\r\n");
-            printCallStack();
+            yasem::Core::printCallStack();
             break;
     }
     QCoreApplication::quit();

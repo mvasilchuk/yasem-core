@@ -13,6 +13,7 @@
 #include <QUrl>
 #include <QHash>
 #include <QDebug>
+#include <QSize>
 
 class QWidget;
 
@@ -133,6 +134,7 @@ public slots:
 
     virtual QUrl handleUrl(QUrl &url) { return url; }
     virtual void applyFixes() {}
+
 };
 
 }

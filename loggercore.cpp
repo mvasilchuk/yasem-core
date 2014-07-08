@@ -1,3 +1,4 @@
+#include "core.h"
 #include "loggercore.h"
 
 #define LOG_TYPE_DEBUG QtDebugMsg
@@ -18,6 +19,8 @@ static const char* LOG_PREFIX_LOG = "$LOG$";
 static const char* LOG_PREFIX_INFO = "$INFO$";
 static const char* LOG_PREFIX_WTF = "$WTF$";
 static const char* LOG_PREFIX_FIXME = "$FIXME$";
+
+using namespace yasem;
 
 LoggerCore::LoggerCore(QObject *parent) :
     QObject(parent)
@@ -85,11 +88,13 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         case LOG_TYPE_CRITICAL:
         {
             fprintf(stderr, "[CRIT ]: (%s:%u): %s\n", context.file, context.line, message);
+            Core::printCallStack();
             break;
         }
         case LOG_TYPE_FATAL:
         {
             fprintf(stderr, "[FATAL] (%s:%u): %s\n", context.file, context.line, message);
+            Core::printCallStack();
             abort();
             break;
         }

@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QHash>
 #include <QFile>
+#include <QDir>
 
 namespace yasem
 {
@@ -40,9 +41,14 @@ public:
 
     void loadProfileKeymap(Profile *profile);
 protected:
+    QDir profilesDir;
     QString createUniqueName(const QString &classId, const QString &baseName);
 
-    void loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString classId);
+    void loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString &classId);
+
+    // ProfileManager interface
+public:
+    void backToMainPage();
 };
 
 }

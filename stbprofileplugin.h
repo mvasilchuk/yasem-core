@@ -5,6 +5,7 @@
 #include "macros.h"
 
 #include <QString>
+#include <QSize>
 
 namespace yasem
 {
@@ -15,15 +16,8 @@ class StbProfilePlugin: public virtual Plugin
 public:
     virtual QString getProfileClassId() = 0;
     virtual Profile* createProfile(const QString& id = "") = 0;
-
-    QString getImage() { return this->image; }
-    void setImage(const QString &path) { this->image = path; }
-
     virtual void init() = 0;
-protected:
-    QString image;
-
-    //Profile* profileObj;
+    virtual QString getIcon(const QSize &size = QSize()) = 0;
 };
 
 }

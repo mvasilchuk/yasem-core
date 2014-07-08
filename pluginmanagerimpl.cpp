@@ -74,7 +74,6 @@ PLUGIN_ERROR_CODES PluginManagerImpl::listPlugins()
         QObject* obj = pluginLoader.instance();
         Plugin *plugin = qobject_cast<Plugin*>(obj);
         if (plugin) {
-           // PluginInterface *plugin = qobject_cast<PluginInterface*>(absPlugin);
             if (plugin != NULL)
             {
                 QJsonObject metadata = pluginLoader.metaData().value("MetaData").toObject();
@@ -296,7 +295,6 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
     if(initValue != PLUGIN_ERROR_NO_ERROR)
     {
         WARN() <<"Plugin initialization failed. Code:" << initValue;
-        throw new std::exception();
         plugin->state = PLUGIN_STATE_DISABLED;
         return PLUGIN_ERROR_NOT_INITIALIZED;
     }
@@ -459,12 +457,17 @@ void PluginManagerImpl::loadProfiles()
 PLUGIN_ERROR_CODES PluginManagerImpl::initPlugins()
 {
     DEBUG() << "initPlugins()";
+
+    if(plugins.size() == 0)
+        return PLUGIN_ERROR_NOT_INITIALIZED;
+
     for(int index = 0; index < plugins.size(); index++)
     {
         Plugin* plugin = plugins.at(index);
         initPlugin(plugin);
 
     }
+    DEBUG() << "Initialization finished";
     return PLUGIN_ERROR_NO_ERROR;
 }
 

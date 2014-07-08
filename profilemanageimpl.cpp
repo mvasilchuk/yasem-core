@@ -16,6 +16,7 @@ using namespace yasem;
 ProfileManageImpl::ProfileManageImpl(QObject *parent): ProfileManager(parent)
 {
     activeProfile = NULL;
+    profilesDir = QFileInfo(Core::instance()->settings()->fileName()).absoluteDir();
 }
 
 QSet<Profile *> ProfileManageImpl::getProfiles()
@@ -65,7 +66,7 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
     qWarning() << QString("Cannot change profile '%1': not found!").arg(profile->getId());
 }
 
-void ProfileManageImpl::loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString classId)
+void ProfileManageImpl::loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString &classId)
 {
     QFile file(keymap.fileName());
     if(!file.exists())
@@ -168,7 +169,7 @@ void ProfileManageImpl::loadProfileKeymap(Profile *profile)
             else if(key_name == "which")
                 which = QString(key_value).toInt();
             else if(key_name == "alt")
-                which = (key_value == "true");
+                alt = (key_value == "true");
             else if(key_name == "ctrl")
                 ctrl = (key_value == "true");
             else if(key_name == "shift")
@@ -198,13 +199,16 @@ bool ProfileManageImpl::removeProfile(Profile *profile)
     if(profile == activeProfile)
         return false;
 
-    return profilesList.remove(profile);
-    emit profileRemoved();
+    QFile file(profilesDir.path().append("/").append(profile->getId()).append(".ini"));
+    DEBUG() << "Removing profile file" << file.fileName();
+    bool is_removed = file.remove();
+    emit profileRemoved(is_removed);
+    return is_removed && profilesList.remove(profile);
 }
 
 void ProfileManageImpl::loadProfiles()
 {
-    QDir profilesDir = QFileInfo(Core::instance()->settings()->fileName()).absoluteDir();
+
     QString profilePath = Core::instance()->settings()->value(CONFIG_PROFILES_DIR, "profiles").toString();
 
     qDebug() << "Looking for profiles in" << profilePath;
@@ -303,7 +307,7 @@ Profile *ProfileManageImpl::findById(const QString &id)
     foreach (Profile* profile, profilesList) {
         if(id == profile->getId())
         {
-            qDebug() << "PROFILE: " << profile;
+            DEBUG() << "PROFILE: " << profile;
             return profile;
         }
     }
@@ -326,6 +330,17 @@ Profile *ProfileManageImpl::backToPreviousProifile()
     setActiveProfile(profile);
     return profile;
 }
+
+void ProfileManageImpl::backToMainPage()
+{
+    if(profileStack.size() < 1)
+        return;
+
+    profileStack.resize(1);
+    Profile* profile = profileStack.at(0);
+    setActiveProfile(profile);
+}
+
 
 QString ProfileManageImpl::createUniqueName(const QString &classId, const QString &baseName = "")
 {

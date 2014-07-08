@@ -14,10 +14,10 @@ public:
     ProfileConfig(){}
 
     enum Types {
-        STRING = 5,
-        BOOL = 6,
-        INT = 7,
-        VARIANT = 8
+        STRING = 1,
+        BOOL = 2,
+        INT = 3,
+        VARIANT = 4
     };
 
     class Option

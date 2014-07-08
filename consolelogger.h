@@ -6,6 +6,11 @@
 #include <QObject>
 #include <QRegExp>
 
+/**
+ * @brief The ConsoleLogger class
+ *
+ * @deprecated
+ */
 class ConsoleLogger : public Logger
 {
     Q_OBJECT

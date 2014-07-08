@@ -123,12 +123,22 @@ enum RC_KEY {
 
 enum CMD_ARGUMENTS {
     COLOR_OUTPUT,
-    FULLSCREEN_APP
+    FULLSCREEN_APP,
+    DEVELOPER_TOOLS
 };
 
 static QString arguments[] = {
     "--color",
-    "--fullscreen"
+    "--fullscreen",
+    "--developer-tools"
+};
+
+enum MOUSE_POSITION {
+    MIDDLE  = 0,
+    LEFT    = 1,
+    TOP     = 2,
+    RIGHT   = 4,
+    BOTTOM  = 8
 };
 
 #endif // ENUM_H

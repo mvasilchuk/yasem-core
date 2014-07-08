@@ -62,6 +62,12 @@ private:
     PluginManager(PluginManager const&);              // Don't Implement
     void operator=(PluginManager const&); // Don't implement
 
+signals:
+    void pluginLoaded(Plugin* plugin);
+    void pluginUnloaded(Plugin* plugin);
+    void pluginInitialized(Plugin* plugin);
+    void pluginDeinitialized(Plugin* plugin);
+
 };
 
 }

@@ -7,6 +7,11 @@
 #include "diskinfo.h"
 
 #include <functional>
+#include <stdio.h>
+
+#ifdef Q_OS_LINUX
+#include <execinfo.h>
+#endif //Q_OS_LINUX
 
 #include <QObject>
 #include <QSettings>
@@ -18,6 +23,9 @@
 #define CONFIG_DIR "yasem"
 #define CONFIG_NAME "config"
 #define CONFIG_PROFILES_DIR "profiles"
+
+
+#define CALLSTACK_SIZE 2048
 
 namespace yasem
 {
@@ -47,6 +55,22 @@ public:
     virtual CoreNetwork* network() = 0;
     virtual QThread* mainThread() = 0;
     virtual QHash<QString, RC_KEY> getKeycodeHashes() = 0;
+
+    static void printCallStack()
+    {
+        #ifdef Q_OS_LINUX
+            //print call stack (needs #include <execinfo.h>)
+            void* callstack[CALLSTACK_SIZE];
+            int i, frames = backtrace(callstack, CALLSTACK_SIZE);
+            char** strs = backtrace_symbols(callstack, frames);
+            for(i = 0; i < frames; i++){
+                printf("%d: %s\n", i, strs[i]);
+            }
+            free(strs);
+        #else
+            printf("[FIXME]: printCallStack() is only supported under linux\n");
+        #endif //Q_OS_LINUX
+    }
 
 protected:
     Core(){}

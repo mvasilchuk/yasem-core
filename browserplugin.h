@@ -4,11 +4,14 @@
 #include "enums.h"
 
 #include <QSize>
+#include <QObject>
+#include <QMetaMethod>
 
 class QRect;
 class QUrl;
 class QResizeEvent;
 class QWidget;
+class QEvent;
 
 namespace yasem
 {
@@ -48,10 +51,14 @@ public:
     virtual void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false) = 0;
     virtual void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false) = 0;
     virtual void clearKeyEvents() = 0;
+    virtual void passEvent(QEvent *event) = 0;
+
+    virtual void setupMousePositionHandler(const QObject *receiver, const char* method) = 0;
 
 protected:
     QSize innerSize;
     QWidget* activeWebView;
+
 };
 }
 

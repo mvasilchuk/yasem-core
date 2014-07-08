@@ -50,6 +50,7 @@ public:
     virtual StbProfilePlugin* getProfilePluginByClassId(const QString &classId) = 0;
     virtual Profile* findById(const QString &id) = 0;
     virtual Profile* backToPreviousProifile() = 0;
+    virtual void backToMainPage() = 0;
 
     /*static bool sortNameAsc(const Profile * a, const Profile * b)
     {
@@ -62,7 +63,7 @@ public:
 signals:
     void profileChanged(Profile* profile);
     void profileAdded(Profile* profile);
-    void profileRemoved();
+    void profileRemoved(bool removed);
 
 protected:
     ProfileManager(QObject* parent): QObject(parent) {}

@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+
 class LoggerCore : public QObject
 {
     Q_OBJECT
