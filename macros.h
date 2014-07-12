@@ -13,8 +13,8 @@ namespace yasem
     #define ERROR() qWarning()
     #define STUB() qDebug() << "$STUB$"
     #define WTF() qDebug() << "$WTF$"
-    #define NOT_IMPLEMENTED() << "$NI$"
-    #define FIX_ME() << "$FIX$"
+    #define NOT_IMPLEMENTED() qDebug() << "$NI$"
+    #define FIXME() qDebug() << "$FIXME$"
 }
 
 #endif // MACROS_H

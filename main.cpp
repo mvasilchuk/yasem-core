@@ -74,6 +74,12 @@ using namespace yasem;
 
 int main(int argc, char *argv[])
 {
+    QString appPath = QFileInfo(argv[0]).dir().path();
+    QStringList paths = QCoreApplication::libraryPaths();
+    paths.append(appPath);
+    paths.append(appPath.append("/libs"));
+    paths.append(appPath.append("/plugins"));
+    QCoreApplication::setLibraryPaths(paths);
 
     qInstallMessageHandler(LoggerCore::MessageHandler);
 
@@ -84,6 +90,8 @@ int main(int argc, char *argv[])
     //int stdout_fd = startErrorRedirect();
     setupSignalHandlers();
     #endif //Q_OS_LINUX
+
+    qDebug() << "Library paths: " << QApplication::libraryPaths();
 
     Core::setInstance(new CoreImpl());
     a.setProperty("Core", QVariant::fromValue(Core::instance()));

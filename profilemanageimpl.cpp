@@ -211,10 +211,21 @@ void ProfileManageImpl::loadProfiles()
 
     QString profilePath = Core::instance()->settings()->value(CONFIG_PROFILES_DIR, "profiles").toString();
 
-    qDebug() << "Looking for profiles in" << profilePath;
-    if(!profilesDir.cd(profilePath))
+    QString full_profile_path = profilesDir.absolutePath().append("/").append(profilePath);
+
+    QDir configDir(full_profile_path);
+
+    if(!configDir.exists())
     {
-        ERROR() << QString("Cannot go to profiles dir: %1   ").arg(profilesDir.dirName()).append(Core::instance()->settings()->fileName());
+        DEBUG() << "Profiles directory doesn't exist. Creating" << full_profile_path;
+        bool is_created = configDir.mkpath(full_profile_path);
+        DEBUG() << "Directory create result" << is_created;
+    }
+
+    qDebug() << "Looking for profiles in" << full_profile_path;
+    if(!profilesDir.cd(full_profile_path))
+    {
+        ERROR() << QString("Cannot go to profiles dir: ").append(full_profile_path);
         return;
     }
 

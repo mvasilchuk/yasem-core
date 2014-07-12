@@ -31,7 +31,8 @@ SOURCES += main.cpp \
     pluginthread.cpp \
     loggercore.cpp \
     yasemapplication.cpp \
-    diskinfo.cpp
+    diskinfo.cpp \
+    stacktrace.cxx
 
 HEADERS += \
     pluginmanager.h \

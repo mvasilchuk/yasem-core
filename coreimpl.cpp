@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QFileInfo>
+#include <QDir>
 
 using namespace yasem;
 
@@ -13,6 +15,9 @@ CoreImpl::CoreImpl(QObject *parent ): Core()
     Q_UNUSED(parent)
     setObjectName("Core");
     appSettings = new QSettings(QSettings::IniFormat, QSettings::UserScope, CONFIG_DIR, CONFIG_NAME);
+
+    DEBUG() << "Settings directory" << QFileInfo(appSettings->fileName()).absoluteDir().absolutePath();
+
     networkObj = new NetworkImpl(parent);
     fillKeymapHashTable();
 

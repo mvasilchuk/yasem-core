@@ -9,9 +9,11 @@
 #include <functional>
 #include <stdio.h>
 
-#ifdef Q_OS_LINUX
+// Includes for backtrace
+#if defined(Q_OS_LINUX)
 #include <execinfo.h>
-#endif //Q_OS_LINUX
+#elif defined(Q_OS_WIN32)
+#endif // defined(Q_OS_LINUX)
 
 #include <QObject>
 #include <QSettings>
@@ -58,7 +60,7 @@ public:
 
     static void printCallStack()
     {
-        #ifdef Q_OS_LINUX
+        #if defined(Q_OS_LINUX)
             //print call stack (needs #include <execinfo.h>)
             void* callstack[CALLSTACK_SIZE];
             int i, frames = backtrace(callstack, CALLSTACK_SIZE);
@@ -68,8 +70,8 @@ public:
             }
             free(strs);
         #else
-            printf("[FIXME]: printCallStack() is only supported under linux\n");
-        #endif //Q_OS_LINUX
+            printf("[FIXME]: printCallStack() is only supported under linux.\n");
+        #endif // defined(Q_OS_LINUX)
     }
 
 protected:
