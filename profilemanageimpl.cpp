@@ -225,11 +225,11 @@ void ProfileManageImpl::loadProfiles()
     qDebug() << "Looking for profiles in" << full_profile_path;
     if(!profilesDir.cd(full_profile_path))
     {
-        ERROR() << QString("Cannot go to profiles dir: ").append(full_profile_path);
+        ERROR() << "Cannot go to profiles dir" << full_profile_path;
         return;
     }
 
-    DEBUG() << QString("Searching for profiles in %1").arg(profilesDir.path());
+    DEBUG() << "Searching for profiles in" << profilesDir.path();
 
     profilesDir.setNameFilters(QStringList() << "*.ini");
 
@@ -237,7 +237,7 @@ void ProfileManageImpl::loadProfiles()
 
     foreach (QString fileName, profilesDir.entryList(QDir::Files | QDir::NoSymLinks | QDir::Readable))
     {
-        DEBUG() << QString("Loading profile from %1").arg(fileName);
+        DEBUG() << "Loading profile from" << fileName;
         QSettings s(profilesDir.path().append("/").append(fileName), QSettings::IniFormat);
 
         s.beginGroup("profile");
@@ -246,15 +246,13 @@ void ProfileManageImpl::loadProfiles()
 
         if(profilePlugin == NULL)
         {
-            qWarning() << QString("Plugin for profile classid '%1' not found!").arg(classId);
+            qWarning() << "Plugin for profile classid " << classId << " not found!";
             continue;
         }
 
         Profile* profile = profilePlugin->createProfile(s.value("uuid").toString());
         Q_ASSERT(profile);
         profile->datasource(dsPlugin->getDatasourceForProfile(profile));
-        //qDebug() << "PROFILE DS: " << profile << profile->datasource();
-
         profile->setName(s.value("name").toString());
 
         s.endGroup();
