@@ -10,8 +10,6 @@ QT       += core gui widgets network
 
 CONFIG += c++11
 
-#-Wunused-parameter -Wstrict-overflow=5 -Wundef -Wshadow -Wcast-qual -Wcast-align -Wconversion -Wsign-conversion -Wmissing-declarations -Wredundant-decls -Wdisabled-optimization -Woverloaded-virtual -Wctor-dtor-privacy -Wold-style-cast
-
 TARGET = yasem
 CONFIG   += console
 TEMPLATE = app
@@ -64,13 +62,8 @@ HEADERS += \
     core-network.h \
     loggercore.h \
     yasemapplication.h \
-    diskinfo.h
-
-
-
-
-
-DEPENDPATH += DesktopGUI MagApi
+    diskinfo.h \
+    webobjectinfo.h
 
 include(../common.pri)
 DESTDIR = $$DEFAULT_BIN_DIR

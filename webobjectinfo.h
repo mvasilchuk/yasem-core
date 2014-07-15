@@ -1,0 +1,4 @@
+#ifndef WEBOBJECTINFO_H
+#define WEBOBJECTINFO_H
+
+#endif // WEBOBJECTINFO_H

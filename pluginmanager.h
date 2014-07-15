@@ -37,10 +37,10 @@ public:
     virtual PLUGIN_ERROR_CODES initPlugins() = 0;
     virtual PLUGIN_ERROR_CODES deinitPlugins() = 0;
     //virtual PLUGIN_ERROR_CODES connectSlots();
-    virtual QList<Plugin*> getPlugins(const QString &role) = 0;
+    virtual QList<Plugin*> getPlugins(PluginRole role) = 0;
     virtual PLUGIN_ERROR_CODES initPlugin(Plugin* plugin, int dependencyLevel = 0) = 0;
     virtual PLUGIN_ERROR_CODES deinitPlugin(Plugin* plugin) = 0;
-    virtual Plugin* getByRole(const QString &role, Plugin::PluginFlag flags = Plugin::CLIENT) = 0;
+    virtual Plugin* getByRole(PluginRole role) = 0;
     virtual Plugin* getByIID(const QString &iid) = 0;
     virtual void setPluginDir(const QString &pluginDir) = 0;
     virtual QString getPluginDir() = 0;
@@ -49,9 +49,7 @@ public:
 protected:
     PluginManager() {}
     QList<Plugin*> plugins;
-    virtual QList<Plugin::PluginRole> parseRoles(const QJsonArray &array) = 0;
-    virtual Plugin::PluginFlag parseFlags(const QString &flagsStr) = 0;
-    virtual QList<PluginDependency*> convertDependenciesList(const QJsonArray &array) = 0;
+    virtual PluginFlag parseFlags(const QString &flagsStr) = 0;
     QString pluginDir;
 
 private:

@@ -233,7 +233,7 @@ void ProfileManageImpl::loadProfiles()
 
     profilesDir.setNameFilters(QStringList() << "*.ini");
 
-    DatasourcePlugin* dsPlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole("datasource"));
+    DatasourcePlugin* dsPlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(PluginRole::ROLE_DATASOURCE));
 
     foreach (QString fileName, profilesDir.entryList(QDir::Files | QDir::NoSymLinks | QDir::Readable))
     {
@@ -263,7 +263,7 @@ void ProfileManageImpl::loadProfiles()
 
 Profile* ProfileManageImpl::createProfile(const QString &classId, const QString &baseName = "")
 {
-    DatasourcePlugin* dsPlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole("datasource"));
+    DatasourcePlugin* dsPlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(PluginRole::ROLE_DATASOURCE));
 
     Q_ASSERT(classId != "");
     DEBUG() << baseName << classId;

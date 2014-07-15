@@ -60,7 +60,7 @@ public:
 
     static void printCallStack()
     {
-        #if defined(Q_OS_LINUX)
+        #ifdef Q_OS_LINUX
             //print call stack (needs #include <execinfo.h>)
             void* callstack[CALLSTACK_SIZE];
             int i, frames = backtrace(callstack, CALLSTACK_SIZE);
@@ -71,7 +71,7 @@ public:
             free(strs);
         #else
             printf("[FIXME]: printCallStack() is only supported under linux.\n");
-        #endif // defined(Q_OS_LINUX)
+        #endif // Q_OS_LINUX
     }
 
 protected:

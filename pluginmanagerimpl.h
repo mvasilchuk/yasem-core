@@ -19,17 +19,15 @@ public:
     virtual PLUGIN_ERROR_CODES initPlugins();
     virtual PLUGIN_ERROR_CODES deinitPlugins();
     //virtual PLUGIN_ERROR_CODES connectSlots();
-    virtual QList<Plugin*> getPlugins(const QString &role);
+    virtual QList<Plugin*> getPlugins(PluginRole role = ROLE_UNKNOWN);
     virtual PLUGIN_ERROR_CODES initPlugin(Plugin* plugin, int dependencyLevel);
     virtual PLUGIN_ERROR_CODES deinitPlugin(Plugin* plugin);
-    virtual Plugin* getByRole(const QString &role, Plugin::PluginFlag flags);
+    virtual Plugin* getByRole(PluginRole role);
     virtual Plugin *getByIID(const QString &iid);
     virtual void setPluginDir(const QString &pluginDir);
     virtual QString getPluginDir();
 
-    virtual QList<Plugin::PluginRole> parseRoles(const QJsonArray &array);
-    Plugin::PluginFlag parseFlags(const QString &flagsStr);
-    virtual QList<PluginDependency*> convertDependenciesList(const QJsonArray &array);
+    PluginFlag parseFlags(const QString &flagsStr);
 
     QStringList blacklistedPlugins;
 

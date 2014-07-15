@@ -21,9 +21,6 @@ signals:
 
 public slots:
 
-
-
-
     // ProfileManager interface
 public:
     QSet<Profile *> getProfiles();

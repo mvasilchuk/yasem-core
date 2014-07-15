@@ -141,4 +141,23 @@ enum MOUSE_POSITION {
     BOTTOM  = 8
 };
 
+enum PluginFlag {
+    PLUGIN_FLAG_NONE = 0,
+    PLUGIN_FLAG_CLIENT = 1,
+    PLUGIN_FLAG_SYSTEM = 2,
+    PLUGIN_FLAG_HIDDEN = 4,
+    PLUGIN_FLAG_GUI = 8
+};
+
+enum PluginRole {
+    ROLE_UNKNOWN,
+    ROLE_UNSPECIFIED,
+    ROLE_GUI,
+    ROLE_MEDIA,
+    ROLE_STB_API,
+    ROLE_STB_API_SYSTEM,
+    ROLE_BROWSER,
+    ROLE_DATASOURCE
+};
+
 #endif // ENUM_H

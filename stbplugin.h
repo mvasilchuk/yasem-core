@@ -1,13 +1,12 @@
 #ifndef STBPLUGIN_H
 #define STBPLUGIN_H
 
-#include "enums.h"
-#include "macros.h"
 #include "stbprofileplugin.h"
+
+#include "webobjectinfo.h"
+#include "macros.h"
 #include "datasource.h"
 
-
-#include <functional>
 
 #include <QtPlugin>
 #include <QUrl>
@@ -23,33 +22,11 @@ class DatasourcePlugin;
 class BrowserPlugin;
 class GuiPlugin;
 class BaseWidget;
-
 class MediaPlayerPlugin;
 
-class StbPlugin: public virtual StbProfilePlugin
-{
+class StbPluginPrivate: public StbProfilePluginPrivate {
 public:
-    StbPlugin(): Plugin() {}
-    virtual ~StbPlugin(){}
 
-    QHash<QString, QObject*> getStbApiList()
-    {
-        return api;
-    }
-
-    typedef std::function<QWidget*()> WidgetFactory;
-
-    struct WebObjectInfo {
-        QString name;
-        QWidget* webObject;
-        QString mimeType;
-        QList<QString> fileExtensions;
-        QString description;
-        QString classid;
-        WidgetFactory widgetFactory;
-    };
-
-protected:
     QHash<QString, QObject*> api;
     Datasource* datasourceInstance;
     MediaPlayerPlugin* mediaPlayer;
@@ -59,6 +36,27 @@ protected:
     QList<WebObjectInfo> webObjects;
     QHash<int, RC_KEY> keyCodeMap;
     QList<QString> subModels;
+};
+
+class StbPlugin: public StbProfilePlugin
+{
+    Q_DECLARE_PRIVATE(StbPlugin)
+public:
+
+    StbPlugin(): StbProfilePlugin(*new StbPluginPrivate)  {
+    }
+
+    QHash<QString, QObject*> getStbApiList()
+    {
+        Q_D(StbPlugin);
+        return d->api;
+    }
+
+
+protected:
+    StbPlugin(StbPluginPrivate &d)
+       : StbProfilePlugin(d) {
+    }
 
 public:
     QString description;
@@ -67,45 +65,54 @@ public:
 public slots:
     void gui(GuiPlugin* gui)
     {
-        this->guiPlugin = gui;
+        Q_D(StbPlugin);
+        d->guiPlugin = gui;
     }
 
     GuiPlugin *gui()
     {
-        return this->guiPlugin;
+        Q_D(StbPlugin);
+        return d->guiPlugin;
     }
 
     void player(MediaPlayerPlugin* player)
     {
-        this->mediaPlayer = player;
+        Q_D(StbPlugin);
+        d->mediaPlayer = player;
     }
     MediaPlayerPlugin* player()
     {
-        return this->mediaPlayer;
+        Q_D(StbPlugin);
+        return d->mediaPlayer;
     }
 
     void browser(BrowserPlugin* browser)
     {
-        this->browserPlugin = browser;
+        Q_D(StbPlugin);
+        d->browserPlugin = browser;
     }
 
     BrowserPlugin* browser()
     {
-        return browserPlugin;
+        Q_D(StbPlugin);
+        return d->browserPlugin;
     }
 
-    QList<WebObjectInfo> getWebObjects() const
+    QList<WebObjectInfo> getWebObjects()
     {
-        return webObjects;
+        Q_D(StbPlugin);
+        return d->webObjects;
     }
 
     QHash<int, RC_KEY> getKeyCodeMap()
     {
-        return keyCodeMap;
+        Q_D(StbPlugin);
+        return d->keyCodeMap;
     }
 
     bool addWebObject(const QString &name, QWidget* widget, const QString &mimeType, const QString &classid, const QString &description)
     {
+        Q_D(StbPlugin);
         WebObjectInfo webObject;
         webObject.name = name;
         webObject.webObject = widget;
@@ -114,12 +121,13 @@ public slots:
         webObject.classid = classid;
         webObject.widgetFactory = NULL;
 
-        webObjects.append(webObject);
+        d->webObjects.append(webObject);
         return true;
     }
 
     bool addWebObject(const QString &name, const QString &mimeType, const QString &classid, const QString &description, std::function < QWidget*() > widgetFactory)
     {
+        Q_D(StbPlugin);
         WebObjectInfo webObject;
         webObject.name = name;
         webObject.widgetFactory = widgetFactory;
@@ -128,12 +136,24 @@ public slots:
         webObject.description = description;
         webObject.classid = classid;
 
-        webObjects.append(webObject);
+        d->webObjects.append(webObject);
         return true;
     }
 
     virtual QUrl handleUrl(QUrl &url) { return url; }
     virtual void applyFixes() {}
+
+    QHash<QString, QObject*>& getApi() {
+        Q_D(StbPlugin);
+        return d->api;
+    }
+
+    QList<QString> getSubmodels()
+    {
+        Q_D(StbPlugin);
+        DEBUG() << &(d->subModels);
+        return d->subModels;
+    }
 
 };
 
