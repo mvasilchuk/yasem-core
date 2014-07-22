@@ -67,7 +67,13 @@ HEADERS += \
     loggercore.h \
     yasemapplication.h \
     diskinfo.h \
-    webobjectinfo.h
+    webobjectinfo.h \
+    profile_config_parser.h \
+    profileconfigparserimpl.h \
+    samba.h \
+    sambaimpl.h \
+    mountpointinfo.h \
+    sambanode.h
 
 include(../common.pri)
 DESTDIR = $$DEFAULT_BIN_DIR
