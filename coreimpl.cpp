@@ -10,7 +10,7 @@
 
 using namespace yasem;
 
-CoreImpl::CoreImpl(QObject *parent ): Core()
+CoreImpl::CoreImpl(QObject *parent ): Core(parent)
 {
     Q_UNUSED(parent)
     setObjectName("Core");
@@ -23,6 +23,12 @@ CoreImpl::CoreImpl(QObject *parent ): Core()
 
 
     //mountPointChanged();
+}
+
+CoreImpl::~CoreImpl()
+{
+    STUB();
+    delete networkObj;
 }
 
 void CoreImpl::fillKeymapHashTable()

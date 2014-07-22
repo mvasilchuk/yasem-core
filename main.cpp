@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
     qDebug() << "Library paths: " << QApplication::libraryPaths();
 
-    Core::setInstance(new CoreImpl());
+    Core::setInstance(new CoreImpl(qApp));
     a.setProperty("Core", QVariant::fromValue(Core::instance()));
 
     ProfileManager::setInstance(new ProfileManageImpl());

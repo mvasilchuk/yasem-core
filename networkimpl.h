@@ -13,16 +13,14 @@ class NetworkImpl : public QObject, public CoreNetwork
     Q_OBJECT
 public:
     explicit NetworkImpl(QObject *parent = 0);
+    virtual ~NetworkImpl();
     bool isConnected();
     bool isLanConnected();
     bool isWifiConnected();
     bool isInterfaceConnected(QNetworkInterface iface);
     QList<QNetworkInterface> getInterfaces();
 
-signals:
-
-public slots:
-
+    Samba* samba();
 };
 
 }

@@ -30,7 +30,10 @@ SOURCES += main.cpp \
     loggercore.cpp \
     yasemapplication.cpp \
     diskinfo.cpp \
-    stacktrace.cxx
+    stacktrace.cxx \
+    sambaimpl.cpp \
+    mountpointinfo.cpp \
+    sambanode.cpp
 
 HEADERS += \
     pluginmanager.h \

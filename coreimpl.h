@@ -11,7 +11,7 @@ class CoreImpl : public Core
     Q_OBJECT
 public:
     explicit CoreImpl(QObject *parent = 0);
-
+    virtual ~CoreImpl();
 signals:
 
 public slots:

@@ -75,7 +75,7 @@ public:
     }
 
 protected:
-    Core(){}
+    Core(QObject* parent): QObject(parent){}
     Core(Core const&);
 
     QHash<QString, RC_KEY> keycode_hashes;

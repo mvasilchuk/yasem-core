@@ -1,4 +1,6 @@
 #include "networkimpl.h"
+#include "sambaimpl.h"
+#include "macros.h"
 
 #include <QNetworkInterface>
 
@@ -7,6 +9,14 @@ using namespace yasem;
 NetworkImpl::NetworkImpl(QObject *parent) :
     QObject(parent)
 {
+    samba_impl = NULL;
+}
+
+NetworkImpl::~NetworkImpl()
+{
+    STUB();
+    if(samba_impl == NULL)
+        delete samba_impl;
 }
 
 bool NetworkImpl::isConnected()
@@ -66,4 +76,12 @@ bool NetworkImpl::isInterfaceConnected(QNetworkInterface iface)
 QList<QNetworkInterface> NetworkImpl::getInterfaces()
 {
     return QNetworkInterface::allInterfaces();
+}
+
+
+Samba* yasem::NetworkImpl::samba()
+{
+    if(samba_impl == NULL)
+        samba_impl = new SambaImpl(this);
+    return samba_impl;
 }

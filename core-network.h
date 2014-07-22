@@ -1,6 +1,8 @@
 #ifndef CORENETWORK_H
 #define CORENETWORK_H
 
+#include "samba.h"
+
 #include <QtNetwork/QNetworkInterface>
 #include <QList>
 
@@ -16,6 +18,11 @@ public:
     virtual bool isWifiConnected() = 0;
     virtual bool isInterfaceConnected(QNetworkInterface iface) = 0;
     virtual QList<QNetworkInterface> getInterfaces() = 0;
+
+    virtual Samba* samba() = 0;
+
+protected:
+    Samba* samba_impl;
 };
 
 }
