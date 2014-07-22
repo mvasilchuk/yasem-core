@@ -4,10 +4,6 @@
 #include <QString>
 
 static const QString DB_TAG_PROFILE = "profile";
-static const QString DB_TAG_RDIR = "RDIR";
-static const QString DB_TAG_ENV = "ENV";
-static const QString DB_TAG_USER = "USER";
-static const QString DB_TAG_SFG = "SFG";
 
 enum MediaPlayingState
 {
@@ -94,8 +90,8 @@ enum RC_KEY {
     RC_KEY_WEB = 20,
     RC_KEY_FRAME = 21,
 
-    RC_KEY_VOLUME_PLUS = 22,
-    RC_KEY_VOLUME_MINUS = 23,
+    RC_KEY_VOLUME_UP = 22,
+    RC_KEY_VOLUME_DOWN = 23,
 
     RC_KEY_REWIND = 24,
     RC_KEY_FAST_FORWARD = 25,
@@ -118,7 +114,10 @@ enum RC_KEY {
     RC_KEY_NUMBER_7 = 40,
     RC_KEY_NUMBER_8 = 41,
     RC_KEY_NUMBER_9 = 42,
-    RC_KEY_EXIT = 99
+    RC_KEY_EXIT = 99,
+
+    RC_KEY_PLAY,
+    RC_KEY_PAUSE
 };
 
 enum CMD_ARGUMENTS {
@@ -148,6 +147,7 @@ enum PluginFlag {
     PLUGIN_FLAG_HIDDEN = 4,
     PLUGIN_FLAG_GUI = 8
 };
+
 
 enum PluginRole {
     ROLE_UNKNOWN,

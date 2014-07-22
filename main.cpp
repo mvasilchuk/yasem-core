@@ -100,7 +100,6 @@ int main(int argc, char *argv[])
     ProfileManager::setInstance(new ProfileManageImpl());
     a.setProperty("ProfileManager", QVariant::fromValue(ProfileManager::instance()));
 
-
     Core::instance()->mountPointChanged();
 
     qDebug() << "Starting application...";
