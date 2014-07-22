@@ -4,6 +4,7 @@
 #include "profilemanageimpl.h"
 #include "loggercore.h"
 #include "yasemapplication.h"
+#include "profileconfigparserimpl.h"
 
 #include <QDebug>
 #include <signal.h>

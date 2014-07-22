@@ -1,10 +1,12 @@
 #ifndef PROFILE_H
 #define PROFILE_H
 
+
 #include "datasourceplugin.h"
 #include "pluginmanager.h"
 #include "stbplugin.h"
 #include "profileconfig.h"
+#include "profile_config_parser.h"
 
 #include <QUrl>
 #include <QUuid>
@@ -32,7 +34,12 @@ public:
         this->id = id;
         this->flags = NORMAL;
 
-        profileConfig.add(ProfileConfig::Option(DB_TAG_PROFILE, "name", "", "Profile name"));
+        ProfileConfigGroup group(QObject::tr("Main settings"));
+
+        ConfigOption profile_name(DB_TAG_PROFILE, "name", QObject::tr("Profile name"), QObject::tr("New profile"));
+        group.options.append(profile_name);
+
+        profileConfiguration.groups.append(group);
     }
 
     virtual ~Profile(){}
@@ -115,6 +122,11 @@ public:
         return submodelNames.value(subModel);
     }
 
+    ProfileConfiguration config()
+    {
+        return profileConfiguration;
+    }
+
 protected:
     QString id;
     QString name;
@@ -128,6 +140,7 @@ protected:
     QHash<QString, QSize> portalResolutions;
     QHash<QString, QSize> videoResolutions;
     QHash<int, QString> submodelNames;
+    ProfileConfiguration profileConfiguration;
 
 signals:
 
