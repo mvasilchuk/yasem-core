@@ -38,6 +38,7 @@ public:
         this->comment = comment;
         this->options = options;
     }
+
 };
 
 class ProfileConfigGroup {

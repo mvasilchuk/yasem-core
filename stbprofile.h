@@ -13,6 +13,7 @@
 #include <QSize>
 #include <QJsonDocument>
 
+static const QString CONFIG_PROFILE_NAME = "name";
 static const QString CONFIG_SUBMODEL = "submodel";
 static const QString CONFIG_PORTAL_SIZE = "portal_size";
 static const QString CONFIG_PORTAL_URL = "portal";
@@ -32,12 +33,24 @@ public:
     {
         this->profilePlugin = profilePlugin;
         this->id = id;
+        if(id == "")
+            this->id = QUuid::createUuid().toString().mid(1, 34); //Remove braces, full length is 36
         this->flags = NORMAL;
 
-        ProfileConfigGroup group(QObject::tr("Main settings"));
+        name = getId();
 
-        ConfigOption profile_name(DB_TAG_PROFILE, "name", QObject::tr("Profile name"), QObject::tr("New profile"));
-        group.options.append(profile_name);
+
+        ProfileConfigGroup group(QObject::tr("Main settings"));
+        group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_PROFILE_NAME, QObject::tr("Profile name"), QObject::tr("New profile")));
+
+        QHash<QString, QString> models;
+        QList<StbSubmodel> submodels = profilePlugin->getSubmodels();
+        for(StbSubmodel model: submodels)
+        {
+            models.insert(model.id, model.name);
+        }
+
+        group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_SUBMODEL, QObject::tr("Model name"), "","options", "", models));
 
         profileConfiguration.groups.append(group);
     }
@@ -46,40 +59,24 @@ public:
 
     virtual void start() = 0;
     virtual void stop() = 0;
+
     void setName(const QString &name) { this->name = name; }
-    QString getName() {
-        if(name == "") name = getId();
-        return name;
-    }
-    QString getId() {
-        if(id == "") id = QUuid::createUuid().toString().mid(1, 34); //Remove braces, full length is 36
-        return id;
-    }
+    QString getName() const { return name; }
+    QString getId() const { return id; }
     void setId(const QString &id) { this->id = id; }
-    StbPlugin* getProfilePlugin()
-    {
-        return this->profilePlugin;
-    }
+    StbPlugin* getProfilePlugin() const { return this->profilePlugin; }
 
-    Datasource* datasource() {
-        return datasourceObj;
-    }
+    Datasource* datasource() const { return datasourceObj; }
+    void datasource(Datasource* datasource){ this->datasourceObj = datasource; }
 
-    void datasource(Datasource* datasource){
-        this->datasourceObj = datasource;
-    }
-
-    QString getImage() { return this->image; }
+    QString getImage() const { return this->image; }
     void setImage(const QString &path) { this->image = path; }
 
     virtual void initDefaults() = 0;
 
     virtual void configureKeyMap() = 0;
 
-    bool hasFlag(ProfileFlag flag)
-    {
-        return (flags & flag) == flag;
-    }
+    bool hasFlag(ProfileFlag flag) const { return (flags & flag) == flag; }
 
     void addFlag(ProfileFlag flag)
     {
@@ -92,7 +89,8 @@ public:
     int get(const QString &name, int defaultValue = 0) { return datasource()->get(DB_TAG_PROFILE, name, defaultValue); }
     bool set(const QString &name, int value) { return datasource()->set(DB_TAG_PROFILE, name, value); }
 
-    ProfileConfig& getProfileConfig() { return profileConfig; }
+
+    Q_DECL_DEPRECATED ProfileConfig& getProfileConfig() { return profileConfig; }
 
     bool saveJsonConfig(const QString& jsonConfig)
     {
@@ -117,29 +115,33 @@ public:
     }
 
     virtual QString portal() = 0;
-    QString getSubmodelName()
-    {
-        return submodelNames.value(subModel);
-    }
 
-    ProfileConfiguration config()
+
+
+    ProfileConfiguration &config()
     {
         return profileConfiguration;
     }
 
+
+    StbSubmodel getSubmodel() const { return submodel; }
+    void setSubmodel(const StbSubmodel &submodel) {
+        this->submodel = submodel;
+    }
+
+
 protected:
+    StbSubmodel submodel;
     QString id;
     QString name;
     ProfileFlag flags;
     QString image;
     StbPlugin* profilePlugin;
     Datasource* datasourceObj;
-    ProfileConfig profileConfig;
-    int subModel;
+    Q_DECL_DEPRECATED ProfileConfig profileConfig;
     QHash<QString, QString> userAgents;
     QHash<QString, QSize> portalResolutions;
     QHash<QString, QSize> videoResolutions;
-    QHash<int, QString> submodelNames;
     ProfileConfiguration profileConfiguration;
 
 signals:

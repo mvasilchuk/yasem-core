@@ -24,6 +24,25 @@ class GuiPlugin;
 class BaseWidget;
 class MediaPlayerPlugin;
 
+class StbSubmodel {
+public:
+    StbSubmodel() {}
+
+    StbSubmodel(const QString &id, const QString &name){
+        this->id = id;
+        this->name = name;
+    }
+
+    StbSubmodel(const QString &id){
+        this->id = id;
+        this->name = id;
+    }
+
+    QString id;
+    QString name;
+    QString logo;
+};
+
 class StbPluginPrivate: public StbProfilePluginPrivate {
 public:
 
@@ -35,7 +54,9 @@ public:
     BrowserPlugin* browserPlugin;
     QList<WebObjectInfo> webObjects;
     QHash<int, RC_KEY> keyCodeMap;
-    QList<QString> subModels;
+    QList<StbSubmodel> subModels;
+    QString submodelDatasourceGroup;
+    QString submodelDatasourceField;
 };
 
 class StbPlugin: public StbProfilePlugin
@@ -51,7 +72,6 @@ public:
         Q_D(StbPlugin);
         return d->api;
     }
-
 
 protected:
     StbPlugin(StbPluginPrivate &d)
@@ -148,11 +168,41 @@ public slots:
         return d->api;
     }
 
-    QList<QString> getSubmodels()
+    QList<StbSubmodel> &getSubmodels()
     {
         Q_D(StbPlugin);
-        DEBUG() << &(d->subModels);
         return d->subModels;
+    }
+
+    StbSubmodel findSubmodel(const QString &id)
+    {
+        Q_D(StbPlugin);
+        for(const StbSubmodel &submodel: d->subModels)
+            if(submodel.id == id)
+                return submodel;
+        throw QString("Requested undefined submodel ID: ").append(id);
+    }
+
+    QString listSubmodels()
+    {
+        Q_D(StbPlugin);
+        QStringList result;
+        for(StbSubmodel model: d->subModels)
+        {
+            result << model.name;
+        }
+        return result.join(", ");
+    }
+
+    QString getSubmodelDatasourceGroup() { Q_D(StbPlugin); return d->submodelDatasourceGroup; }
+    QString getSubmodelDatasourceField() { Q_D(StbPlugin); return d->submodelDatasourceField; }
+
+protected:
+    void setSubmodelDatasourceField(const QString &group, const QString &field)
+    {
+        Q_D(StbPlugin);
+        d->submodelDatasourceGroup = group;
+        d->submodelDatasourceField = field;
     }
 
 };

@@ -7,8 +7,12 @@
 
 namespace yasem
 {
-
-class ProfileConfig
+/**
+ * @brief The ProfileConfig class
+ *
+ * @deprecated
+ */
+class Q_DECL_DEPRECATED ProfileConfig
 {
 public:
     ProfileConfig(){}

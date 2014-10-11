@@ -19,7 +19,7 @@ MountPointInfo::~MountPointInfo()
     this->unmount();
 }
 
-bool MountPointInfo::mount(const QString &host, const QString &m_point, bool force)
+bool MountPointInfo::mount(const QString &host, const QString &m_point, const QString &options, bool force)
 {
     is_mounted = true;
     #ifdef Q_OS_UNIX
@@ -40,12 +40,8 @@ bool MountPointInfo::mount(const QString &host, const QString &m_point, bool for
             WARN() << "Cannot create directory" << tmpdir.path();
     }
 
-
     QProcess cmd;
     QStringList params;
-
-    //sudo mount -t cifs -o username=guest,password= //ironman/ /tmp/yasem/samba/ironman/
-    //sudo mount -t cifs -o guest //ironman/public /tmp/yasem/samba/ironman/
 
     params << "/usr/bin/env";
     params << "mount";
@@ -53,12 +49,14 @@ bool MountPointInfo::mount(const QString &host, const QString &m_point, bool for
     params << "cifs";
     params << "-o";
     //params << QString("username=%1,password=%2").arg("guest").arg("");
-    params << "guest";
+    if(options.length() > 0)
+        params << options;
+    else
+        params << "guest";
     params << host;
     params << m_point;
 
     cmd.start("sudo", params);
-
 
     if (!cmd.waitForStarted())
     {

@@ -29,10 +29,10 @@ public:
     void setActiveProfile(Profile *profile);
     bool removeProfile(Profile *profile);
     void loadProfiles();
-    Profile* createProfile(const QString &classId, const QString &baseName);
-    void registerProfileClassId(const QString &classId, StbProfilePlugin* profilePlugin);
-    QMap<QString, StbProfilePlugin*> getRegisteredClasses();
-    StbProfilePlugin *getProfilePluginByClassId(const QString &idclassId);
+    Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName);
+    void registerProfileClassId(const QString &classId, StbPlugin* profilePlugin);
+    QMap<QString, StbPlugin*> getRegisteredClasses();
+    StbPlugin *getProfilePluginByClassId(const QString &idclassId);
     Profile *findById(const QString &id);
     Profile* backToPreviousProifile();
 

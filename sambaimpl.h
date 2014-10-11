@@ -23,7 +23,7 @@ public:
     virtual QList<SambaNode*> hosts(const QString &domainName);
     virtual QList<SambaNode*> shares(const QString &hostName);
     virtual void makeTree();
-    virtual bool mount(const QString &what, const QString &where, const QString &params);
+    virtual bool mount(const QString &what, const QString &where, const QString &options);
     virtual bool unmount(const QString &path);
 
 

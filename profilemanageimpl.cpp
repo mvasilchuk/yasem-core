@@ -246,7 +246,7 @@ void ProfileManageImpl::loadProfiles()
 
         if(profilePlugin == NULL)
         {
-            qWarning() << "Plugin for profile classid " << classId << " not found!";
+            WARN() << "Plugin for profile classid " << classId << " not found! Profile will be skipped!";
             continue;
         }
 
@@ -254,6 +254,7 @@ void ProfileManageImpl::loadProfiles()
         Q_ASSERT(profile);
         profile->datasource(dsPlugin->getDatasourceForProfile(profile));
         profile->setName(s.value("name").toString());
+        DEBUG() << "Profile" << profile->getName() << "loaded";
 
         s.endGroup();
 
@@ -261,20 +262,20 @@ void ProfileManageImpl::loadProfiles()
     }
 }
 
-Profile* ProfileManageImpl::createProfile(const QString &classId, const QString &baseName = "")
+Profile* ProfileManageImpl::createProfile(const QString &classId, const QString &submodel, const QString &baseName = "")
 {
     DatasourcePlugin* dsPlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(PluginRole::ROLE_DATASOURCE));
 
     Q_ASSERT(classId != "");
     DEBUG() << baseName << classId;
-    StbProfilePlugin* profilePlugin = getProfilePluginByClassId(classId);
-    Q_ASSERT(profilePlugin != NULL);
-    Profile* profile = profilePlugin->createProfile();
+    StbPlugin* stbPlugin = getProfilePluginByClassId(classId);
+    Q_ASSERT(stbPlugin != NULL);
+    Profile* profile = stbPlugin->createProfile();
 
     Q_ASSERT(profile);
     profile->setName(createUniqueName(classId, baseName));
     profile->datasource(dsPlugin->getDatasourceForProfile(profile));
-
+    profile->setSubmodel(stbPlugin->findSubmodel(submodel));
     profile->datasource()->set("profile", "uuid", profile->getId());
     profile->datasource()->set("profile", "name", profile->getName());
     profile->datasource()->set("profile", "classid", classId);
@@ -283,7 +284,7 @@ Profile* ProfileManageImpl::createProfile(const QString &classId, const QString 
     return profile;
 }
 
-void ProfileManageImpl::registerProfileClassId(const QString &classId, StbProfilePlugin* profilePlugin)
+void ProfileManageImpl::registerProfileClassId(const QString &classId, StbPlugin* profilePlugin)
 {
     if(!profileClasses.contains(classId))
     {
@@ -294,12 +295,12 @@ void ProfileManageImpl::registerProfileClassId(const QString &classId, StbProfil
         WARN() << "Profile class ID" << classId <<  "has bee already registered!";
 }
 
-QMap<QString, StbProfilePlugin *> ProfileManageImpl::getRegisteredClasses()
+QMap<QString, StbPlugin *> ProfileManageImpl::getRegisteredClasses()
 {
     return profileClasses;
 }
 
-StbProfilePlugin *ProfileManageImpl::getProfilePluginByClassId(const QString &classId)
+StbPlugin *ProfileManageImpl::getProfilePluginByClassId(const QString &classId)
 {
     for(auto iterator = profileClasses.begin(); iterator != profileClasses.end(); iterator++)
     {

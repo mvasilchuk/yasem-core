@@ -77,12 +77,20 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
     switch (msgType) {
         case LOG_TYPE_DEBUG:
         {
+#ifdef EXTRA_DEBUG_INFO
+            fprintf(stdout, "[DEBUG] (%s:%u): %s\n", context.file, context.line, message);
+#else
             fprintf(stdout, "[DEBUG] %s\n", message);
+#endif
             break;
         }
         case LOG_TYPE_WARN:
         {
+#ifdef EXTRA_DEBUG_INFO
             fprintf(stdout, "[WARN ] (%s:%u): %s\n", context.file, context.line, message);
+#else
+            fprintf(stdout, "[WARN ] %s\n", message);
+#endif
             break;
         }
         case LOG_TYPE_CRITICAL:
@@ -100,12 +108,22 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         }
         case LOG_TYPE_STUB:
         {
+#ifdef EXTRA_DEBUG_INFO
+            fprintf(stdout, "[STUB ] (%s:%u): %s%s%s\n", context.file, context.line, context.function, strlen(message) > 0 ? ": " : "", message);
+#else
             fprintf(stdout, "[STUB ] %s%s%s\n", context.function, strlen(message) > 0 ? ": " : "", message);
+#endif
+
             break;
         }
         case LOG_TYPE_LOG:
         {
+#ifdef EXTRA_DEBUG_INFO
+            fprintf(stdout, "[LOG  ] (%s:%u): %s\n", context.file, context.line, message);
+#else
             fprintf(stdout, "[LOG  ] %s\n", message);
+#endif
+
             break;
         }
         case LOG_TYPE_FIXME:

@@ -15,6 +15,8 @@ CONFIG   += console
 TEMPLATE = app
 #CONFIG   -= app_bundle
 
+#DEFINES += EXTRA_DEBUG_INFO #Set this flag to show extra information in logger output
+
 TRANSLATIONS = lang/en_US.qm \
     lang/ru_RU.qm \
     lang/uk_UA.qm

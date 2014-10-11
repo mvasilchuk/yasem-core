@@ -16,8 +16,12 @@
 #include <QSettings>
 #include <QThread>
 
-
 using namespace yasem;
+
+static const QString PLUGIN_FLAG_NAME_CLIENT = "client";
+static const QString PLUGIN_FLAG_NAME_SYSTEM = "system";
+static const QString PLUGIN_FLAG_NAME_HIDDEN = "hidden";
+static const QString PLUGIN_FLAG_NAME_GUI    = "gui";
 
 PluginManagerImpl::PluginManagerImpl()
 {
@@ -71,75 +75,63 @@ PLUGIN_ERROR_CODES PluginManagerImpl::listPlugins()
         qDebug() << "Found file:" << fileName;
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
 
-        QObject* obj = pluginLoader.instance();
-        Plugin *plugin = qobject_cast<Plugin*>(obj);
-        if (plugin) {
-            if (plugin != NULL)
+        Plugin *plugin = qobject_cast<Plugin*>(pluginLoader.instance());
+
+        if (plugin != NULL)
+        {
+            QJsonObject metadata = pluginLoader.metaData().value("MetaData").toObject();
+            QString id = metadata.value("id").toString();
+
+            if(!pluginIds.contains(id))
             {
-                QJsonObject metadata = pluginLoader.metaData().value("MetaData").toObject();
-                QString id = metadata.value("id").toString();
-
-                if(!pluginIds.contains(id))
+                if(blacklistedPlugins.contains(id))
                 {
-                    QString name = metadata.value("name").toString();
-                    QString version = metadata.value("version").toString();
-                    QString type = metadata.value("type").toString();
-
-                    plugin->setIID(pluginLoader.metaData().value("IID").toString());
-                    plugin->setClassName(pluginLoader.metaData().value("className").toString());
-                    plugin->setMetadata(metadata);
-                    plugin->setId(id);
-                    plugin->setVersion(version);
-                    plugin->setName(name);
-                    plugin->setState(PLUGIN_STATE_LOADED);
-                    plugin->setFlags(parseFlags(metadata.value("flags").toString()));
-
-
-
-                    plugin->register_roles();
-                    plugin->register_dependencies();
-
-                    //qDebug() << "CLASS count: "
-                    //            << ((QPluginLoader*)plugin)->metaObject()->className();
-
-                    if(blacklistedPlugins.contains(plugin->getId()))
-                    {
-                        qDebug() << QString("Plugin %1 is ignored and won't be loaded.").arg(plugin->getId());
-                        continue;
-                    }
-
-                    pluginIds.append(id);
-                    plugins.append(plugin);
-
-
-                    DEBUG() << "Plugin loaded:" << plugin->getName();
-
-                    // Trying to register plugin as profile plugin
-                    StbProfilePlugin* profilePlugin = dynamic_cast<StbProfilePlugin*>(plugin);
-                    if(profilePlugin != 0)
-                    {
-                        DEBUG() << "Found STB plugin" << profilePlugin->getName();
-                        ProfileManager::instance()->registerProfileClassId(profilePlugin->getProfileClassId(), profilePlugin);
-
-                        StbPlugin* stbPlugin = dynamic_cast<StbPlugin*>(profilePlugin);
-                        if(!stbPlugin != 0)
-                        {
-                            DEBUG() << "submodules" << stbPlugin->getSubmodels();
-                        }
-                        else
-                            DEBUG() << profilePlugin->getName() << " is not a STB plugin";
-                    }
+                    DEBUG() << "Plugin" << id << "is ignored and won't be loaded.";
+                    continue;
                 }
 
-            }
+                QString name = metadata.value("name").toString();
+                QString version = metadata.value("version").toString();
+                QString type = metadata.value("type").toString();
 
-            settings->setValue("plugins", pluginIds.join(","));
+                plugin->setIID(pluginLoader.metaData().value("IID").toString());
+                plugin->setClassName(pluginLoader.metaData().value("className").toString());
+                plugin->setMetadata(metadata);
+                plugin->setId(id);
+                plugin->setVersion(version);
+                plugin->setName(name);
+                plugin->setState(PLUGIN_STATE_LOADED);
+                plugin->setFlags(parseFlags(metadata.value("flags").toString()));
+
+
+                DEBUG() << "Registering plugin roles...";
+                plugin->register_roles();
+                DEBUG() << "Registering plugin dependencies...";
+                plugin->register_dependencies();
+
+                pluginIds.append(id);
+                plugins.append(plugin);
+
+
+                DEBUG() << "Plugin loaded:" << plugin->getName();
+
+                // Trying to register plugin as profile plugin
+                StbPlugin* stbPlugin = dynamic_cast<StbPlugin*>(plugin);
+                if(stbPlugin != 0)
+                {
+                    ProfileManager::instance()->registerProfileClassId(stbPlugin->getProfileClassId(), stbPlugin);
+                    DEBUG() << "Found STB plugin:" << stbPlugin->getName();
+                    DEBUG() << "Found STB submodels:" << stbPlugin->listSubmodels();
+                }
+            }
 
         }
         else
         {
-            qDebug() << pluginLoader.errorString();
+           WARN() << pluginLoader.errorString();
         }
+
+    settings->setValue("plugins", pluginIds.join(","));
 
     }
     return PLUGIN_ERROR_NO_ERROR;
@@ -211,16 +203,16 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
 
             if(cyclic)
             {
-                WARN() << "Cyclic dependency in" << plugin->getId() << "with role" << dependency.role;
+                WARN() << "Cyclic dependency in" << plugin->getId() << "with role" << dependency.roleName();
                 continue;
             }
 
-            DEBUG() << qPrintable(spacing) << "Trying to load dependency" << dependency.role << " for" << plugin->getName();
+            DEBUG() << qPrintable(spacing) << "Trying to load dependency" << dependency.roleName() << " for" << plugin->getName();
 
             Plugin* dependencyPlugin = PluginManager::instance()->getByRole(dependency.role);
             if(dependencyPlugin == NULL)
             {
-                WARN() << "Dependency" << dependency.role << "for" << plugin->getId() << "not found!";
+                WARN() << "Dependency" << dependency.roleName() << "for" << plugin->getId() << "not found!";
                 if(dependency.required)
                 {
                     result = PLUGIN_ERROR_DEPENDENCY_MISSING;
@@ -228,7 +220,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
                 }
                 else
                 {
-                    LOG() << qPrintable(spacing) << "Skipping" << dependency.role << "as not required";
+                    LOG() << qPrintable(spacing) << "Skipping" << dependency.roleName() << "as not required";
                     continue;
                 }
             }
@@ -244,13 +236,13 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
             PLUGIN_ERROR_CODES code = PluginManager::instance()->initPlugin(dependencyPlugin, dependencyLevel+1);
             if(code != PLUGIN_ERROR_NO_ERROR)
             {
-                WARN() << "Error" << code << "occured while initializing plugin" << plugin->getName() << "dependency" << dependency.role;
+                WARN() << "Error" << code << "occured while initializing plugin" << plugin->getName() << "dependency" << dependency.roleName();
                 plugin->setState(PLUGIN_STATE_INITIALIZED);
                 result = PLUGIN_ERROR_DEPENDENCY_MISSING;
             }
             else
             {
-                DEBUG() << qPrintable(spacing) << "Dependency" << dependency.role << "initialized";
+                DEBUG() << qPrintable(spacing) << "Dependency" << dependency.roleName() << "initialized";
             }
         }
 
@@ -365,13 +357,13 @@ PluginFlag PluginManagerImpl::parseFlags(const QString &flagsStr)
     PluginFlag result = PLUGIN_FLAG_NONE;
     foreach(QString flag, flags)
     {
-        if(flag == "client")
+        if(flag == PLUGIN_FLAG_NAME_CLIENT)
             result = (PluginFlag)(result | PLUGIN_FLAG_CLIENT);
-        else if(flag == "system")
+        else if(flag == PLUGIN_FLAG_NAME_SYSTEM)
             result = (PluginFlag)(result | PLUGIN_FLAG_SYSTEM);
-        else if(flag == "hidden")
+        else if(flag == PLUGIN_FLAG_NAME_HIDDEN)
             result = (PluginFlag)(result | PLUGIN_FLAG_HIDDEN);
-        else if(flag == "gui")
+        else if(flag == PLUGIN_FLAG_NAME_GUI)
             result = (PluginFlag)(result | PLUGIN_FLAG_GUI);
     }
     return result;

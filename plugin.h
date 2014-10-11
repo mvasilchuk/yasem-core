@@ -12,9 +12,9 @@
 #include <QPluginLoader>
 #include <QCryptographicHash>
 #include <QThread>
+#include <QJsonObject>
 
 class QObject;
-class QJsonObject;
 class QStringList;
 class QCoreApplication;
 class QMetaType;
@@ -23,7 +23,8 @@ namespace yasem {
 
 class Plugin;
 
-struct PluginPrivate {
+class PluginPrivate {
+public:
     // Constructor that initializes the q-ptr
 
     PluginPrivate(){}
@@ -48,7 +49,7 @@ struct PluginPrivate {
 
 class Plugin
 {
-    Q_DECLARE_PRIVATE(Plugin)
+
 public:
 
     Plugin() : d_ptr(new PluginPrivate(this)) {}
@@ -146,6 +147,8 @@ protected:
     Plugin(PluginPrivate &d): d_ptr(&d) {}
         // allow subclasses to initialize with their own concrete Private
     PluginPrivate *d_ptr;
+
+    Q_DECLARE_PRIVATE(Plugin)
 };
 
 }

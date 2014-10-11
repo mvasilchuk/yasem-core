@@ -105,7 +105,7 @@ void SambaImpl::makeTree()
         else
             line_type = SAMBA_DOMAIN;
 
-        SambaNode* parent;
+        SambaNode* parent = NULL;
         switch(line_type)
         {
             case SAMBA_SHARE:
@@ -133,6 +133,13 @@ void SambaImpl::makeTree()
             }
             default: break;
         }
+
+        if(parent == NULL)
+        {
+            WARN() << "Parent for node" << line << "not found!";
+            continue;
+        }
+
         SambaNode* node = new SambaNode(parent);
         node->type = line_type;
         QRegularExpressionMatch nodeMatch = nodeRegex.match(line);
@@ -162,11 +169,13 @@ void SambaImpl::makeTree()
     DEBUG() << "----- TREE END ----";
 }
 
-bool SambaImpl::mount(const QString &what, const QString &where, const QString &params)
+bool SambaImpl::mount(const QString &what, const QString &where, const QString &options)
 {
     MountPointInfo* m_point = new MountPointInfo(this);
-    m_point->mount(what, where, true);
-    mountPoints.append(m_point);
+    bool mounted = m_point->mount(what, where, options, true);
+    if(mounted)
+        mountPoints.append(m_point);
+    return mounted;
 }
 
 bool SambaImpl::unmount(const QString &path)
@@ -174,7 +183,8 @@ bool SambaImpl::unmount(const QString &path)
     for(MountPointInfo* m_point: mountPoints)
         if(m_point->host() == path || m_point->mountPoint() == path)
         {
-            m_point->unmount();
+            return m_point->unmount();
             break;
         }
+    return false;
 }

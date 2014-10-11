@@ -43,11 +43,11 @@ public:
     virtual void addProfile(Profile* profile) = 0;
     virtual void setActiveProfile(Profile* profile) = 0;
     virtual bool removeProfile(Profile* profile) = 0;
-    virtual Profile* createProfile(const QString &classId, const QString &baseName = "") = 0;
-    virtual void registerProfileClassId(const QString &classId, StbProfilePlugin* profilePlugin) = 0;
-    virtual QMap<QString, StbProfilePlugin*> getRegisteredClasses() = 0;
+    virtual Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName = "") = 0;
+    virtual void registerProfileClassId(const QString &classId, StbPlugin* profilePlugin) = 0;
+    virtual QMap<QString, StbPlugin*> getRegisteredClasses() = 0;
 
-    virtual StbProfilePlugin* getProfilePluginByClassId(const QString &classId) = 0;
+    virtual StbPlugin* getProfilePluginByClassId(const QString &classId) = 0;
     virtual Profile* findById(const QString &id) = 0;
     virtual Profile* backToPreviousProifile() = 0;
     virtual void backToMainPage() = 0;
@@ -68,7 +68,7 @@ signals:
 protected:
     ProfileManager(QObject* parent): QObject(parent) {}
     QSet<Profile*> profilesList;
-    QMap<QString, StbProfilePlugin*> profileClasses;
+    QMap<QString, StbPlugin*> profileClasses;
     Profile* activeProfile;
     QStack<Profile*> profileStack;
 

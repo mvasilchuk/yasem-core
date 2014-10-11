@@ -18,7 +18,7 @@ ProfileConfiguration ProfileConfigParserImpl::parseOptions(ProfileConfiguration 
 {
     DEBUG() << data;
 
-    QJsonParseError *error;
+    QJsonParseError *error = NULL;
     QJsonDocument doc = QJsonDocument::fromJson(data, error);
 
     if(doc.isNull())
