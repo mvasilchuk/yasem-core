@@ -55,6 +55,9 @@ public:
 
     virtual void setupMousePositionHandler(const QObject *receiver, const char* method) = 0;
 
+    virtual void setOpacity(qint32 alpha) = 0;
+    virtual qint32 getOpacity() = 0;
+
 protected:
     QSize innerSize;
     QWidget* activeWebView;

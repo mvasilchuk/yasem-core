@@ -21,6 +21,8 @@ public:
 
     virtual void setFullscreen(bool fullscreen) = 0;
     virtual bool getFullscreen() = 0;
+
+    virtual void repaintGui() = 0;
 };
 
 }
