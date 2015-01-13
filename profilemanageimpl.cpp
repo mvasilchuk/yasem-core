@@ -6,6 +6,7 @@
 #include "datasourceplugin.h"
 #include "stbplugin.h"
 #include "browserplugin.h"
+#include "mediaplayerplugin.h"
 
 #include <QFile>
 #include <QDir>
@@ -55,6 +56,19 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
             loadProfileKeymap(profile);
 
             profile->start();
+
+            MediaPlayerPlugin* player = dynamic_cast<MediaPlayerPlugin*>(PluginManager::instance()->getByRole(ROLE_MEDIA));
+            if(player != NULL)
+                player->mediaStop();
+            else
+                qDebug() << "[V] No player found!";
+
+
+            BrowserPlugin* browser = dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
+            if(browser != NULL)
+                browser->raise();
+            else
+                qDebug() << "[V] No browser found!";
 
             profileStack.push(profile);
 
