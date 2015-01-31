@@ -80,6 +80,15 @@ int main(int argc, char *argv[])
     paths.append(appPath);
     paths.append(appPath.append("/libs"));
     paths.append(appPath.append("/plugins"));
+
+#ifdef Q_OS_WIN
+    // A patch for Windows to support LD_LIBRARY_PATH
+    QString libraryPath = qgetenv("LD_LIBRARY_PATH");
+    QStringList pathList = libraryPath.split(";");
+    for(QString path: pathList)
+        paths.append(path);
+#endif
+
     QCoreApplication::setLibraryPaths(paths);
 
     qInstallMessageHandler(LoggerCore::MessageHandler);
