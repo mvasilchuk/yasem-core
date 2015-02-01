@@ -180,7 +180,7 @@ public slots:
         for(const StbSubmodel &submodel: d->subModels)
             if(submodel.id == id)
                 return submodel;
-        throw QString("Requested undefined submodel ID: ").append(id);
+        qCritical() << QString("Requested undefined submodel ID: %1").arg(id);
     }
 
     QString listSubmodels()

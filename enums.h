@@ -157,7 +157,9 @@ enum PluginRole {
     ROLE_STB_API,
     ROLE_STB_API_SYSTEM,
     ROLE_BROWSER,
-    ROLE_DATASOURCE
+    ROLE_DATASOURCE,
+    ROLE_WEB_SERVER,
+    ROLE_WEB_GUI
 };
 
 #endif // ENUM_H

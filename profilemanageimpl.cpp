@@ -276,8 +276,9 @@ void ProfileManageImpl::loadProfiles()
     }
 }
 
-Profile* ProfileManageImpl::createProfile(const QString &classId, const QString &submodel, const QString &baseName = "")
+Profile* ProfileManageImpl::createProfile(const QString &classId, const QString &submodel, const QString &baseName = "", bool overwrite = false)
 {
+    DEBUG() << "Creaing profile" << classId << submodel << baseName;
     DatasourcePlugin* dsPlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(PluginRole::ROLE_DATASOURCE));
 
     Q_ASSERT(classId != "");
@@ -287,7 +288,7 @@ Profile* ProfileManageImpl::createProfile(const QString &classId, const QString 
     Profile* profile = stbPlugin->createProfile();
 
     Q_ASSERT(profile);
-    profile->setName(createUniqueName(classId, baseName));
+    profile->setName(createUniqueName(classId, baseName, overwrite));
     profile->datasource(dsPlugin->getDatasourceForProfile(profile));
     profile->setSubmodel(stbPlugin->findSubmodel(submodel));
     profile->datasource()->set("profile", "uuid", profile->getId());
@@ -340,6 +341,20 @@ Profile *ProfileManageImpl::findById(const QString &id)
     return NULL;
 }
 
+Profile *ProfileManageImpl::findByName(const QString &id)
+{
+    foreach (Profile* profile, profilesList) {
+        if(id == profile->getName())
+        {
+            DEBUG() << "PROFILE: " << profile;
+            return profile;
+        }
+    }
+
+    ERROR() << QString("Profile '%1' not found!").arg(id);
+    return NULL;
+}
+
 Profile *ProfileManageImpl::backToPreviousProifile()
 {
     qDebug() << "profiles:" << profileStack.size();
@@ -366,7 +381,7 @@ void ProfileManageImpl::backToMainPage()
 }
 
 
-QString ProfileManageImpl::createUniqueName(const QString &classId, const QString &baseName = "")
+QString ProfileManageImpl::createUniqueName(const QString &classId, const QString &baseName = "", bool overwrite = false)
 {
     const QString newProfileName = baseName != "" ? baseName : QObject::tr("New %1 profile").arg(classId.toCaseFolded());
 
@@ -391,6 +406,9 @@ QString ProfileManageImpl::createUniqueName(const QString &classId, const QStrin
     }
 
     maxIndex++;
+
+    if(overwrite)
+        return newProfileName;
 
     return maxIndex > 1 ? newProfileName + QString(" #") + QString::number(maxIndex) : newProfileName;
 }

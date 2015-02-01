@@ -75,7 +75,8 @@ HEADERS += \
     samba.h \
     sambaimpl.h \
     mountpointinfo.h \
-    sambanode.h
+    sambanode.h \
+    webserverplugin.h
 
 include(../common.pri)
 DESTDIR = $$DEFAULT_BIN_DIR

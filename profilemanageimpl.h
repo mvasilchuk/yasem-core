@@ -29,17 +29,18 @@ public:
     void setActiveProfile(Profile *profile);
     bool removeProfile(Profile *profile);
     void loadProfiles();
-    Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName);
+    Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName, bool overwrite);
     void registerProfileClassId(const QString &classId, StbPlugin* profilePlugin);
     QMap<QString, StbPlugin*> getRegisteredClasses();
     StbPlugin *getProfilePluginByClassId(const QString &idclassId);
     Profile *findById(const QString &id);
+    Profile *findByName(const QString &id);
     Profile* backToPreviousProifile();
 
     void loadProfileKeymap(Profile *profile);
 protected:
     QDir profilesDir;
-    QString createUniqueName(const QString &classId, const QString &baseName);
+    QString createUniqueName(const QString &classId, const QString &baseName, bool overwrite);
 
     void loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString &classId);
 

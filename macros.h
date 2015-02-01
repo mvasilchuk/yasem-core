@@ -17,6 +17,7 @@ namespace yasem
     #define WTF() qDebug() << "$WTF$"
     #define NOT_IMPLEMENTED() qDebug() << "$NI$"
     #define FIXME() qDebug() << "$FIXME$"
+    #define FATAL(msg)  qFatal(msg)
 
     #define NOT_SUPPORTED_ON_OS(os) STUB() << "[this method is not supported on" << os << "]"
     #define NOT_SUPPORTED_ON_UNIX NOT_SUPPORTED_ON_OS("unix")

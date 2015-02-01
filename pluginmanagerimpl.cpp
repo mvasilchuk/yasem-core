@@ -321,7 +321,6 @@ PLUGIN_ERROR_CODES  PluginManagerImpl::deinitPlugin(Plugin *plugin)
 
 Plugin* PluginManagerImpl::getByRole(PluginRole role)
 {
-    //DEBUG(QString("getByRole(%1)").arg(role));
     for(int index = 0; index < plugins.size(); index++)
     {
         Plugin *plugin = plugins.at(index);
@@ -329,6 +328,8 @@ Plugin* PluginManagerImpl::getByRole(PluginRole role)
         {
             if(pluginRole == role)
             {
+                Q_ASSERT(plugin);
+                qDebug() << "Found plugin" << plugin << plugin->getName() << plugin->getClassName();
                 return plugin;
             }
         }

@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 // Includes for backtrace
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_UNIX
 #include <execinfo.h>
 #elif defined(Q_OS_WIN32)
 #endif // defined(Q_OS_LINUX)
@@ -60,7 +60,7 @@ public:
 
     static void printCallStack()
     {
-        #ifdef Q_OS_LINUX
+        #ifdef Q_OS_UNIX
             //print call stack (needs #include <execinfo.h>)
             void* callstack[CALLSTACK_SIZE];
             int i, frames = backtrace(callstack, CALLSTACK_SIZE);

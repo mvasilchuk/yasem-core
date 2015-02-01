@@ -43,12 +43,13 @@ public:
     virtual void addProfile(Profile* profile) = 0;
     virtual void setActiveProfile(Profile* profile) = 0;
     virtual bool removeProfile(Profile* profile) = 0;
-    virtual Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName = "") = 0;
+    virtual Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName = "", bool overwrite = false) = 0;
     virtual void registerProfileClassId(const QString &classId, StbPlugin* profilePlugin) = 0;
     virtual QMap<QString, StbPlugin*> getRegisteredClasses() = 0;
 
     virtual StbPlugin* getProfilePluginByClassId(const QString &classId) = 0;
     virtual Profile* findById(const QString &id) = 0;
+    virtual Profile* findByName(const QString &id) = 0;
     virtual Profile* backToPreviousProifile() = 0;
     virtual void backToMainPage() = 0;
 
@@ -72,7 +73,7 @@ protected:
     Profile* activeProfile;
     QStack<Profile*> profileStack;
 
-    virtual QString createUniqueName(const QString &classId, const QString &baseName = "") = 0;
+    virtual QString createUniqueName(const QString &classId, const QString &baseName = "", bool overwrite = false) = 0;
 
 private:
 
