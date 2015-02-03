@@ -70,9 +70,7 @@ void stopErrorRedirect(int stdout_fd)
 
 #endif //Q_OS_LINUX
 
-
 using namespace yasem;
-
 int main(int argc, char *argv[])
 {
     QString appPath = QFileInfo(argv[0]).dir().path();
@@ -92,7 +90,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setLibraryPaths(paths);
 
     qInstallMessageHandler(LoggerCore::MessageHandler);
-
     YasemApplication a(argc, argv);
     int execCode;
 

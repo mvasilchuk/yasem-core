@@ -6,14 +6,17 @@
 
 VERSION = 0.1.0
 
-QT       += core gui widgets network
+QT += core widgets network
+QT -= gui
+
+CONFIG -= console
+QT.testlib.CONFIG -= console
 
 CONFIG += c++11
 
 TARGET = yasem
-CONFIG   += console
+
 TEMPLATE = app
-#CONFIG   -= app_bundle
 
 #DEFINES += EXTRA_DEBUG_INFO #Set this flag to show extra information in logger output
 
@@ -91,5 +94,6 @@ DESTDIR = $$DEFAULT_BIN_DIR
 OTHER_FILES += \
     LICENSE \
     README.md
+
 
 
