@@ -1,6 +1,8 @@
 #ifndef MEDIASIGNALSENDER_H
 #define MEDIASIGNALSENDER_H
 
+#include "enums.h"
+
 #include <QObject>
 
 namespace yasem
@@ -26,6 +28,7 @@ signals:
     void brightnessChanged(int val);
     void contrastChanged(int val);
     void saturationChanged(int val);
+    void statusChanged(MediaStatus status);
 };
 
 }

@@ -162,4 +162,20 @@ enum PluginRole {
     ROLE_WEB_GUI
 };
 
+namespace yasem {
+// Similar to QtAV::MediaStatus, but I made a copy to remove dependency from QtAV
+enum MediaStatus
+{
+    UnknownMediaStatus,
+    NoMedia,
+    LoadingMedia, // when source is set
+    LoadedMedia, // if auto load and source is set. player is stopped state
+    StalledMedia, // insufficient buffering or other interruptions (timeout, user interrupt)
+    BufferingMedia, // NOT IMPLEMENTED
+    BufferedMedia, // when playing //NOT IMPLEMENTED
+    EndOfMedia,
+    InvalidMedia // what if loop > 0 or stopPosition() is not mediaStopPosition()?
+};
+}
+
 #endif // ENUM_H
