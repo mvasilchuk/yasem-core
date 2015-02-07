@@ -27,7 +27,11 @@ class PluginPrivate {
 public:
     // Constructor that initializes the q-ptr
 
-    PluginPrivate(){}
+    PluginPrivate(){
+        active = false;
+        flags = PluginFlag::PLUGIN_FLAG_NONE;
+        state = PLUGIN_STATE_UNKNOWN;
+    }
     PluginPrivate(Plugin *q) : q_ptr(q) { }
     Plugin *q_ptr; // q-ptr points to the API class
     QList<PluginRole> role_list;

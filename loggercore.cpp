@@ -104,7 +104,6 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
             fprintf(stderr, "[FATAL] (%s:%u): %s\n", context.file, context.line, message);
             Core::printCallStack();
             abort();
-            break;
         }
         case LOG_TYPE_STUB:
         {

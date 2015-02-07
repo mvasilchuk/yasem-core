@@ -174,13 +174,14 @@ public slots:
         return d->subModels;
     }
 
-    StbSubmodel findSubmodel(const QString &id)
+    StbSubmodel* findSubmodel(const QString &id)
     {
         Q_D(StbPlugin);
-        for(const StbSubmodel &submodel: d->subModels)
+        for(StbSubmodel &submodel: d->subModels)
             if(submodel.id == id)
-                return submodel;
+                return &submodel;
         qCritical() << QString("Requested undefined submodel ID: %1").arg(id);
+        return NULL;
     }
 
     QString listSubmodels()

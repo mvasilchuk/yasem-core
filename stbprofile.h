@@ -124,14 +124,14 @@ public:
     }
 
 
-    StbSubmodel getSubmodel() const { return submodel; }
-    void setSubmodel(const StbSubmodel &submodel) {
+    StbSubmodel* getSubmodel() const { return submodel; }
+    void setSubmodel(StbSubmodel* submodel) {
         this->submodel = submodel;
     }
 
 
 protected:
-    StbSubmodel submodel;
+    StbSubmodel* submodel;
     QString id;
     QString name;
     ProfileFlag flags;

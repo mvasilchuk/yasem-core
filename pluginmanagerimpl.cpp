@@ -194,7 +194,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
             bool cyclic = false;
             for(PluginRole role: plugin->roles())
             {
-                if(role == dependency.role)
+                if(role == dependency.getRole())
                 {
                     cyclic = true;
                     break;
@@ -209,11 +209,11 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
 
             DEBUG() << qPrintable(spacing) << "Trying to load dependency" << dependency.roleName() << " for" << plugin->getName();
 
-            Plugin* dependencyPlugin = PluginManager::instance()->getByRole(dependency.role);
+            Plugin* dependencyPlugin = PluginManager::instance()->getByRole(dependency.getRole());
             if(dependencyPlugin == NULL)
             {
                 WARN() << "Dependency" << dependency.roleName() << "for" << plugin->getId() << "not found!";
-                if(dependency.required)
+                if(dependency.isRequired())
                 {
                     result = PLUGIN_ERROR_DEPENDENCY_MISSING;
                     break;

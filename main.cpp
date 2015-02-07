@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #ifdef Q_OS_LINUX
+#ifndef Q_OS_ANDROID
 #include <unistd.h>
 
 void signalHandler(int signal)
@@ -25,7 +26,6 @@ void signalHandler(int signal)
         case SIGSEGV: printf("SIGSEGV\r\n");
             yasem::Core::printCallStack();
             abort();
-            exit(1);
         break;
         default:
             printf("APPLICATION EXITING\r\n");
@@ -67,7 +67,7 @@ void stopErrorRedirect(int stdout_fd)
     stdout = fdopen(STDERR_FILENO, "w");
     close(stdout_fd);
 }
-
+#endif Q_OS_ANDROID
 #endif //Q_OS_LINUX
 
 using namespace yasem;
@@ -94,8 +94,10 @@ int main(int argc, char *argv[])
     int execCode;
 
     #ifdef Q_OS_LINUX
+    #ifndef Q_OS_ANDROID
     //int stdout_fd = startErrorRedirect();
     setupSignalHandlers();
+    #endif
     #endif //Q_OS_LINUX
 
     qDebug() << "Library paths: " << QApplication::libraryPaths();
@@ -112,7 +114,12 @@ int main(int argc, char *argv[])
 
     PluginManager::setInstance(new PluginManagerImpl());
     a.setProperty("PluginManager", QVariant::fromValue(PluginManager::instance()));
+
+#ifndef STATIC_BUILD
     PLUGIN_ERROR_CODES listResult = PluginManager::instance()->listPlugins();
+#else
+    PLUGIN_ERROR_CODES listResult = PLUGIN_ERROR_NO_ERROR;
+#endif
     if(listResult == PLUGIN_ERROR_NO_ERROR)
     {
 

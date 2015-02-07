@@ -10,30 +10,21 @@ namespace yasem
 
 class PluginDependency {
 public:
-    QString dependency_name; // A name of registered plugin dependency
-    PluginRole role;         // A role of a dependency.
-                             // You should declare at least one of dependency_name or role (or both).
-    bool required;           // Set this flag if plugin cannot be loaded without this dependency.
-
     PluginDependency(QString name, bool required = true) {
-        this->dependency_name = name;
-        this->required = required;
+        init(name, required, ROLE_UNKNOWN);
     }
 
     PluginDependency(PluginRole role, bool required = true) {
-        this->role = role;
-        this->required = required;
+        init("", required, role);
     }
 
     PluginDependency(QString name, PluginRole role, bool required = true) {
-        this->dependency_name = name;
-        this->role = role;
-        this->required = required;
+        init(name, required, role);
     }
 
     QString roleName() const
     {
-        switch(role)
+        switch(m_role)
         {
             case ROLE_UNKNOWN:          { return QObject::tr("Unknown");                 }
             case ROLE_UNSPECIFIED:      { return QObject::tr("Unspecified");             }
@@ -45,9 +36,26 @@ public:
             case ROLE_DATASOURCE:       { return QObject::tr("Datasource plugin");       }
             case ROLE_WEB_SERVER:       { return QObject::tr("Web server plugin");       }
             case ROLE_WEB_GUI:          { return QObject::tr("Web GUI plugin");          }
+            default:                    { return QObject::tr("Unknown plugin role");     }
         }
     }
 
+    bool isRequired()           const { return m_required; }
+    PluginRole getRole()        const { return m_role; }
+    QString getDependencyName() const { return m_dependency_name; }
+
+protected:
+    QString m_dependency_name; // A name of registered plugin dependency
+    PluginRole m_role;         // A role of a dependency.
+                               // You should declare at least one of dependency_name or role (or both).
+    bool m_required;           // Set this flag if plugin cannot be loaded without this dependency.
+
+    void init(const QString& dependency_name, const bool required, const PluginRole role)
+    {
+        this->m_dependency_name = dependency_name;
+        this->m_required = required;
+        this->m_role = role;
+    }
 };
 
 }

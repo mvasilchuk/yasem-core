@@ -123,7 +123,7 @@ void SambaImpl::makeTree()
                 {
                     case SAMBA_SHARE:   parent = qobject_cast<SambaNode*>(last_node->parent()->parent());       break;
                     case SAMBA_HOST:    parent = qobject_cast<SambaNode*>(last_node->parent());                 break;
-                    case SAMBA_DOMAIN:  parent = last_node; break;                                              break;
+                    case SAMBA_DOMAIN:  parent = last_node;                                                     break;
                     default:            WARN() << "Broken host node" << line << last_node->name;                break;
                 }
                 break;
@@ -184,7 +184,6 @@ bool SambaImpl::unmount(const QString &path)
         if(m_point->host() == path || m_point->mountPoint() == path)
         {
             return m_point->unmount();
-            break;
         }
     return false;
 }
