@@ -62,6 +62,7 @@ void CoreImpl::fillKeymapHashTable()
     keycode_hashes["RC_KEY_FAST_FORWARD"]   = RC_KEY_FAST_FORWARD;
     keycode_hashes["RC_KEY_STOP"]           = RC_KEY_STOP;
     keycode_hashes["RC_KEY_PLAY_PAUSE"]     = RC_KEY_PLAY_PAUSE;
+    keycode_hashes["RC_KEY_PLAY"]           = RC_KEY_PLAY;
     keycode_hashes["RC_KEY_REC"]            = RC_KEY_REC;
     keycode_hashes["RC_KEY_MIC"]            = RC_KEY_MIC;
     keycode_hashes["RC_KEY_MUTE"]           = RC_KEY_MUTE;
