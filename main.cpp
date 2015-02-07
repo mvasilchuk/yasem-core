@@ -67,7 +67,7 @@ void stopErrorRedirect(int stdout_fd)
     stdout = fdopen(STDERR_FILENO, "w");
     close(stdout_fd);
 }
-#endif Q_OS_ANDROID
+#endif //Q_OS_ANDROID
 #endif //Q_OS_LINUX
 
 using namespace yasem;
