@@ -6,11 +6,13 @@
 #include <QtPlugin>
 
 class QRect;
+class QMenu;
 
 namespace yasem
 {
 
 class BrowserPlugin;
+
 class GuiPlugin
 {
 public:
@@ -23,6 +25,7 @@ public:
     virtual bool getFullscreen() = 0;
 
     virtual void repaintGui() = 0;
+    virtual QList<QMenu*> getMenuItems() = 0;
 };
 
 }

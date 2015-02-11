@@ -370,34 +370,6 @@ PluginFlag PluginManagerImpl::parseFlags(const QString &flagsStr)
     return result;
 }
 
-/*
-void PluginManagerImpl::loadProfiles()
-{
-    STUB();
-    ProfileManager::instance()->loadProfiles();
-
-    / *
-    if(ProfileManager::instance()->getProfiles().size() == 0)
-    {
-        INFO("No profiles found. Creating the new one.");
-        StbProfilePlugin* profilePlugin = ProfileManager::instance()->getProfilePluginByClassId("mag");
-        Q_ASSERT(profilePlugin);
-        Profile* profile = ProfileManager::instance()->createProfile("test profile 1", profilePlugin->getProfileClassId());
-        Q_ASSERT(profile);
-        ProfileManager::instance()->addProfile(profile);
-        ProfileManager::instance()->setActiveProfile(profile);
-    }
-    else
-    {
-        QString profileId = Core::instance()->settings()->value("active_profile", "").toString();
-        Q_ASSERT(profileId != "");
-        Profile* profile = ProfileManager::instance()->findById(profileId);
-        Q_ASSERT(profile);
-        ProfileManager::instance()->setActiveProfile(profile);
-    }* /
-
-}*/
-
 PLUGIN_ERROR_CODES PluginManagerImpl::initPlugins()
 {
     DEBUG() << "initPlugins()";

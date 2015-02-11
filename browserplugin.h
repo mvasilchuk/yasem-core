@@ -17,15 +17,15 @@ namespace yasem
 {
 class StbPlugin;
 class CustomKeyEvent;
+class AbstractWebPage;
 class BrowserPlugin
 {
 public:
     virtual ~BrowserPlugin(){}
 
-    virtual void parent(QWidget *parent) = 0;
-    virtual QWidget* parent() = 0;
+    virtual void setParentWidget(QWidget *parent) = 0;
+    virtual QWidget* getParentWidget() = 0;
     virtual bool load(const QUrl &url) = 0;
-    virtual void evalJs(const QString &js) = 0;
     virtual QWidget* widget() = 0 ;
     virtual void resize(QResizeEvent* = 0) = 0;
     virtual void rect(const QRect &rect) = 0;
@@ -47,7 +47,6 @@ public:
     virtual QString browserRootDir() = 0;
     virtual void setUserAgent(const QString &userAgent) = 0;
     virtual void addFont(const QString &fileName) = 0;
-    virtual bool receiveKeyCode(RC_KEY keyCode) = 0;
     virtual void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false) = 0;
     virtual void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false) = 0;
     virtual void clearKeyEvents() = 0;
@@ -57,6 +56,8 @@ public:
 
     virtual void setOpacity(qint32 alpha) = 0;
     virtual qint32 getOpacity() = 0;
+
+    virtual AbstractWebPage* getFirstPage() = 0;
 
 protected:
     QSize innerSize;

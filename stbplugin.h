@@ -7,7 +7,6 @@
 #include "macros.h"
 #include "datasource.h"
 
-
 #include <QtPlugin>
 #include <QUrl>
 #include <QHash>

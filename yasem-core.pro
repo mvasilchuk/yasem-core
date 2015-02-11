@@ -28,7 +28,6 @@ TRANSLATIONS = lang/en_US.qm \
 SOURCES += main.cpp \
     pluginmanagerimpl.cpp \
     coreimpl.cpp \
-    consolelogger.cpp \
     profilemanageimpl.cpp \
     networkimpl.cpp \
     pluginthread.cpp \
@@ -47,7 +46,6 @@ HEADERS += \
     coreimpl.h \
     core.h \
     logger.h \
-    consolelogger.h \
     mainwindow.h \
     plugindependency.h \
     profilemanager.h \
@@ -79,7 +77,8 @@ HEADERS += \
     sambaimpl.h \
     mountpointinfo.h \
     sambanode.h \
-    webserverplugin.h
+    webserverplugin.h \
+    abstractwebpage.h
 
 include(../common.pri)
 DESTDIR = $$DEFAULT_BIN_DIR

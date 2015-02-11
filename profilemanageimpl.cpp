@@ -51,7 +51,13 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
 
             qDebug() << QString("Active profile: %1").arg(profile->getName());
 
-            profile->getProfilePlugin()->init();
+            BrowserPlugin* browser = dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
+            if(browser != NULL)
+                browser->raise();
+            else
+                qDebug() << "[V] No browser found!";
+
+            profile->getProfilePlugin()->init(browser->getFirstPage());
 
             loadProfileKeymap(profile);
 
@@ -62,13 +68,6 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
                 player->mediaStop();
             else
                 qDebug() << "[V] No player found!";
-
-
-            BrowserPlugin* browser = dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
-            if(browser != NULL)
-                browser->raise();
-            else
-                qDebug() << "[V] No browser found!";
 
             profileStack.push(profile);
 
@@ -355,7 +354,7 @@ Profile *ProfileManageImpl::findByName(const QString &id)
     return NULL;
 }
 
-Profile *ProfileManageImpl::backToPreviousProifile()
+Profile *ProfileManageImpl::backToPreviousProfile()
 {
     qDebug() << "profiles:" << profileStack.size();
     if(profileStack.size() < 1)
@@ -378,6 +377,11 @@ void ProfileManageImpl::backToMainPage()
     profileStack.resize(1);
     Profile* profile = profileStack.at(0);
     setActiveProfile(profile);
+}
+
+bool ProfileManageImpl::canGoBack()
+{
+    return profileStack.size() > 1;
 }
 
 

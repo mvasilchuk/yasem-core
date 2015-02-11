@@ -45,7 +45,6 @@ public:
     virtual void setPluginDir(const QString &pluginDir) = 0;
     virtual QString getPluginDir() = 0;
     //virtual void loadProfiles() = 0;
-
 protected:
     PluginManager() {}
     QList<Plugin*> plugins;

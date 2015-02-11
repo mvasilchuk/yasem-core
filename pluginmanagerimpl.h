@@ -31,9 +31,6 @@ public:
 
     QStringList blacklistedPlugins;
 
-    // PluginManager interface
-public:
-    //void loadProfiles();
 };
 
 }

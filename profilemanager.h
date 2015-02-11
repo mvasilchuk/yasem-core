@@ -50,8 +50,9 @@ public:
     virtual StbPlugin* getProfilePluginByClassId(const QString &classId) = 0;
     virtual Profile* findById(const QString &id) = 0;
     virtual Profile* findByName(const QString &id) = 0;
-    virtual Profile* backToPreviousProifile() = 0;
+    virtual Profile* backToPreviousProfile() = 0;
     virtual void backToMainPage() = 0;
+    virtual bool canGoBack() = 0;
 
     /*static bool sortNameAsc(const Profile * a, const Profile * b)
     {

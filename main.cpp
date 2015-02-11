@@ -122,7 +122,6 @@ int main(int argc, char *argv[])
 #endif
     if(listResult == PLUGIN_ERROR_NO_ERROR)
     {
-
         PLUGIN_ERROR_CODES initResult = PluginManager::instance()->initPlugins();
         if(initResult != PLUGIN_ERROR_NO_ERROR)
         {

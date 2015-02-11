@@ -35,7 +35,7 @@ public:
     StbPlugin *getProfilePluginByClassId(const QString &idclassId);
     Profile *findById(const QString &id);
     Profile *findByName(const QString &id);
-    Profile* backToPreviousProifile();
+    Profile* backToPreviousProfile();
 
     void loadProfileKeymap(Profile *profile);
 protected:
@@ -47,6 +47,7 @@ protected:
     // ProfileManager interface
 public:
     void backToMainPage();
+    bool canGoBack();
 };
 
 }
