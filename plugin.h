@@ -31,8 +31,10 @@ public:
         active = false;
         flags = PluginFlag::PLUGIN_FLAG_NONE;
         state = PLUGIN_STATE_UNKNOWN;
+        q_ptr = NULL;
     }
-    PluginPrivate(Plugin *q) : q_ptr(q) { }
+    PluginPrivate(Plugin *q) : q_ptr(q) {
+    }
     Plugin *q_ptr; // q-ptr points to the API class
     QList<PluginRole> role_list;
     QList<PluginDependency> dependency_list;

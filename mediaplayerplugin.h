@@ -2,7 +2,9 @@
 #define MEDIAPLAYERPLUGIN_H
 
 #include "enums.h"
+#include "macros.h"
 #include "mediasignalsender.h"
+#include "mediainfo.h"
 
 #include <QWidget>
 #include <QtPlugin>
@@ -93,6 +95,14 @@ public:
     virtual void move(int x, int y) = 0;    
     virtual void raise() = 0;
 
+    virtual QList<AudioLangInfo> getAudioLanguages() = 0;
+    virtual void setAudioLanguage(int index) = 0;
+
+    virtual int getBrightness() = 0;
+    virtual int getContrast() = 0;
+
+    virtual MediaMetadata getMetadata() = 0;
+
     MediaSignalSender& getSignalSender() { return mediaSignalSender; }
 
     void setViewport(const QRect &baseRect, const qreal baseScale, const QRect &newRect)
@@ -109,10 +119,10 @@ public:
 
                 QRect videoRect = rect();
 
-                qDebug() << "baseRect: " << baseRect;
-                qDebug() << "baseScale: " << baseScale;
-                qDebug() << "video rect:" << videoRect;
-                qDebug() << "videoFixedRect:" << newRect;
+                DEBUG() << "baseRect: " << baseRect;
+                DEBUG() << "baseScale: " << baseScale;
+                DEBUG() << "video rect:" << videoRect;
+                DEBUG() << "videoFixedRect:" << newRect;
 
                 QRect zoomedRect = QRect(
                             (int)((float)newRect.left() * baseScale + baseRect.left()),
@@ -121,7 +131,7 @@ public:
                             (int)((float)newRect.height() * baseScale)
                         );
 
-                qDebug() << "rect:" << zoomedRect;
+                DEBUG() << "rect:" << zoomedRect;
 
                 this->baseRect = baseRect;
                 scale(baseScale);

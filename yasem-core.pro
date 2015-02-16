@@ -78,7 +78,8 @@ HEADERS += \
     mountpointinfo.h \
     sambanode.h \
     webserverplugin.h \
-    abstractwebpage.h
+    abstractwebpage.h \
+    mediainfo.h
 
 include(../common.pri)
 DESTDIR = $$DEFAULT_BIN_DIR
