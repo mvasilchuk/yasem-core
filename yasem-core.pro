@@ -7,7 +7,9 @@
 VERSION = 0.1.0
 
 QT += core widgets network
-QT -= gui
+equals(QT_MAJOR_VERSION, 5): {
+    QT -= gui
+}
 
 CONFIG -= console
 QT.testlib.CONFIG -= console

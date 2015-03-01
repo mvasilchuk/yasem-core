@@ -19,7 +19,7 @@ public:
     virtual PLUGIN_ERROR_CODES initPlugins();
     virtual PLUGIN_ERROR_CODES deinitPlugins();
     //virtual PLUGIN_ERROR_CODES connectSlots();
-    virtual QList<Plugin*> getPlugins(PluginRole role = ROLE_UNKNOWN);
+    virtual QList<Plugin*> getPlugins(PluginRole role = ROLE_ANY, bool active_only = true);
     virtual PLUGIN_ERROR_CODES initPlugin(Plugin* plugin, int dependencyLevel);
     virtual PLUGIN_ERROR_CODES deinitPlugin(Plugin* plugin);
     virtual Plugin* getByRole(PluginRole role);

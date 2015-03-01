@@ -37,7 +37,7 @@ public:
     virtual PLUGIN_ERROR_CODES initPlugins() = 0;
     virtual PLUGIN_ERROR_CODES deinitPlugins() = 0;
     //virtual PLUGIN_ERROR_CODES connectSlots();
-    virtual QList<Plugin*> getPlugins(PluginRole role) = 0;
+    virtual QList<Plugin*> getPlugins(PluginRole role, bool active_only) = 0;
     virtual PLUGIN_ERROR_CODES initPlugin(Plugin* plugin, int dependencyLevel = 0) = 0;
     virtual PLUGIN_ERROR_CODES deinitPlugin(Plugin* plugin) = 0;
     virtual Plugin* getByRole(PluginRole role) = 0;

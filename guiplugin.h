@@ -26,6 +26,7 @@ public:
 
     virtual void repaintGui() = 0;
     virtual QList<QMenu*> getMenuItems() = 0;
+    virtual QRect widgetRect() = 0;
 };
 
 }

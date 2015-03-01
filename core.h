@@ -10,10 +10,8 @@
 #include <stdio.h>
 
 // Includes for backtrace
-#ifdef Q_OS_UNIX
-#ifndef Q_OS_ANDROID
+#ifdef Q_OS_LINUX
 #include <execinfo.h>
-#endif
 #endif // defined(Q_OS_LINUX)
 
 #include <QObject>
@@ -61,8 +59,7 @@ public:
 
     static void printCallStack()
     {
-        #ifdef Q_OS_UNIX
-        #ifndef Q_OS_ANDROID
+        #ifdef Q_OS_LINUX
             //print call stack (needs #include <execinfo.h>)
             void* callstack[CALLSTACK_SIZE];
             int i, frames = backtrace(callstack, CALLSTACK_SIZE);
@@ -71,7 +68,6 @@ public:
                 printf("%d: %s\n", i, strs[i]);
             }
             free(strs);
-        #endif
         #else
             printf("[FIXME]: printCallStack() is only supported under desktop Unix-based systems\n");
         #endif // Q_OS_LINUX

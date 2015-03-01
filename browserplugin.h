@@ -59,6 +59,9 @@ public:
 
     virtual AbstractWebPage* getFirstPage() = 0;
 
+    virtual QString getQmlComponentName() { return ""; }
+
+    virtual void createNewPage() = 0;
 protected:
     QSize innerSize;
     QWidget* activeWebView;

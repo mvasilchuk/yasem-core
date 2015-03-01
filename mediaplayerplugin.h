@@ -201,6 +201,8 @@ public:
         return true;
     }
 
+    virtual QString getQmlComponentName() { return ""; }
+
 protected:
     qreal widgetScale;
     QRect widgetFixedRect;
