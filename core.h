@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QMetaType>
 #include <QThread>
+#include <QRegularExpression>
 
 #define CONFIG_DIR "yasem"
 #define CONFIG_NAME "config"
@@ -73,11 +74,18 @@ public:
         #endif // Q_OS_LINUX
     }
 
+    virtual QString version() = 0;
+    QHash<QString, BlockDeviceInfo*> getBlockDeviceTree() {
+        return block_device_tree;
+    }
+
 protected:
     Core(QObject* parent): QObject(parent){}
     Core(Core const&);
 
     QHash<QString, RC_KEY> keycode_hashes;
+    QHash<QString, BlockDeviceInfo*> block_device_tree;
+    QHash<HwinfoLineTypes, QRegularExpression> hwinfo_regex_list;
 
 private:
 

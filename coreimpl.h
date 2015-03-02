@@ -34,9 +34,14 @@ protected:
     void fillKeymapHashTable();
 public slots:
     void mountPointChanged();
+    void buildBlockDeviceTree();
     QList<DiskInfo *> disks();
     CoreNetwork* network();
     QThread* mainThread();
+
+    // Core interface
+public:
+    QString version();
 };
 
 }

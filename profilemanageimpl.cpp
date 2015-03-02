@@ -53,11 +53,12 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
 
             BrowserPlugin* browser = dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
             if(browser != NULL)
+            {
                 browser->raise();
+                profile->getProfilePlugin()->init(browser->getFirstPage());
+            }
             else
                 qDebug() << "[V] No browser found!";
-
-            profile->getProfilePlugin()->init(browser->getFirstPage());
 
             loadProfileKeymap(profile);
 
@@ -151,7 +152,8 @@ void ProfileManageImpl::loadProfileKeymap(Profile *profile)
     QStringList keys = keymap.allKeys();
 
     BrowserPlugin* browser = profile->getProfilePlugin()->browser();
-    browser->clearKeyEvents();
+    if(browser)
+        browser->clearKeyEvents();
 
     for(QString key: keys)
     {
@@ -199,7 +201,7 @@ void ProfileManageImpl::loadProfileKeymap(Profile *profile)
         if(keycode_value == RC_KEY_NO_KEY)
             WARN() << "Key value for" << key << "not found!";
         else
-            browser->registerKeyEvent(keycode_value, code, which, alt, ctrl, shift);
+            if(browser) browser->registerKeyEvent(keycode_value, code, which, alt, ctrl, shift);
 
     }
     keymap.endGroup();

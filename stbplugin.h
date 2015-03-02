@@ -44,6 +44,12 @@ public:
 
 class StbPluginPrivate: public StbProfilePluginPrivate {
 public:
+    StbPluginPrivate() {
+        datasourceInstance = NULL;
+        mediaPlayer = NULL;
+        guiPlugin = NULL;
+        browserPlugin = NULL;
+    }
 
     QHash<QString, QObject*> api;
     Datasource* datasourceInstance;

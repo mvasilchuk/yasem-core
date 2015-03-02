@@ -22,6 +22,18 @@ CoreImpl::CoreImpl(QObject *parent ): Core(parent)
     fillKeymapHashTable();
 
 
+    // Regular expressions to extract information from hwinfo's output.
+    hwinfo_regex_list.insert(HwinfoLineTypes::TITLE,           QRegularExpression("^(\\d+):\\s+(\\w+)\\s+\\d+\\.\\d+:\\s+\\d+\\s+\\w+\n"));
+    hwinfo_regex_list.insert(HwinfoLineTypes::HARDWARE_CLASS,  QRegularExpression("Hardware Class:\\s+(\\w+)\n"));
+    hwinfo_regex_list.insert(HwinfoLineTypes::UNIQUE_ID,       QRegularExpression("Unique ID:\\s+(.*)\n"));
+    hwinfo_regex_list.insert(HwinfoLineTypes::PARENT_ID,       QRegularExpression("Parent ID:\\s+(.*)\n"));
+    hwinfo_regex_list.insert(HwinfoLineTypes::SYS_FS_ID,       QRegularExpression("SysFS ID:\\s+(.*)\n"));
+    hwinfo_regex_list.insert(HwinfoLineTypes::MODEL,           QRegularExpression("Model:\\s+\\\"(.*)\\\"\n"));
+    hwinfo_regex_list.insert(HwinfoLineTypes::VENDOR,          QRegularExpression("Vendor:\\s+(?:.*\\s+)?\\\"(.*)\\\"\n"));
+    hwinfo_regex_list.insert(HwinfoLineTypes::DEVICE,          QRegularExpression("Device:\\s+(?:.*\\s+)?\\\"(.*)\\\"\n"));
+    hwinfo_regex_list.insert(HwinfoLineTypes::REVISION,        QRegularExpression("Revision:\\s+\\\"(.*)\\\"\n"));
+    hwinfo_regex_list.insert(HwinfoLineTypes::DEVICE_FILE,     QRegularExpression("Device File:\\s+(/dev/\\w+)\n"));
+
     //mountPointChanged();
 }
 
@@ -94,14 +106,14 @@ void CoreImpl::onClose()
 
 void CoreImpl::mountPointChanged()
 {
-    QProcess dfProcess;
+    QProcess df;
     QRegularExpression dfRegEx("(/dev/\\w+\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+%)\\s+(.*)");
 
-    dfProcess.start("df");
-    if (!dfProcess.waitForStarted())
+    df.start("df");
+    if (!df.waitForStarted())
            return;
 
-    if (!dfProcess.waitForFinished())
+    if (!df.waitForFinished())
     {
         qWarning() << "Not finished!";
         return;
@@ -110,9 +122,9 @@ void CoreImpl::mountPointChanged()
     disksList.clear();
 
     QByteArray result;
-    while(dfProcess.canReadLine())
+    while(df.canReadLine())
     {
-        result = dfProcess.readLine();
+        result = df.readLine();
         QRegularExpressionMatch matcher = dfRegEx.match(result);
         if(matcher.hasMatch())
         {
@@ -130,14 +142,139 @@ void CoreImpl::mountPointChanged()
         }
     }
 
-    dfProcess.close();
-    dfProcess.kill();
-    if(dfProcess.state() != QProcess::NotRunning)
+    df.close();
+    df.kill();
+    if(df.state() != QProcess::NotRunning)
     {
-        dfProcess.terminate();
+        df.terminate();
     }
 
-    dfProcess.waitForFinished();
+    df.waitForFinished();
+    buildBlockDeviceTree();
+
+    for(DiskInfo* disk: disksList)
+    {
+        QString device = disk->blockDevice;
+        for(BlockDeviceInfo* block_device: block_device_tree)
+        {
+            if(device.startsWith(block_device->device_file))
+            {
+                disk->model = block_device->device;
+                disk->vendor = block_device->vendor;
+                break;
+            }
+        }
+    }
+}
+
+/**
+ * @brief CoreImpl::buildBlockDeviceTree
+ *
+ * Builds block device tree.
+ *
+ * This method required hwinfo to be installed.
+ */
+void CoreImpl::buildBlockDeviceTree()
+{
+    DEBUG() << "updateDisksExtraInfo";
+
+    QProcess hwinfo;
+    hwinfo.start("hwinfo", QStringList() << "--block" );
+    if (!hwinfo.waitForStarted())
+           return;
+
+    if (!hwinfo.waitForFinished())
+    {
+        qWarning() << "Not finished!";
+        return;
+    }
+
+    QString result = QString(hwinfo.readAll());
+
+    hwinfo.close();
+    hwinfo.kill();
+    if(hwinfo.state() != QProcess::NotRunning)
+    {
+        hwinfo.terminate();
+    }
+
+    hwinfo.waitForFinished();
+
+    // Parsing output
+    QStringList data = result.split("\n\n");
+
+    block_device_tree.clear();
+    for(QString part_data: data)
+    {
+        BlockDeviceInfo* block_device = new BlockDeviceInfo(this);
+        for(HwinfoLineTypes index: hwinfo_regex_list.keys())
+        {
+            QRegularExpressionMatch matcher = hwinfo_regex_list.value(index).match(part_data);
+            if(matcher.hasMatch())
+            {
+                switch(index) {
+                    case HwinfoLineTypes::TITLE: {
+                        block_device->index = matcher.captured(1).toInt();
+                        break;
+                    }
+                    case HwinfoLineTypes::HARDWARE_CLASS: {
+                        QString hw_class_name = matcher.captured(1);
+                        if(hw_class_name == "disk")
+                            block_device->hardware_type = BlockDeviceType::DEVICE_TYPE_DISK;
+                        else if(hw_class_name == "partition")
+                            block_device->hardware_type = BlockDeviceType::DEVICE_TYPE_PARTITION;
+                        else if(hw_class_name == "cdrom")
+                            block_device->hardware_type = BlockDeviceType::DEVICE_TYPE_CD_ROM;
+                        else
+                            block_device->hardware_type = BlockDeviceType::DEVICE_TYPE_UNKNOWN;
+                        break;
+                    }
+                    case HwinfoLineTypes::UNIQUE_ID: {
+                        block_device->unique_id = matcher.captured(1);
+                        break;
+                    }
+                    case HwinfoLineTypes::PARENT_ID: {
+                        block_device->parent_id = matcher.captured(1);
+                        break;
+                    }
+                    case HwinfoLineTypes::SYS_FS_ID: {
+                        block_device->sys_fs_id = matcher.captured(1);
+                        break;
+                    }
+                    case HwinfoLineTypes::MODEL: {
+                        block_device->model = matcher.captured(1);
+                        break;
+                    }
+                    case HwinfoLineTypes::VENDOR: {
+                        block_device->vendor = matcher.captured(1);
+                        break;
+                    }
+                    case HwinfoLineTypes::DEVICE: {
+                        block_device->device = matcher.captured(1);
+                        break;
+                    }
+                    case HwinfoLineTypes::REVISION: {
+                        block_device->revision = matcher.captured(1);
+                        break;
+                    }
+                    case HwinfoLineTypes::DEVICE_FILE: {
+                        block_device->device_file = matcher.captured(1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        DEBUG() << "block device" << block_device->toString();
+        if(block_device->hardware_type == DEVICE_TYPE_DISK)
+        {
+            block_device_tree.insert(block_device->unique_id, block_device);
+        }
+        else if(block_device->hardware_type == DEVICE_TYPE_PARTITION)
+        {
+            block_device_tree.value(block_device->parent_id)->children.append(block_device);
+        }
+    }
 }
 
 QList<DiskInfo *> CoreImpl::disks()
@@ -162,3 +299,9 @@ QHash<QString, RC_KEY> CoreImpl::getKeycodeHashes()
 }
 
 
+
+
+QString yasem::CoreImpl::version()
+{
+    return MODULE_VERSION;
+}

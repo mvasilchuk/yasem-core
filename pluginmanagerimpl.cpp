@@ -161,17 +161,11 @@ QList<Plugin*> PluginManagerImpl::getPlugins(PluginRole role, bool active_only)
     return result;
 }
 
-PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLevel = 0)
+PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLevel = 2)
 {
     DEBUG() << qPrintable("**************** Initialization of") << plugin->getName();
     Q_ASSERT(plugin != NULL);
 
-
-    QStringList depLevel;
-    for(int index=0; index < dependencyLevel; index++)
-        depLevel.append("--");
-
-    QString spacing = depLevel.size() > 0 ? depLevel.join("-") : "";
     if(plugin->getState() == PLUGIN_STATE_INITIALIZED)
     {
         //INFO(QString("Plugin '%1' is already initialized").arg(plugin->name));
@@ -183,8 +177,8 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
     if(plugin->getId() == NULL || plugin->getId() == "")
         return PLUGIN_ERROR_NO_PLUGIN_ID;
 
-    DEBUG() << qPrintable(spacing) << "Plugin" << plugin->getId() << "initialization...";
-    DEBUG() << qPrintable(spacing) << "Loading dependencies for" << plugin->getId() << "...";
+    DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Plugin" << plugin->getId() << "initialization...";
+    DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Loading dependencies for" << plugin->getId() << "...";
 
     if(plugin->dependencies().size() > 0)
     {
@@ -211,7 +205,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
                 continue;
             }
 
-            DEBUG() << qPrintable(spacing) << "Trying to load dependency" << dependency.roleName() << " for" << plugin->getName();
+            DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Trying to load dependency" << dependency.roleName() << " for" << plugin->getName();
 
             Plugin* dependencyPlugin = PluginManager::instance()->getByRole(dependency.getRole());
             if(dependencyPlugin == NULL)
@@ -219,12 +213,18 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
                 WARN() << "Dependency" << dependency.roleName() << "for" << plugin->getId() << "not found!";
                 if(dependency.isRequired())
                 {
+                    if(dependency.doSkipIfFailed())
+                    {
+                        WARN() << qPrintable(QString("Failed to load \"%1\", so it was skipped").arg(dependency.roleName()));
+                        result = PLUGIN_ERROR_NO_ERROR;
+                        continue;
+                    }
                     result = PLUGIN_ERROR_DEPENDENCY_MISSING;
                     break;
                 }
                 else
                 {
-                    LOG() << qPrintable(spacing) << "Skipping" << dependency.roleName() << "as not required";
+                    LOG() << qPrintable(QString(dependencyLevel, '*')) << "Skipping" << dependency.roleName() << "as not required";
                     continue;
                 }
             }
@@ -237,7 +237,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
 
 
 
-            PLUGIN_ERROR_CODES code = PluginManager::instance()->initPlugin(dependencyPlugin, dependencyLevel+1);
+            PLUGIN_ERROR_CODES code = PluginManager::instance()->initPlugin(dependencyPlugin, dependencyLevel+2);
             if(code != PLUGIN_ERROR_NO_ERROR)
             {
                 WARN() << "Error" << code << "occured while initializing plugin" << plugin->getName() << "dependency" << dependency.roleName();
@@ -246,7 +246,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
             }
             else
             {
-                DEBUG() << qPrintable(spacing) << "Dependency" << dependency.roleName() << "initialized";
+                DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Dependency" << dependency.roleName() << "initialized";
             }
         }
 
@@ -255,7 +255,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
         {
             case PLUGIN_ERROR_NO_ERROR:
             {
-                DEBUG() << qPrintable(spacing) << "Dependencies for" << plugin->getId() << "have been loaded.";
+                DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Dependencies for" << plugin->getId() << "have been loaded.";
                 break;
             }
             case PLUGIN_ERROR_DEPENDENCY_MISSING:
@@ -268,7 +268,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
                 WARN() << "Plugin" << plugin->getId() << "unknown initialization code" << result;
                 return PLUGIN_ERROR_UNKNOWN_ERROR;
             }
-        }
+        }            
     }
     else
         DEBUG() << "No dependencies for" << plugin->getId() << "have been found";
@@ -297,7 +297,7 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
         return PLUGIN_ERROR_NOT_INITIALIZED;
     }
 
-    DEBUG() << qPrintable(spacing) << "Plugin" << plugin->getId() << "initialized";
+    DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Plugin" << plugin->getId() << "initialized";
 
     plugin->setState(PLUGIN_STATE_INITIALIZED);
     return PLUGIN_ERROR_NO_ERROR;
@@ -326,7 +326,6 @@ PLUGIN_ERROR_CODES  PluginManagerImpl::deinitPlugin(Plugin *plugin)
 
 Plugin* PluginManagerImpl::getByRole(PluginRole role)
 {
-    DEBUG() << QString("getByRole(role: %1)").arg(QString::number(role));
     for(int index = 0; index < plugins.size(); index++)
     {
         Plugin *plugin = plugins.at(index);
