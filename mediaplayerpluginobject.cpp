@@ -2,8 +2,8 @@
 
 using namespace yasem;
 
-MediaPlayerPluginObject::MediaPlayerPluginObject(Plugin *plugin, QObject *parent):
-    AbstractPluginObject(plugin, parent)
+MediaPlayerPluginObject::MediaPlayerPluginObject(Plugin *plugin):
+    AbstractPluginObject(plugin)
 {
 
 }

@@ -16,19 +16,17 @@ class AbstractPluginObject: public QObject
 {
     Q_OBJECT
 public:
-    explicit AbstractPluginObject(Plugin* plugin, QObject* parent = NULL):
-        m_plugin(plugin),
-        m_parent(parent){}
+    explicit AbstractPluginObject(Plugin* plugin):
+        m_plugin(plugin){}
     virtual ~AbstractPluginObject(){};
     virtual PluginObjectResult init() = 0;
     virtual PluginObjectResult deinit() = 0;
-    virtual Plugin* plugin() {
+    Plugin* plugin() {
         return m_plugin;
     }
 
 protected:
     Plugin* m_plugin;
-    QObject* m_parent;
 };
 
 }

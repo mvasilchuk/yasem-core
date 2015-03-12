@@ -15,8 +15,8 @@ namespace yasem
 class GuiPluginObject: public AbstractPluginObject
 {
 public:
-    explicit GuiPluginObject(Plugin* plugin, QObject* parent = NULL):
-        AbstractPluginObject(plugin, parent) {}
+    explicit GuiPluginObject(Plugin* plugin):
+        AbstractPluginObject(plugin) {}
     virtual ~GuiPluginObject(){}
 
     virtual QRect getWindowRect() = 0;

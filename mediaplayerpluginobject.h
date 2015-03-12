@@ -26,7 +26,7 @@ class MediaPlayerPluginObject: public AbstractPluginObject
     Q_OBJECT
 public:
 
-    explicit MediaPlayerPluginObject(Plugin* plugin, QObject* parent = NULL);
+    explicit MediaPlayerPluginObject(Plugin* plugin);
 
     typedef bool (*hook_function)(void);
 

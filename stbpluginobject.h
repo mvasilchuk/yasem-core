@@ -31,7 +31,7 @@ class StbPluginObject: public AbstractPluginObject
     Q_DECLARE_PRIVATE(StbPluginObject)
 public:
 
-    explicit StbPluginObject(Plugin* plugin, QObject* parent);
+    explicit StbPluginObject(Plugin* plugin);
     virtual ~StbPluginObject();
 
     virtual QHash<QString, QObject*> getStbApiList();
@@ -77,8 +77,8 @@ public slots:
     virtual QString getIcon(const QSize &size = QSize()) = 0;
 
 protected:
-    StbPluginObject(Plugin &plugin, QObject &parent, StbPluginObjectPrivate &d):
-        AbstractPluginObject(&plugin, &parent),
+    StbPluginObject(Plugin &plugin, StbPluginObjectPrivate &d):
+        AbstractPluginObject(&plugin),
         d_ptr(&d) {}
     // allow subclasses to initialize with their own concrete Private
     StbPluginObjectPrivate *d_ptr;

@@ -5,6 +5,10 @@
 #-------------------------------------------------
 
 VERSION = 0.1.0
+TARGET = yasem
+TEMPLATE = app
+
+include($${top_srcdir}/common.pri)
 
 QT += core widgets network
 equals(QT_MAJOR_VERSION, 5): {
@@ -14,18 +18,12 @@ equals(QT_MAJOR_VERSION, 5): {
 CONFIG -= console
 QT.testlib.CONFIG -= console
 
-CONFIG += c++11
-
-TARGET = yasem
-
-TEMPLATE = app
 
 #DEFINES += EXTRA_DEBUG_INFO #Set this flag to show extra information in logger output
 
 TRANSLATIONS = lang/en_US.qm \
     lang/ru_RU.qm \
     lang/uk_UA.qm
-
 
 SOURCES += main.cpp \
     pluginmanagerimpl.cpp \
@@ -87,9 +85,6 @@ HEADERS += \
     browserpluginobject.h \
     guipluginobject.h \
     datasourcepluginobject.h
-
-include(../common.pri)
-DESTDIR = $$DEFAULT_BIN_DIR
 
 #unix:!mac{
 #  QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/

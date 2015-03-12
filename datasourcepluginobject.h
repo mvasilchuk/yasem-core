@@ -14,8 +14,8 @@ class DatasourcePluginObject: public AbstractPluginObject, public DatasourcePlug
 {
     Q_OBJECT
 public:
-    DatasourcePluginObject(Plugin* plugin, QObject* parent):
-        AbstractPluginObject(plugin, parent){}
+    DatasourcePluginObject(Plugin* plugin):
+        AbstractPluginObject(plugin){}
 
     virtual ~DatasourcePluginObject() {};
 

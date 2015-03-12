@@ -24,7 +24,7 @@ class BrowserPluginObject: public AbstractPluginObject
 {
     Q_OBJECT
 public:
-    BrowserPluginObject(Plugin* plugin, QObject* parent): AbstractPluginObject(plugin, parent){}
+    BrowserPluginObject(Plugin* plugin): AbstractPluginObject(plugin){}
     virtual ~BrowserPluginObject(){
         m_use_qml = false;
     }

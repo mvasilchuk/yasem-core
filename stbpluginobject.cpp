@@ -5,8 +5,8 @@
 
 using namespace yasem;
 
-StbPluginObject::StbPluginObject(Plugin* plugin, QObject* parent):
-    AbstractPluginObject(plugin, parent),
+StbPluginObject::StbPluginObject(Plugin* plugin):
+    AbstractPluginObject(plugin),
     d_ptr(new StbPluginObjectPrivate(this))
 {
 
