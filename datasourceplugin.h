@@ -10,15 +10,15 @@ class QString;
 
 namespace yasem {
 class Profile;
-class Datasource;
+class DatasourcePluginObject;
 
 class DatasourcePlugin
 {
 public:
-    virtual Datasource* getDatasourceForProfile(Profile* profile) = 0;
+    virtual DatasourcePluginObject* getDatasourceForProfile(Profile* profile) = 0;
 
 protected:
-    QHash<Profile*, Datasource*> datasources;
+    QHash<Profile*, DatasourcePluginObject*> datasources;
 };
 
 }

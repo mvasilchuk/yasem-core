@@ -1,12 +1,12 @@
 #include "profilemanageimpl.h"
 #include "core.h"
-#include "datasource.h"
-#include "stbprofileplugin.h"
-#include "datasource.h"
+#include "datasourcepluginobject.h"
+#include "datasourcepluginobject.h"
 #include "datasourceplugin.h"
-#include "stbplugin.h"
-#include "browserplugin.h"
-#include "mediaplayerplugin.h"
+#include "stbpluginobject.h"
+#include "browserpluginobject.h"
+#include "mediaplayerpluginobject.h"
+#include "stbprofile.h"
 
 #include <QFile>
 #include <QDir>
@@ -51,11 +51,11 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
 
             qDebug() << QString("Active profile: %1").arg(profile->getName());
 
-            BrowserPlugin* browser = dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
+            BrowserPluginObject* browser = dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
             if(browser != NULL)
             {
                 browser->raise();
-                profile->getProfilePlugin()->init(browser->getFirstPage());
+                profile->getProfilePlugin()->initObject(browser->getFirstPage());
             }
             else
                 qDebug() << "[V] No browser found!";
@@ -64,7 +64,7 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
 
             profile->start();
 
-            MediaPlayerPlugin* player = dynamic_cast<MediaPlayerPlugin*>(PluginManager::instance()->getByRole(ROLE_MEDIA));
+            MediaPlayerPluginObject* player = dynamic_cast<MediaPlayerPluginObject*>(PluginManager::instance()->getByRole(ROLE_MEDIA));
             if(player != NULL)
                 player->mediaStop();
             else
@@ -151,7 +151,7 @@ void ProfileManageImpl::loadProfileKeymap(Profile *profile)
     keymap.beginGroup("keymap");
     QStringList keys = keymap.allKeys();
 
-    BrowserPlugin* browser = profile->getProfilePlugin()->browser();
+    BrowserPluginObject* browser = profile->getProfilePlugin()->browser();
     if(browser)
         browser->clearKeyEvents();
 
@@ -257,15 +257,15 @@ void ProfileManageImpl::loadProfiles()
 
         s.beginGroup("profile");
         QString classId = s.value("classid").toString();
-        StbProfilePlugin* profilePlugin = ProfileManager::instance()->getProfilePluginByClassId(classId);
+        StbPluginObject* stbPlugin = ProfileManager::instance()->getProfilePluginByClassId(classId);
 
-        if(profilePlugin == NULL)
+        if(stbPlugin == NULL)
         {
             WARN() << "Plugin for profile classid " << classId << " not found! Profile will be skipped!";
             continue;
         }
 
-        Profile* profile = profilePlugin->createProfile(s.value("uuid").toString());
+        Profile* profile = stbPlugin->createProfile(s.value("uuid").toString());
         Q_ASSERT(profile);
         profile->datasource(dsPlugin->getDatasourceForProfile(profile));
         profile->setName(s.value("name").toString());
@@ -279,16 +279,12 @@ void ProfileManageImpl::loadProfiles()
 
 Profile* ProfileManageImpl::createProfile(const QString &classId, const QString &submodel, const QString &baseName = "", bool overwrite = false)
 {
-    DEBUG() << "Creaing profile" << classId << submodel << baseName;
-    DatasourcePlugin* dsPlugin = dynamic_cast<DatasourcePlugin*>(PluginManager::instance()->getByRole(PluginRole::ROLE_DATASOURCE));
+    DEBUG() << "Creaing profile" << classId << baseName << submodel << baseName;
+    DatasourcePluginObject* dsPlugin = dynamic_cast<DatasourcePluginObject*>(PluginManager::instance()->getByRole(PluginRole::ROLE_DATASOURCE));
 
-    Q_ASSERT(classId != "");
-    DEBUG() << baseName << classId;
-    StbPlugin* stbPlugin = getProfilePluginByClassId(classId);
-    Q_ASSERT(stbPlugin != NULL);
+    StbPluginObject* stbPlugin = getProfilePluginByClassId(classId);
     Profile* profile = stbPlugin->createProfile();
 
-    Q_ASSERT(profile);
     profile->setName(createUniqueName(classId, baseName, overwrite));
     profile->datasource(dsPlugin->getDatasourceForProfile(profile));
     profile->setSubmodel(stbPlugin->findSubmodel(submodel));
@@ -300,7 +296,7 @@ Profile* ProfileManageImpl::createProfile(const QString &classId, const QString 
     return profile;
 }
 
-void ProfileManageImpl::registerProfileClassId(const QString &classId, StbPlugin* profilePlugin)
+void ProfileManageImpl::registerProfileClassId(const QString &classId, StbPluginObject* profilePlugin)
 {
     if(!profileClasses.contains(classId))
     {
@@ -311,12 +307,12 @@ void ProfileManageImpl::registerProfileClassId(const QString &classId, StbPlugin
         WARN() << "Profile class ID" << classId <<  "has bee already registered!";
 }
 
-QMap<QString, StbPlugin *> ProfileManageImpl::getRegisteredClasses()
+QMap<QString, StbPluginObject *> ProfileManageImpl::getRegisteredClasses()
 {
     return profileClasses;
 }
 
-StbPlugin *ProfileManageImpl::getProfilePluginByClassId(const QString &classId)
+StbPluginObject *ProfileManageImpl::getProfilePluginByClassId(const QString &classId)
 {
     for(auto iterator = profileClasses.begin(); iterator != profileClasses.end(); iterator++)
     {

@@ -3,6 +3,8 @@
 
 #include <QString>
 
+namespace yasem {
+
 static const QString DB_TAG_PROFILE = "profile";
 
 enum MediaPlayingState
@@ -17,7 +19,7 @@ enum TOP_GUI_OBJECT {
     VIDEO = 1
 };
 
-enum ASPECT_RATIO {
+enum AspectRatio {
     ASPECT_RATIO_AUTO,
     ASPECT_RATIO_1_1,
     ASPECT_RATIO_5_4,
@@ -33,23 +35,25 @@ enum ASPECT_RATIO {
 
 };
 
-enum PLUGIN_ERROR_CODES {
+enum PluginErrorCodes {
     PLUGIN_ERROR_UNKNOWN_ERROR = -1,
     PLUGIN_ERROR_NO_ERROR = 0,
     PLUGIN_ERROR_NOT_INITIALIZED = 1,
     PLUGIN_ERROR_CYCLIC_DEPENDENCY = 2,
     PLUGIN_ERROR_DEPENDENCY_MISSING = 3,
     PLUGIN_ERROR_NO_PLUGIN_ID = 4,
-    PLUGIN_ERROR_DIR_NOT_FOUND = 5
+    PLUGIN_ERROR_DIR_NOT_FOUND = 5,
+    PLUGIN_ERROR_CONFLICT = 6
 };
 
-enum PLUGIN_STATE {
+enum PluginState {
     PLUGIN_STATE_UNKNOWN = -1,
     PLUGIN_STATE_DISABLED = 0,
-    PLUGIN_STATE_NOT_INITIALIZED,
-    PLUGIN_STATE_INITIALIZED,
-    PLUGIN_STATE_WAITING_FOR_DEPENDENCY,
-    PLUGIN_STATE_ERROR_STATE
+    PLUGIN_STATE_NOT_INITIALIZED = 1,
+    PLUGIN_STATE_INITIALIZED = 2,
+    PLUGIN_STATE_WAITING_FOR_DEPENDENCY = 3,
+    PLUGIN_STATE_ERROR_STATE = 4,
+    PLUGIN_STATE_CONFLICT = 5
 };
 
 enum DB_ERRORS {
@@ -162,20 +166,26 @@ enum PluginFlag {
 
 
 enum PluginRole {
-    ROLE_ANY,
-    ROLE_UNKNOWN,
-    ROLE_UNSPECIFIED,
-    ROLE_GUI,
-    ROLE_MEDIA,
-    ROLE_STB_API,
-    ROLE_STB_API_SYSTEM,
-    ROLE_BROWSER,
-    ROLE_DATASOURCE,
-    ROLE_WEB_SERVER,
-    ROLE_WEB_GUI
+    ROLE_ANY = -1,
+    ROLE_UNKNOWN = 0,
+    ROLE_UNSPECIFIED = 1,
+    ROLE_GUI = 2,
+    ROLE_MEDIA = 3,
+    ROLE_STB_API = 4,
+
+    ROLE_BROWSER = 6,
+    ROLE_DATASOURCE = 7,
+    ROLE_WEB_SERVER = 8,
+    ROLE_WEB_GUI = 9
 };
 
-namespace yasem {
+enum PluginConflictType {
+    PLUGIN_CONFLICTS_BY_NAME,
+    PLUGIN_CONFLICTS_BY_ID,
+    PLUGIN_CONFLICTS_BY_NAME_OR_ID
+};
+
+
 // Similar to QtAV::MediaStatus, but I made a copy to remove dependency from QtAV
 enum MediaStatus
 {

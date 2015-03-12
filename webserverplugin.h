@@ -3,7 +3,6 @@
 
 #include "enums.h"
 #include "plugin.h"
-
 #include <QtPlugin>
 #include <QHash>
 
@@ -11,32 +10,22 @@ class QString;
 
 namespace yasem {
 
-class WebServerPluginPrivate: public PluginPrivate {
-public:
-    QString m_rootDirectory;
-};
+class WebServerPluginPrivate;
 
-class WebServerPlugin: public virtual Plugin
+class WebServerPlugin
 {
     Q_DECLARE_PRIVATE(WebServerPlugin)
 public:
-    WebServerPlugin() {};
+    explicit WebServerPlugin();
+    virtual ~WebServerPlugin();
 
-    void setRootDirectory(const QString& dir)
-    {
-        Q_D(WebServerPlugin);
-        d->m_rootDirectory = dir;
-    }
-
-    QString getRootDirectory () {
-        Q_D(WebServerPlugin);
-        return d->m_rootDirectory;
-    }
+    void setRootDirectory(const QString& dir);
+    QString getRootDirectory();
 
 protected:
-   WebServerPlugin(WebServerPluginPrivate &d)
-      : Plugin(d) {
-   }
+    WebServerPlugin(WebServerPluginPrivate &d): d_ptr(&d) {}
+    // allow subclasses to initialize with their own concrete Private
+    WebServerPluginPrivate *d_ptr;
 };
 
 }

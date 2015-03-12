@@ -2,9 +2,6 @@
 #define PROFILEMANAGER_H
 
 #include "enums.h"
-#include "plugin.h"
-#include "stbprofile.h"
-#include "stbprofileplugin.h"
 
 #include <QObject>
 #include <QList>
@@ -16,6 +13,9 @@
 #include <QStack>
 
 namespace yasem {
+
+class StbPluginObject;
+class Profile;
 
 class ProfileManager : public QObject
 {
@@ -44,23 +44,15 @@ public:
     virtual void setActiveProfile(Profile* profile) = 0;
     virtual bool removeProfile(Profile* profile) = 0;
     virtual Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName = "", bool overwrite = false) = 0;
-    virtual void registerProfileClassId(const QString &classId, StbPlugin* profilePlugin) = 0;
-    virtual QMap<QString, StbPlugin*> getRegisteredClasses() = 0;
+    virtual void registerProfileClassId(const QString &classId, StbPluginObject* profilePlugin) = 0;
+    virtual QMap<QString, StbPluginObject*> getRegisteredClasses() = 0;
 
-    virtual StbPlugin* getProfilePluginByClassId(const QString &classId) = 0;
+    virtual StbPluginObject* getProfilePluginByClassId(const QString &classId) = 0;
     virtual Profile* findById(const QString &id) = 0;
     virtual Profile* findByName(const QString &id) = 0;
     virtual Profile* backToPreviousProfile() = 0;
     virtual void backToMainPage() = 0;
     virtual bool canGoBack() = 0;
-
-    /*static bool sortNameAsc(const Profile * a, const Profile * b)
-    {
-        // may want to check that the pointers aren't zero...
-        QString &nameA = a->getName();
-        QString &nameB = b->getName();
-        return nameA < nameB;
-    }*/
 
 signals:
     void profileChanged(Profile* profile);
@@ -70,7 +62,7 @@ signals:
 protected:
     ProfileManager(QObject* parent): QObject(parent) {}
     QSet<Profile*> profilesList;
-    QMap<QString, StbPlugin*> profileClasses;
+    QMap<QString, StbPluginObject*> profileClasses;
     Profile* activeProfile;
     QStack<Profile*> profileStack;
 

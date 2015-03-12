@@ -1,6 +1,7 @@
 #include "pluginmanagerimpl.h"
 #include "core.h"
-#include "stbplugin.h"
+#include "plugin.h"
+#include "stbpluginobject.h"
 #include "profilemanager.h"
 #include "pluginthread.h"
 
@@ -33,9 +34,21 @@ PluginManagerImpl::PluginManagerImpl()
    //blacklistedPlugins.append("mag-api");
    //blacklistedPlugins.append("samsung-smart-tv-plugin");
    //blacklistedPlugins.append("libav-mediaplayer");
+
+   registerPluginRole(ROLE_ANY,          PluginRoleData(tr("Any role"),      tr("Any role")));
+   registerPluginRole(ROLE_STB_API,      PluginRoleData(tr("STB API"),       tr("STB API implementation")));
+   registerPluginRole(ROLE_UNSPECIFIED,  PluginRoleData(tr("Unspecified"),   tr("Unspecified role")));
+   registerPluginRole(ROLE_UNKNOWN,      PluginRoleData(tr("Unknown role"),  tr("Role is unknown. Plugin may not be compatible with core module!")));
+
+   registerPluginRole(ROLE_BROWSER,      PluginRoleData(tr("Browser"),       tr("Web browser component"),        QList<PluginRole>() << ROLE_BROWSER));
+   registerPluginRole(ROLE_MEDIA,        PluginRoleData(tr("Media player"),  tr("Media player component"),       QList<PluginRole>() << ROLE_MEDIA));
+   registerPluginRole(ROLE_DATASOURCE,   PluginRoleData(tr("Datasource"),    tr("Datasource component"),         QList<PluginRole>() << ROLE_DATASOURCE));
+   registerPluginRole(ROLE_GUI,          PluginRoleData(tr("GUI"),           tr("Graphical user interface"),     QList<PluginRole>() << ROLE_GUI));
+   registerPluginRole(ROLE_WEB_GUI,      PluginRoleData(tr("Web GUI"),       tr("Web-based GUI for main screen"),QList<PluginRole>() << ROLE_WEB_GUI));
+   registerPluginRole(ROLE_WEB_SERVER,   PluginRoleData(tr("Web server"),    tr("Web server for fake web service emulation"), QList<PluginRole>() << ROLE_WEB_SERVER));
 }
 
-PLUGIN_ERROR_CODES PluginManagerImpl::listPlugins()
+PluginErrorCodes PluginManagerImpl::listPlugins()
 {
     DEBUG() << "Looking for plugins...";
     QSettings* settings = Core::instance()->settings();
@@ -114,15 +127,6 @@ PLUGIN_ERROR_CODES PluginManagerImpl::listPlugins()
                 plugins.append(plugin);
 
                 DEBUG() << "Plugin loaded:" << plugin->getName();
-
-                // Trying to register plugin as profile plugin
-                StbPlugin* stbPlugin = dynamic_cast<StbPlugin*>(plugin);
-                if(stbPlugin != 0)
-                {
-                    ProfileManager::instance()->registerProfileClassId(stbPlugin->getProfileClassId(), stbPlugin);
-                    DEBUG() << "Found STB plugin:" << stbPlugin->getName();
-                    DEBUG() << "Found STB submodels:" << stbPlugin->listSubmodels();
-                }
             }
 
         }
@@ -147,7 +151,7 @@ QList<Plugin*> PluginManagerImpl::getPlugins(PluginRole role, bool active_only)
     foreach(Plugin* plugin, plugins)
     {
         bool add_this = false;
-        foreach(PluginRole pluginRole, plugin->roles())
+        foreach(PluginRole pluginRole, plugin->roles().keys())
         {
             if(pluginRole == role || role == ROLE_ANY)
             {
@@ -161,7 +165,7 @@ QList<Plugin*> PluginManagerImpl::getPlugins(PluginRole role, bool active_only)
     return result;
 }
 
-PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLevel = 2)
+PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLevel = 2)
 {
     DEBUG() << qPrintable("**************** Initialization of") << plugin->getName();
     Q_ASSERT(plugin != NULL);
@@ -178,19 +182,27 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
         return PLUGIN_ERROR_NO_PLUGIN_ID;
 
     DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Plugin" << plugin->getId() << "initialization...";
+
+    if(pluginHasConflicts(plugin))
+    {
+        plugin->setState(PLUGIN_STATE_CONFLICT);
+        return PLUGIN_ERROR_CONFLICT;
+    }
+
+
     DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Loading dependencies for" << plugin->getId() << "...";
 
     if(plugin->dependencies().size() > 0)
     {
         plugin->setState(PLUGIN_STATE_WAITING_FOR_DEPENDENCY);
-        PLUGIN_ERROR_CODES result = PLUGIN_ERROR_NO_ERROR;
+        PluginErrorCodes result = PLUGIN_ERROR_NO_ERROR;
 
         for (const PluginDependency &dependency: plugin->dependencies())
         {
             //Check dependency cycle
 
             bool cyclic = false;
-            for(PluginRole role: plugin->roles())
+            for(PluginRole role: plugin->roles().keys())
             {
                 if(role == dependency.getRole())
                 {
@@ -207,8 +219,8 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
 
             DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Trying to load dependency" << dependency.roleName() << " for" << plugin->getName();
 
-            Plugin* dependencyPlugin = PluginManager::instance()->getByRole(dependency.getRole());
-            if(dependencyPlugin == NULL)
+            AbstractPluginObject* dependencyObject = PluginManager::instance()->getByRole(dependency.getRole());
+            if(dependencyObject == NULL)
             {
                 WARN() << "Dependency" << dependency.roleName() << "for" << plugin->getId() << "not found!";
                 if(dependency.isRequired())
@@ -229,15 +241,15 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
                 }
             }
 
-            if(dependencyPlugin->getState() == PLUGIN_STATE_WAITING_FOR_DEPENDENCY)
+            if(dependencyObject->plugin()->getState() == PLUGIN_STATE_WAITING_FOR_DEPENDENCY)
             {
-                WARN() << "Cyclic dependency in plugin" << plugin->getId() << "with" << dependencyPlugin->getId();
+                WARN() << "Cyclic dependency in plugin" << plugin->getId() << "with" << dependencyObject->plugin()->getId();
                 continue;
             }
 
 
 
-            PLUGIN_ERROR_CODES code = PluginManager::instance()->initPlugin(dependencyPlugin, dependencyLevel+2);
+            PluginErrorCodes code = PluginManager::instance()->initPlugin(dependencyObject->plugin(), dependencyLevel+2);
             if(code != PLUGIN_ERROR_NO_ERROR)
             {
                 WARN() << "Error" << code << "occured while initializing plugin" << plugin->getName() << "dependency" << dependency.roleName();
@@ -303,11 +315,11 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyL
     return PLUGIN_ERROR_NO_ERROR;
 }
 
-PLUGIN_ERROR_CODES  PluginManagerImpl::deinitPlugin(Plugin *plugin)
+PluginErrorCodes  PluginManagerImpl::deinitPlugin(Plugin *plugin)
 {
     DEBUG() << "deinitPlugin(" << plugin->getName() << ")";
 
-    PLUGIN_ERROR_CODES result = plugin->deinitialize();
+    PluginErrorCodes result = plugin->deinitialize();
     if(result == PLUGIN_ERROR_NO_ERROR)
         plugin->setState(PLUGIN_STATE_ERROR_STATE);
 
@@ -324,23 +336,23 @@ PLUGIN_ERROR_CODES  PluginManagerImpl::deinitPlugin(Plugin *plugin)
     return result;
 }
 
-Plugin* PluginManagerImpl::getByRole(PluginRole role)
+AbstractPluginObject* PluginManagerImpl::getByRole(PluginRole role)
 {
     for(int index = 0; index < plugins.size(); index++)
     {
         Plugin *plugin = plugins.at(index);
         if(!plugin->isActive()) continue;
-        for(PluginRole pluginRole: plugin->roles())
+        for(PluginRole pluginRole: plugin->roles().keys())
         {
             if(pluginRole == role)
             {
                 Q_ASSERT(plugin);
                 qDebug() << "Found plugin" << plugin->getName() << plugin->getClassName();
-                return plugin;
+                return plugin->roles().value(pluginRole);
             }
         }
     }
-    ERROR() << qPrintable(QString("Plugin for role %1 not found!"));
+    ERROR() << qPrintable(QString("Plugin for role %1 not found!").arg(role));
     return NULL;
 }
 
@@ -377,7 +389,84 @@ PluginFlag PluginManagerImpl::parseFlags(const QString &flagsStr)
     return result;
 }
 
-PLUGIN_ERROR_CODES PluginManagerImpl::initPlugins()
+bool PluginManagerImpl::pluginHasConflicts(Plugin *plugin)
+{
+    QHash<Plugin*, QList<PluginRoleData>> conflict_list;
+    for(Plugin* pl: plugins)
+    {
+        QList<PluginRoleData> conflicts;
+
+        // Skip itself and plugins that hasn't been loaded yet
+        if(pl == plugin || pl->getState() != PLUGIN_STATE_INITIALIZED) continue;
+
+        // First check static conflicts that has been registered by plugin
+        // @see: registerPluginRole()
+
+        bool has_conflict = false;
+        for(PluginConflict conflict: pl->getStaticConflicts())
+        {
+            switch (conflict.type()) {
+                case PLUGIN_CONFLICTS_BY_ID:
+                    if(conflict.id() == plugin->getId())
+                        has_conflict = true;
+                    break;
+                case PLUGIN_CONFLICTS_BY_NAME:
+                    if(conflict.name() == plugin->getName())
+                        has_conflict = true;
+                    break;
+                case PLUGIN_CONFLICTS_BY_NAME_OR_ID:
+                    if(conflict.id() == plugin->getId() || conflict.name() == plugin->getName())
+                        has_conflict = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if(has_conflict)
+        {
+            plugin->addRuntimeConflict(pl);
+            continue; // Don't need to continue checking because we've already got a conflict
+        }
+
+        // Next check any runtime conflicts that PluginManager registered
+
+        for(const PluginRole& role: pl->roles().keys())
+        {
+            for(const PluginRole& own_role: plugin->roles().keys())
+            {
+                const PluginRoleData& role_data = m_plugin_roles.value(role);
+                if(role_data.m_conflicts_with.contains(own_role))
+                {
+                    conflicts.append(role_data);
+                }
+            }
+        }
+
+        if(!conflicts.isEmpty())
+            conflict_list.insert(pl, conflicts);
+    }
+
+    if(conflict_list.isEmpty()) return false;
+
+    WARN() << "Plugin" << plugin->getName() << "conflicts with the following plugins:";
+    for(Plugin* pl: conflict_list.keys())
+    {
+        plugin->addRuntimeConflict(pl);
+
+        QList<PluginRoleData> roles = conflict_list.value(pl);
+        QStringList names;
+        for(PluginRoleData role: roles)
+        {
+            names.append(role.m_name);
+        }
+        WARN() << qPrintable(QString("%1 ").arg(QString(10, '*'))) << pl->getName();
+        WARN() << qPrintable(QString("%1 ").arg(QString(16, ' '))) << "roles: " << names.join(", ");
+    }
+    return true;
+}
+
+PluginErrorCodes PluginManagerImpl::initPlugins()
 {
     DEBUG() << "initPlugins()";
 
@@ -389,33 +478,37 @@ PLUGIN_ERROR_CODES PluginManagerImpl::initPlugins()
         if(plugin->isActive() && plugin->getState() == PLUGIN_STATE_NOT_INITIALIZED)
             initPlugin(plugin);
     }
+
+    // Draw a table
     DEBUG() << "Initialization finished";
-    DEBUG() << qPrintable(QString(40, '*'));
-    DEBUG() << qPrintable(QString(9, '*'))
-            << qPrintable(QString("PLUGINS").rightJustified(10).leftJustified(20))
-            << qPrintable(QString(9, '*'));
+    DEBUG() << qPrintable(QString(41, '-'));
+    DEBUG() << qPrintable(QString("|%1|%2|")
+                          .arg(QString("PLUGIN").leftJustified(30))
+                          .arg(QString("STATUS").leftJustified(8)));
+    DEBUG() << qPrintable(QString(41, '-')) ;
     QString state = "";
 
     for(Plugin* plugin: plugins)
     {
         switch(plugin->getState())
         {
-            case PLUGIN_STATE_UNKNOWN:                  { state = "?"; break; }
-            case PLUGIN_STATE_ERROR_STATE:              { state = "E"; break; }
-            case PLUGIN_STATE_INITIALIZED:              { state = "I"; break; }
-            case PLUGIN_STATE_NOT_INITIALIZED:          { state = "NI"; break; }
-            case PLUGIN_STATE_WAITING_FOR_DEPENDENCY:   { state = "WD"; break; }
-            case PLUGIN_STATE_DISABLED:                 { state = "D"; break; }
+            case PLUGIN_STATE_UNKNOWN:                  { state = "UNKNOWN "; break; }
+            case PLUGIN_STATE_ERROR_STATE:              { state = "ERROR   "; break; }
+            case PLUGIN_STATE_INITIALIZED:              { state = "WORKING "; break; }
+            case PLUGIN_STATE_NOT_INITIALIZED:          { state = "NOT INIT"; break; }
+            case PLUGIN_STATE_WAITING_FOR_DEPENDENCY:   { state = "WAIT4DEP"; break; }
+            case PLUGIN_STATE_DISABLED:                 { state = "DISABLED"; break; }
+            case PLUGIN_STATE_CONFLICT:                 { state = "CONFLICT"; break; }
             default:                                    { state = QString::number(plugin->getState()); break; }
         }
 
-        DEBUG() << qPrintable(QString("%1:%2").arg(plugin->getName().leftJustified(30)).arg(state.leftJustified(2)));
+        DEBUG() << qPrintable(QString("|%1|%2|").arg(plugin->getName().leftJustified(30)).arg(state.leftJustified(8)));
     }
-    DEBUG() << qPrintable(QString(40, '*'));
+    DEBUG() << qPrintable(QString(41, '-')) ;
     return PLUGIN_ERROR_NO_ERROR;
 }
 
-PLUGIN_ERROR_CODES PluginManagerImpl::deinitPlugins()
+PluginErrorCodes PluginManagerImpl::deinitPlugins()
 {
     DEBUG() << "deinitPlugins()";
     for(Plugin* plugin: plugins)
@@ -434,4 +527,10 @@ void PluginManagerImpl::setPluginDir(const QString &pluginDir)
 QString PluginManagerImpl::getPluginDir()
 {
     return this->pluginDir;
+}
+
+
+void yasem::PluginManagerImpl::registerPluginRole(const PluginRole &role, const PluginRoleData &data)
+{
+    m_plugin_roles.insert(role, data);
 }

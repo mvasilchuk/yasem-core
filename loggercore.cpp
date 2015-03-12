@@ -81,7 +81,7 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         localMsg = localMsg.right(localMsg.length() - strlen(LOG_PREFIX_FIXME));
     }
 
-    const char* message = localMsg.constData();
+    QString message = localMsg;
 
     QString line = "";
 
@@ -90,7 +90,7 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         line = QString("(%1:%2) ").arg(context.file).arg(QString::number(context.line));
 #endif
 
-    const char* current_time = QDateTime::currentDateTime().toString("hh:mm:ss:zzz").toUtf8().constData();
+   QString current_time = QDateTime::currentDateTime().toString("hh:mm:ss:zzz");
 
     FILE* output_channel = stdout;
     QString output_line;
@@ -127,9 +127,9 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         }
         case LOG_TYPE_STUB:
         {
-            if(context.function != NULL || !(message == NULL || strlen(message) == 0))
+            if(context.function != NULL || !(message == NULL || message.length() == 0))
             {
-                output_line = QString("[STUB ][%1] %2%3%4%5\n").arg(current_time).arg(line).arg(context.function).arg(strlen(message) > 0 ? ": " : "", message);
+                output_line = QString("[STUB ][%1] %2%3%4%5\n").arg(current_time).arg(line).arg(context.function).arg(message.length() > 0 ? ": " : "", message);
             }
             break;
         }

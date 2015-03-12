@@ -2,7 +2,6 @@
 #define CORE_H
 
 #include "enums.h"
-#include "logger.h"
 #include "core-network.h"
 #include "diskinfo.h"
 
@@ -91,7 +90,6 @@ private:
 
     void operator=(Core const&);
 signals:
-    void loggerChanged(Logger* logger);
     void methodNotImplemented(const QString &name);
 
 public slots:

@@ -15,15 +15,15 @@ public:
     PluginManagerImpl();
 
 // PluginManager interface
-    virtual PLUGIN_ERROR_CODES listPlugins();
-    virtual PLUGIN_ERROR_CODES initPlugins();
-    virtual PLUGIN_ERROR_CODES deinitPlugins();
+    virtual PluginErrorCodes listPlugins();
+    virtual PluginErrorCodes initPlugins();
+    virtual PluginErrorCodes deinitPlugins();
     //virtual PLUGIN_ERROR_CODES connectSlots();
     virtual QList<Plugin*> getPlugins(PluginRole role = ROLE_ANY, bool active_only = true);
-    virtual PLUGIN_ERROR_CODES initPlugin(Plugin* plugin, int dependencyLevel);
-    virtual PLUGIN_ERROR_CODES deinitPlugin(Plugin* plugin);
-    virtual Plugin* getByRole(PluginRole role);
-    virtual Plugin *getByIID(const QString &iid);
+    virtual PluginErrorCodes initPlugin(Plugin* plugin, int dependencyLevel);
+    virtual PluginErrorCodes deinitPlugin(Plugin* plugin);
+    virtual AbstractPluginObject* getByRole(PluginRole role);
+    virtual Plugin*getByIID(const QString &iid);
     virtual void setPluginDir(const QString &pluginDir);
     virtual QString getPluginDir();
 
@@ -31,6 +31,12 @@ public:
 
     QStringList blacklistedPlugins;
 
+    bool pluginHasConflicts(Plugin* plugin);
+
+
+    // PluginManager interface
+protected:
+    void registerPluginRole(const PluginRole &role, const PluginRoleData &data);
 };
 
 }

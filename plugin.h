@@ -5,74 +5,51 @@
 #include "macros.h"
 #include "plugindependency.h"
 
-#include <typeinfo>
-
-#include <QtPlugin>
+#include <QObject>
 #include <QList>
-#include <QPluginLoader>
-#include <QCryptographicHash>
-#include <QThread>
 #include <QJsonObject>
+#include <QPluginLoader>
 
-class QObject;
 class QStringList;
 class QCoreApplication;
 class QMetaType;
 
 namespace yasem {
+class PluginPrivate;
+class AbstractPluginObject;
 
-class Plugin;
-
-class PluginPrivate {
+class PluginConflict {
 public:
-    // Constructor that initializes the q-ptr
+    PluginConflict(const QString &id, const QString &name, PluginConflictType type):
+        m_id(id),
+        m_name(name),
+        m_type(type)
+    {
 
-    PluginPrivate(){
-        active = false;
-        flags = PluginFlag::PLUGIN_FLAG_NONE;
-        state = PLUGIN_STATE_UNKNOWN;
-        q_ptr = NULL;
     }
-    PluginPrivate(Plugin *q) : q_ptr(q) {
-    }
-    Plugin *q_ptr; // q-ptr points to the API class
-    QList<PluginRole> role_list;
-    QList<PluginDependency> dependency_list;
 
-    QString IID;
-    QString className;
-    QString name;
-    QString version;
-    QString id;
-    QJsonObject metadata;
-    QPluginLoader loader;
-    bool active;
+     QString id()               const { return m_id; }
+     QString name()             const { return m_name; }
+     PluginConflictType type()  const { return m_type; }
 
-    PluginFlag flags;
-    PLUGIN_STATE state;
-
+protected:
+    QString m_id;
+    QString m_name;
+    PluginConflictType m_type;
 };
 
-class Plugin
+class Plugin: public QObject
 {
-
+    Q_OBJECT
+    Q_DECLARE_PRIVATE(Plugin)
 public:
 
-    Plugin() : d_ptr(new PluginPrivate(this)) {}
+    explicit Plugin(QObject* parent = NULL);
+    virtual ~Plugin();
 
-    virtual ~Plugin() {}
+    virtual bool hasFlag(PluginFlag flag);
 
-    bool hasFlag(PluginFlag flag)
-    {
-        return (getFlags() & flag) == flag;
-    }
-
-    void addFlag(PluginFlag flag)
-    {
-        this->setFlags((PluginFlag)(getFlags() | flag));
-    }
-
-
+    virtual void addFlag(PluginFlag flag);
 
     /**
      * @brief initialize.
@@ -80,83 +57,84 @@ public:
      * Method will be called from PluginManager for all plugins after they are loaded and ready to be initialized.
      * @return
      */
-    virtual PLUGIN_ERROR_CODES initialize() = 0;
+    virtual PluginErrorCodes initialize();
     /**
      * @brief deinitialize.
      *
      * Method is called from PluginManager before app is closed.
      * @return
      */
-    virtual PLUGIN_ERROR_CODES deinitialize() = 0;
+    virtual PluginErrorCodes deinitialize();
 
+    /**
+     * @brief register_dependencies
+     * Plugin should call add_dependency() method for each dependency it requires
+     */
     virtual void register_dependencies() = 0;
 
-    QList<PluginDependency> dependencies()
-    {
-        return d_ptr->dependency_list;
-    }
-
-    virtual void add_dependency(const PluginDependency &dependency)
-    {
-        d_ptr->dependency_list.append(dependency);
-    }
-
-
+    /**
+     * @brief register_roles
+     */
     virtual void register_roles() = 0;
 
-    void register_role(PluginRole role)
-    {
-        d_ptr->role_list.append(role);
-    }
+    /**
+     * @brief has_role
+     * @param role
+     * @return Plugin has a role
+     */
+    virtual bool has_role(PluginRole role);
 
-    bool has_role(PluginRole role)
-    {
-        return d_ptr->role_list.contains(role);
-    }
+    virtual QHash<PluginRole, AbstractPluginObject*> roles();
 
-    QList<PluginRole> roles()
-    {
-        return d_ptr->role_list;
-    }
+    virtual QList<PluginDependency> dependencies();
 
-    QString getIID() const { return d_ptr->IID; }
-    void setIID(const QString &iid) { d_ptr->IID = iid; }
+    virtual QString getIID();
+    virtual void setIID(const QString &iid);
 
-    QString getClassName() const { return d_ptr->className; }
-    void setClassName(const QString &className) { d_ptr->className = className; }
+    virtual QString getClassName();
+    virtual void setClassName(const QString &className);
 
-    QString getId() const { return d_ptr->id; }
-    void setId(const QString &id) { d_ptr->id = id; }
+    virtual QString getId();
+    virtual void setId(const QString &id);
 
-    QString getVersion() const { return d_ptr->version; }
-    void setVersion(const QString &version) { d_ptr->version = version; }
+    virtual QString getVersion();
+    virtual void setVersion(const QString &version);
 
-    QString getName() const { return d_ptr->name; }
-    void setName(const QString &name) { d_ptr->name = name; }
+    virtual QString getName();
+    virtual void setName(const QString &name);
 
-    QJsonObject getMetadata() const { return d_ptr->metadata; }
-    void setMetadata(const QJsonObject &metadata) { d_ptr->metadata = metadata; }
+    virtual QJsonObject getMetadata();
+    virtual void setMetadata(const QJsonObject &metadata);
 
-    //QPluginLoader& getLoader() const { return d_ptr->loader; }
-    //void setLoader(QPluginLoader &loader) { d_ptr->loader = loader; }
+    virtual PluginFlag getFlags();
+    virtual void setFlags(const PluginFlag &flags);
 
+    virtual PluginState getState();
+    virtual void setState(const PluginState &state);
 
-    PluginFlag getFlags() const { return d_ptr->flags; }
-    void setFlags(const PluginFlag &flags) { d_ptr->flags = flags; }
+    virtual bool isActive();
+    virtual void setActive(bool active);
 
-    PLUGIN_STATE getState() const { return d_ptr->state; }
-    void setState(const PLUGIN_STATE &state) { d_ptr->state = state; }
+    virtual QList<Plugin*> getRuntimeConflicts();
+    virtual void addRuntimeConflict(Plugin* plugin);
 
-    bool isActive() const { return d_ptr->active; }
-    void setActive(bool active) { d_ptr->active = active; }
+    virtual QList<PluginConflict> getStaticConflicts();
+
+signals:
+    void started();
+    void error_happened(int code);
+    void finished();
+
+protected:
+    virtual void add_dependency(const PluginDependency &dependency);
+    virtual void add_static_conflict(const PluginConflict &conflict_info);
+    virtual void register_role(PluginRole role, AbstractPluginObject* obj);
+
 protected:
     Plugin(PluginPrivate &d): d_ptr(&d) {}
-        // allow subclasses to initialize with their own concrete Private
-    PluginPrivate *d_ptr;
-
-    Q_DECLARE_PRIVATE(Plugin)
+    // allow subclasses to initialize with their own concrete Private
+    PluginPrivate *d_ptr;    
 };
-
 }
 
 #define Plugin_iid "com.mvas.yasem.Plugin/1.0"

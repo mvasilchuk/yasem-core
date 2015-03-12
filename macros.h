@@ -1,7 +1,6 @@
 #ifndef MACROS_H
 #define MACROS_H
 
-#include "logger.h"
 #include "core.h"
 
 #include <QDebug>

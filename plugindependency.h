@@ -31,7 +31,6 @@ public:
             case ROLE_GUI:              { return QObject::tr("GUI plugin");              }
             case ROLE_MEDIA:            { return QObject::tr("Media player plugin");     }
             case ROLE_STB_API:          { return QObject::tr("STB API plugin");          }
-            case ROLE_STB_API_SYSTEM:   { return QObject::tr("System STB API plugin");   }
             case ROLE_BROWSER:          { return QObject::tr("Browser plugin");          }
             case ROLE_DATASOURCE:       { return QObject::tr("Datasource plugin");       }
             case ROLE_WEB_SERVER:       { return QObject::tr("Web server plugin");       }

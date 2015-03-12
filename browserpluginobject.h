@@ -2,6 +2,7 @@
 #define BROWSERPLUGIN_H
 
 #include "enums.h"
+#include "abstractpluginobject.h"
 
 #include <QSize>
 #include <QObject>
@@ -15,13 +16,18 @@ class QEvent;
 
 namespace yasem
 {
-class StbPlugin;
+class StbPluginObject;
 class CustomKeyEvent;
 class AbstractWebPage;
-class BrowserPlugin
+
+class BrowserPluginObject: public AbstractPluginObject
 {
+    Q_OBJECT
 public:
-    virtual ~BrowserPlugin(){}
+    BrowserPluginObject(Plugin* plugin, QObject* parent): AbstractPluginObject(plugin, parent){}
+    virtual ~BrowserPluginObject(){
+        m_use_qml = false;
+    }
 
     virtual void setParentWidget(QWidget *parent) = 0;
     virtual QWidget* getParentWidget() = 0;
@@ -32,14 +38,11 @@ public:
     virtual QRect rect() = 0;
     virtual void scale(qreal scale) = 0;
     virtual qreal scale() = 0;
-    virtual void stb(StbPlugin* stbPlugin) = 0;
-    virtual StbPlugin* stb() = 0;
+    virtual void stb(StbPluginObject* stbPlugin) = 0;
+    virtual StbPluginObject* stb() = 0;
     virtual void raise() = 0;
     virtual void show() = 0;
     virtual void hide() = 0;
-    virtual void setInnerSize(int width, int height) = 0;
-    virtual void setInnerSize(const QSize &size) = 0;
-    QSize getInnerSize() { return innerSize; }
     virtual void fullscreen(bool setFullscreen) = 0;
     virtual bool fullscreen() = 0;
 
@@ -61,18 +64,16 @@ public:
 
     virtual QString getQmlComponentName() { return ""; }
 
-    virtual void createNewPage() = 0;
+    virtual AbstractWebPage* createNewPage() = 0;
+    virtual AbstractWebPage* getActiveWebPage() = 0;
+
+    virtual void setUseQml(bool use) { m_use_qml = use; }
+    virtual bool isUsingQml() const { return m_use_qml; }
 protected:
-    QSize innerSize;
     QWidget* activeWebView;
+    bool m_use_qml;
 
 };
 }
-
-#define BrowserPlugin_iid "com.mvas.yasem.BrowserPlugin/1.0"
-
-QT_BEGIN_NAMESPACE
-Q_DECLARE_INTERFACE(yasem::BrowserPlugin, BrowserPlugin_iid)
-QT_END_NAMESPACE
 
 #endif // BROWSERPLUGIN_H

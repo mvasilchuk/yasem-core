@@ -56,7 +56,14 @@ void setupSignalHandlers()
 int startErrorRedirect()
 {
     int stdout_fd = dup(STDERR_FILENO);
-    freopen("/tmp/yasem-error.log", "w", stdout);
+
+    FILE* fp;
+
+    char* filename = (char*)"/tmp/yasem-debug.log";
+
+    if((fp=freopen(filename, "w" ,stdout))==NULL) {
+        printf("Can't open file %s\n", filename);
+    }
     return stdout_fd;
 }
 
@@ -96,7 +103,7 @@ int main(int argc, char *argv[])
     #ifdef Q_OS_LINUX
     #ifndef Q_OS_ANDROID
     //int stdout_fd = startErrorRedirect();
-    setupSignalHandlers();
+    //setupSignalHandlers();
     #endif
     #endif //Q_OS_LINUX
 
@@ -116,13 +123,13 @@ int main(int argc, char *argv[])
     a.setProperty("PluginManager", QVariant::fromValue(PluginManager::instance()));
 
 #ifndef STATIC_BUILD
-    PLUGIN_ERROR_CODES listResult = PluginManager::instance()->listPlugins();
+    PluginErrorCodes listResult = PluginManager::instance()->listPlugins();
 #else
     PLUGIN_ERROR_CODES listResult = PLUGIN_ERROR_NO_ERROR;
 #endif
     if(listResult == PLUGIN_ERROR_NO_ERROR)
     {
-        PLUGIN_ERROR_CODES initResult = PluginManager::instance()->initPlugins();
+        PluginErrorCodes initResult = PluginManager::instance()->initPlugins();
         if(initResult != PLUGIN_ERROR_NO_ERROR)
         {
             qCritical() << "Cannot initialize plugins. Error code" << initResult;
@@ -136,6 +143,10 @@ int main(int argc, char *argv[])
     }
 
     //QObject::connect(&a, &QCoreApplication::aboutToQuit, Core::instance(), &Core::onClose);
+
+    QObject::connect(qApp, &QApplication::lastWindowClosed, [=]() {
+        qApp->exit();
+    });
 
     execCode = a.exec();
     qDebug() <<  "Closing application... code:"  << execCode;

@@ -1,6 +1,7 @@
 #ifndef DISKINFO_H
 #define DISKINFO_H
 
+#include <QObject>
 #include <QString>
 #include <QStringList>
 
@@ -50,7 +51,11 @@ namespace yasem {
     {
         Q_OBJECT
     public:
-        BlockDeviceInfo(QObject* parent = 0): QObject(parent) {}
+        BlockDeviceInfo(QObject* parent = 0): QObject(parent) {
+            index = -1;
+            conn_interface = ConnectionInterface::NONE;
+            hardware_type = DEVICE_TYPE_UNKNOWN;
+        }
         virtual ~BlockDeviceInfo(){};
         int index;
         ConnectionInterface conn_interface;

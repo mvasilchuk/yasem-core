@@ -2,6 +2,7 @@
 #define GUIPLUGIN_H
 
 #include "enums.h"
+#include "abstractpluginobject.h"
 
 #include <QtPlugin>
 
@@ -11,12 +12,12 @@ class QMenu;
 namespace yasem
 {
 
-class BrowserPlugin;
-
-class GuiPlugin
+class GuiPluginObject: public AbstractPluginObject
 {
 public:
-    virtual ~GuiPlugin(){}
+    explicit GuiPluginObject(Plugin* plugin, QObject* parent = NULL):
+        AbstractPluginObject(plugin, parent) {}
+    virtual ~GuiPluginObject(){}
 
     virtual QRect getWindowRect() = 0;
     virtual void setWindowRect(const QRect &rect) = 0;
@@ -27,14 +28,9 @@ public:
     virtual void repaintGui() = 0;
     virtual QList<QMenu*> getMenuItems() = 0;
     virtual QRect widgetRect() = 0;
+
 };
 
 }
-
-#define GuiPlugin_iid "com.mvas.yasem.GuiPlugin/1.0"
-
-QT_BEGIN_NAMESPACE
-Q_DECLARE_INTERFACE(yasem::GuiPlugin, GuiPlugin_iid)
-QT_END_NAMESPACE
 
 #endif // GUIPLUGIN_H

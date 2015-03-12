@@ -40,34 +40,29 @@ SOURCES += main.cpp \
     profileconfigparserimpl.cpp \
     sambaimpl.cpp \
     mountpointinfo.cpp \
-    sambanode.cpp
+    sambanode.cpp \
+    plugin.cpp \
+    webserverplugin.cpp \
+    mediaplayerpluginobject.cpp \
+    stbpluginobject.cpp
 
 HEADERS += \
     pluginmanager.h \
     pluginmanagerimpl.h \
     coreimpl.h \
     core.h \
-    logger.h \
     mainwindow.h \
     plugindependency.h \
     profilemanager.h \
     profilemanageimpl.h \
-    stbprofileplugin.h \
-    datasource.h \
     networkimpl.h \
     stbprofile.h \
     customkeyevent.h \
     plugin.h \
-    guiplugin.h \
-    stbplugin.h \
-    mediaplayerplugin.h \
     macros.h \
     enums.h  \
     datasourceplugin.h \
-    browserplugin.h \
     pluginthread.h \
-    mediasignalsender.h \
-    profileconfig.h \
     core-network.h \
     loggercore.h \
     yasemapplication.h \
@@ -81,7 +76,17 @@ HEADERS += \
     sambanode.h \
     webserverplugin.h \
     abstractwebpage.h \
-    mediainfo.h
+    mediainfo.h \
+    plugin_p.h \
+    stbsubmodule.h \
+    webserverplugin_p.h \
+    abstractpluginobject.h \
+    stbpluginobject.h \
+    stbpluginobject_p.h \
+    mediaplayerpluginobject.h \
+    browserpluginobject.h \
+    guipluginobject.h \
+    datasourcepluginobject.h
 
 include(../common.pri)
 DESTDIR = $$DEFAULT_BIN_DIR

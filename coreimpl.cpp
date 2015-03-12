@@ -1,6 +1,7 @@
 #include "coreimpl.h"
 #include "pluginmanager.h"
 #include "networkimpl.h"
+#include "macros.h"
 
 #include <QDebug>
 #include <QProcess>

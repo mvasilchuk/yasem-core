@@ -1,17 +1,16 @@
 #ifndef PROFILE_H
 #define PROFILE_H
 
-
 #include "datasourceplugin.h"
-#include "pluginmanager.h"
-#include "stbplugin.h"
-#include "profileconfig.h"
 #include "profile_config_parser.h"
+#include "stbsubmodule.h"
+#include "stbpluginobject.h"
 
 #include <QUrl>
 #include <QUuid>
 #include <QSize>
 #include <QJsonDocument>
+#include <QJsonArray>
 
 static const QString CONFIG_PROFILE_NAME = "name";
 static const QString CONFIG_SUBMODEL = "submodel";
@@ -20,6 +19,9 @@ static const QString CONFIG_PORTAL_URL = "portal";
 
 namespace yasem
 {
+
+class StbPluginObject;
+
 class Profile
 {
 
@@ -29,16 +31,15 @@ public:
         HIDDEN = 1,
     };
 
-    explicit Profile(StbPlugin* profilePlugin, const QString &id)
+    explicit Profile(StbPluginObject* profilePlugin, const QString &id):
+        m_profile_plugin(profilePlugin),
+        m_id(id)
     {
-        this->profilePlugin = profilePlugin;
-        this->id = id;
-        if(id == "")
-            this->id = QUuid::createUuid().toString().mid(1, 34); //Remove braces, full length is 36
+        if(m_id == "")
+            this->m_id = QUuid::createUuid().toString().mid(1, 34); //Remove braces, full length is 36
         this->flags = NORMAL;
 
         name = getId();
-
 
         ProfileConfigGroup group(QObject::tr("Main settings"));
         group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_PROFILE_NAME, QObject::tr("Profile name"), QObject::tr("New profile")));
@@ -47,7 +48,7 @@ public:
         QList<StbSubmodel> submodels = profilePlugin->getSubmodels();
         for(StbSubmodel model: submodels)
         {
-            models.insert(model.id, model.name);
+            models.insert(model.m_id, model.m_name);
         }
 
         group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_SUBMODEL, QObject::tr("Model name"), "","options", "", models));
@@ -62,12 +63,12 @@ public:
 
     void setName(const QString &name) { this->name = name; }
     QString getName() const { return name; }
-    QString getId() const { return id; }
-    void setId(const QString &id) { this->id = id; }
-    StbPlugin* getProfilePlugin() const { return this->profilePlugin; }
+    QString getId() const { return m_id; }
+    void setId(const QString &id) { this->m_id = id; }
+    StbPluginObject* getProfilePlugin() const { return this->m_profile_plugin; }
 
-    Datasource* datasource() const { return datasourceObj; }
-    void datasource(Datasource* datasource){ this->datasourceObj = datasource; }
+    DatasourcePluginObject* datasource() const { return datasourceObj; }
+    void datasource(DatasourcePluginObject* datasource){ this->datasourceObj = datasource; }
 
     QString getImage() const { return this->image; }
     void setImage(const QString &path) { this->image = path; }
@@ -88,9 +89,6 @@ public:
 
     int get(const QString &name, int defaultValue = 0) { return datasource()->get(DB_TAG_PROFILE, name, defaultValue); }
     bool set(const QString &name, int value) { return datasource()->set(DB_TAG_PROFILE, name, value); }
-
-
-    Q_DECL_DEPRECATED ProfileConfig& getProfileConfig() { return profileConfig; }
 
     bool saveJsonConfig(const QString& jsonConfig)
     {
@@ -131,14 +129,14 @@ public:
 
 
 protected:
+    StbPluginObject* m_profile_plugin;
+    QString m_id;
+
     StbSubmodel submodel;
-    QString id;
     QString name;
     ProfileFlag flags;
     QString image;
-    StbPlugin* profilePlugin;
-    Datasource* datasourceObj;
-    Q_DECL_DEPRECATED ProfileConfig profileConfig;
+    DatasourcePluginObject* datasourceObj;
     QHash<QString, QString> userAgents;
     QHash<QString, QSize> portalResolutions;
     QHash<QString, QSize> videoResolutions;
@@ -148,7 +146,7 @@ signals:
 
 public slots:
 
-friend class StbPlugin;
+friend class StbPluginObject;
 friend class ProfileManager;
 
 };
