@@ -5,24 +5,45 @@ using namespace yasem;
 MediaPlayerPluginObject::MediaPlayerPluginObject(Plugin *plugin):
     AbstractPluginObject(plugin)
 {
+    reset();
+}
 
+qreal MediaPlayerPluginObject::getOpacity() const
+{
+    return m_opacity;
+}
+
+void MediaPlayerPluginObject::setOpacity(qreal opacity)
+{
+    m_opacity = opacity;
+}
+
+void MediaPlayerPluginObject::reset()
+{
+    m_opacity = 1;
 }
 
 void MediaPlayerPluginObject::setViewport(const QRect &requestedRect)
 {
-    DEBUG() << "setViewport" << requestedRect << fullscreen();
+    DEBUG() << "setViewport" << requestedRect << isFullscreen();
     m_videoStoredRect = requestedRect;
     resize();
 }
 
 void MediaPlayerPluginObject::setViewport(const QRect &containerRect, const qreal containerScale, const QRect &requestedRect)
 {
-    DEBUG() << "setViewport" << containerRect << containerScale << requestedRect << fullscreen();
+    //#define USE_RELATIVE_RECT
+
+    DEBUG() << "setViewport" << containerRect << containerScale << requestedRect << isFullscreen();
     if(requestedRect.width() >= 0 && requestedRect.height() >= 0)
     {
-        if(fullscreen())
+        if(isFullscreen())
         {
+        //#ifdef USE_RELATIVE_RECT
             rect(containerRect);
+        //#else
+        //    rect(QRect(0, 0, containerRect.width(), containerRect.height()));
+        //#endif // USE_RELATIVE_RECT
         }
         else
         {
@@ -35,12 +56,24 @@ void MediaPlayerPluginObject::setViewport(const QRect &containerRect, const qrea
             DEBUG() << "currentVideoWidgetRect:" << currentVideoWidgetRect;
             DEBUG() << "requestedRect:" << requestedRect;
 
+        #ifdef USE_RELATIVE_RECT1
             QRect zoomedRect = QRect(
                         (int)((float)requestedRect.left() * containerScale + containerRect.left()),
                         (int)((float)requestedRect.top() * containerScale + containerRect.top()),
                         (int)((float)requestedRect.width() * containerScale),
                         (int)((float)requestedRect.height() * containerScale)
                         );
+
+        #else
+
+            QRect zoomedRect = QRect(
+                        (int)((float)requestedRect.left() * containerScale),
+                        (int)((float)requestedRect.top() * containerScale),
+                        (int)((float)requestedRect.width() * containerScale),
+                        (int)((float)requestedRect.height() * containerScale)
+                        );
+
+        #endif // USE_RELATIVE_RECT
 
             DEBUG() << "rect:" << zoomedRect;
 
@@ -49,17 +82,30 @@ void MediaPlayerPluginObject::setViewport(const QRect &containerRect, const qrea
         }
         widget()->repaint();
     }
+
     else
+    {
+    #ifdef USE_RELATIVE_RECT1
         move((int)((float)requestedRect.left() * containerScale + containerRect.left()),
              (int)((float)requestedRect.top() * containerScale + containerRect.top()));
+    #else
+        move((int)((float)requestedRect.left() * containerScale),
+             (int)((float)requestedRect.top() * containerScale));
+    #endif // USE_RELATIVE_RECT
+    }
 }
 
-void MediaPlayerPluginObject::fullscreen(bool value) {
-    this->isFullscreen = value;
+QRect MediaPlayerPluginObject::getViewport() const
+{
+    return rect();
 }
 
-bool MediaPlayerPluginObject::fullscreen() const {
-    return this->isFullscreen;
+void MediaPlayerPluginObject::setFullscreen(bool value) {
+    this->m_is_fullscreen = value;
+}
+
+bool MediaPlayerPluginObject::isFullscreen() const {
+    return this->m_is_fullscreen;
 }
 
 void MediaPlayerPluginObject::resize() {

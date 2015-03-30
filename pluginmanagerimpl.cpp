@@ -165,9 +165,9 @@ QList<Plugin*> PluginManagerImpl::getPlugins(PluginRole role, bool active_only)
     return result;
 }
 
-PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLevel = 2)
+PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin)
 {
-    DEBUG() << qPrintable("**************** Initialization of") << plugin->getName();
+    DEBUG() << qPrintable("Initialization of") << plugin->getName();
     Q_ASSERT(plugin != NULL);
 
     if(plugin->getState() == PLUGIN_STATE_INITIALIZED)
@@ -181,7 +181,7 @@ PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLev
     if(plugin->getId() == NULL || plugin->getId() == "")
         return PLUGIN_ERROR_NO_PLUGIN_ID;
 
-    DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Plugin" << plugin->getId() << "initialization...";
+    //DEBUG() << "Plugin" << plugin->getId() << "initialization...";
 
     if(pluginHasConflicts(plugin))
     {
@@ -190,7 +190,7 @@ PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLev
     }
 
 
-    DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Loading dependencies for" << plugin->getId() << "...";
+    //DEBUG() << "Loading dependencies for" << plugin->getId() << "...";
 
     if(plugin->dependencies().size() > 0)
     {
@@ -199,66 +199,19 @@ PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLev
 
         for (const PluginDependency &dependency: plugin->dependencies())
         {
-            //Check dependency cycle
-
-            bool cyclic = false;
-            for(PluginRole role: plugin->roles().keys())
+            if(isCircularDependency(plugin, dependency))
             {
-                if(role == dependency.getRole())
-                {
-                    cyclic = true;
-                    break;
-                }
-            }
-
-            if(cyclic)
-            {
-                WARN() << "Cyclic dependency in" << plugin->getId() << "with role" << dependency.roleName();
+                WARN() << "Circular dependency in" << plugin->getId() << "with role" << dependency.roleName();
                 continue;
             }
 
-            DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Trying to load dependency" << dependency.roleName() << " for" << plugin->getName();
+            PluginErrorCodes dependencyResult = loadDependency(plugin, dependency);
 
-            AbstractPluginObject* dependencyObject = PluginManager::instance()->getByRole(dependency.getRole());
-            if(dependencyObject == NULL)
+            if(dependencyResult != PLUGIN_ERROR_NO_ERROR)
             {
-                WARN() << "Dependency" << dependency.roleName() << "for" << plugin->getId() << "not found!";
-                if(dependency.isRequired())
-                {
-                    if(dependency.doSkipIfFailed())
-                    {
-                        WARN() << qPrintable(QString("Failed to load \"%1\", so it was skipped").arg(dependency.roleName()));
-                        result = PLUGIN_ERROR_NO_ERROR;
-                        continue;
-                    }
-                    result = PLUGIN_ERROR_DEPENDENCY_MISSING;
-                    break;
-                }
-                else
-                {
-                    LOG() << qPrintable(QString(dependencyLevel, '*')) << "Skipping" << dependency.roleName() << "as not required";
-                    continue;
-                }
-            }
-
-            if(dependencyObject->plugin()->getState() == PLUGIN_STATE_WAITING_FOR_DEPENDENCY)
-            {
-                WARN() << "Cyclic dependency in plugin" << plugin->getId() << "with" << dependencyObject->plugin()->getId();
-                continue;
-            }
-
-
-
-            PluginErrorCodes code = PluginManager::instance()->initPlugin(dependencyObject->plugin(), dependencyLevel+2);
-            if(code != PLUGIN_ERROR_NO_ERROR)
-            {
-                WARN() << "Error" << code << "occured while initializing plugin" << plugin->getName() << "dependency" << dependency.roleName();
+                WARN() << "Error" << dependencyResult << "occured while initializing plugin" << plugin->getName() << "dependency" << dependency.roleName();
                 plugin->setState(PLUGIN_STATE_INITIALIZED);
                 result = PLUGIN_ERROR_DEPENDENCY_MISSING;
-            }
-            else
-            {
-                DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Dependency" << dependency.roleName() << "initialized";
             }
         }
 
@@ -267,7 +220,7 @@ PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLev
         {
             case PLUGIN_ERROR_NO_ERROR:
             {
-                DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Dependencies for" << plugin->getId() << "have been loaded.";
+                //DEBUG() << "Dependencies for" << plugin->getId() << "have been loaded.";
                 break;
             }
             case PLUGIN_ERROR_DEPENDENCY_MISSING:
@@ -309,7 +262,7 @@ PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin, int dependencyLev
         return PLUGIN_ERROR_NOT_INITIALIZED;
     }
 
-    DEBUG() << qPrintable(QString(dependencyLevel, '*')) << "Plugin" << plugin->getId() << "initialized";
+    DEBUG() << "Plugin" << plugin->getId() << "initialized";
 
     plugin->setState(PLUGIN_STATE_INITIALIZED);
     return PLUGIN_ERROR_NO_ERROR;
@@ -354,6 +307,25 @@ AbstractPluginObject* PluginManagerImpl::getByRole(PluginRole role)
     }
     ERROR() << qPrintable(QString("Plugin for role %1 not found!").arg(role));
     return NULL;
+}
+
+QList<AbstractPluginObject *> PluginManagerImpl::getAllByRole(PluginRole role, bool active_only)
+{
+    QList<AbstractPluginObject *> result;
+    for(int index = 0; index < plugins.size(); index++)
+    {
+        Plugin *plugin = plugins.at(index);
+        if(active_only && !plugin->isActive()) continue;
+
+        for(PluginRole pluginRole: plugin->roles().keys())
+        {
+            if(pluginRole == role)
+            {
+                result.append(plugin->roles().value(pluginRole));
+            }
+        }
+    }
+    return result;
 }
 
 Plugin *PluginManagerImpl::getByIID(const QString &iid)
@@ -481,30 +453,17 @@ PluginErrorCodes PluginManagerImpl::initPlugins()
 
     // Draw a table
     DEBUG() << "Initialization finished";
-    DEBUG() << qPrintable(QString(41, '-'));
+    DEBUG() << qPrintable(QString(65, '-'));
     DEBUG() << qPrintable(QString("|%1|%2|")
                           .arg(QString("PLUGIN").leftJustified(30))
-                          .arg(QString("STATUS").leftJustified(8)));
-    DEBUG() << qPrintable(QString(41, '-')) ;
-    QString state = "";
+                          .arg(QString("STATUS").leftJustified(32)));
+    DEBUG() << qPrintable(QString(65, '-')) ;
 
     for(Plugin* plugin: plugins)
     {
-        switch(plugin->getState())
-        {
-            case PLUGIN_STATE_UNKNOWN:                  { state = "UNKNOWN "; break; }
-            case PLUGIN_STATE_ERROR_STATE:              { state = "ERROR   "; break; }
-            case PLUGIN_STATE_INITIALIZED:              { state = "WORKING "; break; }
-            case PLUGIN_STATE_NOT_INITIALIZED:          { state = "NOT INIT"; break; }
-            case PLUGIN_STATE_WAITING_FOR_DEPENDENCY:   { state = "WAIT4DEP"; break; }
-            case PLUGIN_STATE_DISABLED:                 { state = "DISABLED"; break; }
-            case PLUGIN_STATE_CONFLICT:                 { state = "CONFLICT"; break; }
-            default:                                    { state = QString::number(plugin->getState()); break; }
-        }
-
-        DEBUG() << qPrintable(QString("|%1|%2|").arg(plugin->getName().leftJustified(30)).arg(state.leftJustified(8)));
+        DEBUG() << qPrintable(QString("|%1|%2|").arg(plugin->getName().leftJustified(30)).arg(plugin->getStateDescription().toUpper().leftJustified(32)));
     }
-    DEBUG() << qPrintable(QString(41, '-')) ;
+    DEBUG() << qPrintable(QString(65, '-')) ;
     return PLUGIN_ERROR_NO_ERROR;
 }
 
@@ -533,4 +492,73 @@ QString PluginManagerImpl::getPluginDir()
 void yasem::PluginManagerImpl::registerPluginRole(const PluginRole &role, const PluginRoleData &data)
 {
     m_plugin_roles.insert(role, data);
+}
+
+bool PluginManagerImpl::isCircularDependency(Plugin *plugin, const PluginDependency &dependency) const
+{
+    bool circular = false;
+    for(PluginRole role: plugin->roles().keys())
+    {
+        if(role == dependency.getRole())
+        {
+            circular = true;
+            break;
+        }
+    }
+
+    return circular;
+}
+
+PluginErrorCodes PluginManagerImpl::loadDependency(Plugin *plugin, const PluginDependency &dependency)
+{
+    PluginErrorCodes result = PLUGIN_ERROR_DEPENDENCY_MISSING;
+    //DEBUG() << qPrintable(QString("Trying to load dependency %1 for %2").arg(dependency.roleName()).arg(plugin->getName()));
+
+    DEBUG() << qPrintable(QString("    DEPENDENCY: %1").arg(dependency.roleName()));
+
+    QList<AbstractPluginObject*> dependencyList = getAllByRole(dependency.getRole(), false);
+
+    if(dependencyList.isEmpty())
+    {
+        QString resString = QString("Required plugin with role %1 for %2 not found!").arg(dependency.roleName()).arg(plugin->getId());
+
+        if(dependency.isRequired())
+        {
+            if(dependency.doSkipIfFailed())
+            {
+                WARN() << qPrintable(resString) << qPrintable("Failed to load. Skipped");
+                return PLUGIN_ERROR_NO_ERROR;
+            }
+            WARN() << qPrintable(resString) << resString;
+            return PLUGIN_ERROR_DEPENDENCY_MISSING;
+        }
+
+        LOG() << qPrintable(resString) << qPrintable("Not required. Skipping...");
+        return PLUGIN_ERROR_NO_ERROR;
+    }
+
+    for(AbstractPluginObject* dependencyObject: dependencyList)
+    {
+        Plugin* depPlugin = dependencyObject->plugin();
+        DEBUG() << qPrintable(QString("        %1")
+                              .arg(depPlugin->getId())
+                              .leftJustified(32, '.'))
+                << qPrintable(depPlugin->getStateDescription().toUpper());
+
+        PluginErrorCodes code;
+        if(dependencyObject->plugin()->getState() == PLUGIN_STATE_WAITING_FOR_DEPENDENCY)
+        {
+            // Usually this code should never be executed if plugin doesn't have circular dependency
+            WARN() << "Circular dependency in plugin" << plugin->getId() << "with" << dependencyObject->plugin()->getId();
+            code = PLUGIN_ERROR_NO_ERROR;
+        }
+        else
+        {
+            code = initPlugin(dependencyObject->plugin());
+        }
+
+        if(code == PLUGIN_ERROR_NO_ERROR) ///< At least one of dependency plugins should be loaded
+            result = PLUGIN_ERROR_NO_ERROR;
+    }
+    return result;
 }

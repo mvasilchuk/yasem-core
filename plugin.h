@@ -112,6 +112,8 @@ public:
     virtual PluginState getState();
     virtual void setState(const PluginState &state);
 
+    virtual QString getStateDescription();
+
     virtual bool isActive();
     virtual void setActive(bool active);
 

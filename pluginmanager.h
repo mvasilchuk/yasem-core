@@ -67,9 +67,10 @@ public:
     virtual PluginErrorCodes deinitPlugins() = 0;
     //virtual PLUGIN_ERROR_CODES connectSlots();
     virtual QList<Plugin*> getPlugins(PluginRole role, bool active_only) = 0;
-    virtual PluginErrorCodes initPlugin(Plugin* plugin, int dependencyLevel = 0) = 0;
+    virtual PluginErrorCodes initPlugin(Plugin* plugin) = 0;
     virtual PluginErrorCodes deinitPlugin(Plugin* plugin) = 0;
     virtual AbstractPluginObject* getByRole(PluginRole role) = 0;
+    virtual QList<AbstractPluginObject*> getAllByRole(PluginRole role, bool active_only = true) = 0;
     virtual Plugin* getByIID(const QString &iid) = 0;
     virtual void setPluginDir(const QString &pluginDir) = 0;
     virtual QString getPluginDir() = 0;

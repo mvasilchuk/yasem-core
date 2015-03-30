@@ -54,8 +54,10 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
             BrowserPluginObject* browser = dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
             if(browser != NULL)
             {
-                browser->raise();
-                profile->getProfilePlugin()->initObject(browser->getFirstPage());
+                browser->setTopWidget(BrowserPluginObject::TOP_WIDGET_BROWSER);
+                AbstractWebPage* page = browser->getFirstPage();
+                page->reset();
+                profile->getProfilePlugin()->initObject(page);
             }
             else
                 qDebug() << "[V] No browser found!";

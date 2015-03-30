@@ -158,6 +158,23 @@ void Plugin::setState(const PluginState &state)
     d->m_state = state;
 }
 
+QString Plugin::getStateDescription()
+{
+    QString result;
+    switch(getState())
+    {
+        case PLUGIN_STATE_UNKNOWN:                  { result = "Unknown"; break; }
+        case PLUGIN_STATE_ERROR_STATE:              { result = "Error"; break; }
+        case PLUGIN_STATE_INITIALIZED:              { result = "Working"; break; }
+        case PLUGIN_STATE_NOT_INITIALIZED:          { result = "Not initialized"; break; }
+        case PLUGIN_STATE_WAITING_FOR_DEPENDENCY:   { result = "Waiting for dependency"; break; }
+        case PLUGIN_STATE_DISABLED:                 { result = "Disabled"; break; }
+        case PLUGIN_STATE_CONFLICT:                 { result = "Conflict"; break; }
+        default:                                    { result = QString::number(getState()); break; }
+    }
+    return result;
+}
+
 bool Plugin::isActive()
 {
     Q_D(Plugin);

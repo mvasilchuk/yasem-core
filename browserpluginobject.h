@@ -29,9 +29,13 @@ public:
         m_use_qml = false;
     }
 
+    enum TopWidget {
+        TOP_WIDGET_BROWSER,
+        TOP_WIDGET_PLAYER
+    };
+
     virtual void setParentWidget(QWidget *parent) = 0;
     virtual QWidget* getParentWidget() = 0;
-    virtual bool load(const QUrl &url) = 0;
     virtual QWidget* widget() = 0 ;
     virtual void resize(QResizeEvent* = 0) = 0;
     virtual void rect(const QRect &rect) = 0;
@@ -40,7 +44,6 @@ public:
     virtual qreal scale() = 0;
     virtual void stb(StbPluginObject* stbPlugin) = 0;
     virtual StbPluginObject* stb() = 0;
-    virtual void raise() = 0;
     virtual void show() = 0;
     virtual void hide() = 0;
     virtual void fullscreen(bool setFullscreen) = 0;
@@ -57,9 +60,6 @@ public:
 
     virtual void setupMousePositionHandler(const QObject *receiver, const char* method) = 0;
 
-    virtual void setOpacity(qint32 alpha) = 0;
-    virtual qint32 getOpacity() = 0;
-
     virtual AbstractWebPage* getFirstPage() = 0;
 
     virtual QString getQmlComponentName() { return ""; }
@@ -69,9 +69,21 @@ public:
 
     virtual void setUseQml(bool use) { m_use_qml = use; }
     virtual bool isUsingQml() const { return m_use_qml; }
+
+
+    virtual void setTopWidget(TopWidget top) {
+        m_top_widget = top;
+        emit topWidgetChanged();
+    }
+    virtual TopWidget getTopWidget() { return m_top_widget; }
+
 protected:
     QWidget* activeWebView;
     bool m_use_qml;
+    TopWidget m_top_widget;
+
+Q_SIGNALS:
+    void topWidgetChanged();
 
 };
 }
