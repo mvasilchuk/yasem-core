@@ -34,16 +34,20 @@ void MediaPlayerPluginObject::setViewport(const QRect &containerRect, const qrea
 {
     //#define USE_RELATIVE_RECT
 
+#ifndef USE_REAL_TRANSPARENCY
+#define USE_RELATIVE_RECT
+#endif //USE_REAL_TRANSPARENCY
+
     DEBUG() << "setViewport" << containerRect << containerScale << requestedRect << isFullscreen();
     if(requestedRect.width() >= 0 && requestedRect.height() >= 0)
     {
         if(isFullscreen())
         {
-        //#ifdef USE_RELATIVE_RECT
+        #ifdef USE_RELATIVE_RECT
             rect(containerRect);
-        //#else
-        //    rect(QRect(0, 0, containerRect.width(), containerRect.height()));
-        //#endif // USE_RELATIVE_RECT
+        #else
+            rect(QRect(0, 0, containerRect.width(), containerRect.height()));
+        #endif // USE_RELATIVE_RECT
         }
         else
         {
@@ -56,7 +60,7 @@ void MediaPlayerPluginObject::setViewport(const QRect &containerRect, const qrea
             DEBUG() << "currentVideoWidgetRect:" << currentVideoWidgetRect;
             DEBUG() << "requestedRect:" << requestedRect;
 
-        #ifdef USE_RELATIVE_RECT1
+        #ifdef USE_RELATIVE_RECT
             QRect zoomedRect = QRect(
                         (int)((float)requestedRect.left() * containerScale + containerRect.left()),
                         (int)((float)requestedRect.top() * containerScale + containerRect.top()),
@@ -85,7 +89,7 @@ void MediaPlayerPluginObject::setViewport(const QRect &containerRect, const qrea
 
     else
     {
-    #ifdef USE_RELATIVE_RECT1
+    #ifdef USE_RELATIVE_RECT
         move((int)((float)requestedRect.left() * containerScale + containerRect.left()),
              (int)((float)requestedRect.top() * containerScale + containerRect.top()));
     #else

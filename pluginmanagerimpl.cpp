@@ -300,7 +300,7 @@ AbstractPluginObject* PluginManagerImpl::getByRole(PluginRole role)
             if(pluginRole == role)
             {
                 Q_ASSERT(plugin);
-                qDebug() << "Found plugin" << plugin->getName() << plugin->getClassName();
+                //qDebug() << "Found plugin" << plugin->getName() << plugin->getClassName();
                 return plugin->roles().value(pluginRole);
             }
         }
