@@ -115,6 +115,8 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         {
             output_channel = stderr;
             output_line = QString("[CRIT ][%1] %2%3\n").arg(current_time).arg(line).arg(message);
+            fprintf(output_channel, "%s", output_line.toUtf8().constData());
+
             Core::printCallStack();
             break;
         }
@@ -122,6 +124,8 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         {
             output_channel = stderr;
             output_line = QString("[FATAL][%1] %2%3\n").arg(current_time).arg(line).arg(message);
+            fprintf(output_channel, "%s", output_line.toUtf8().constData());
+
             Core::printCallStack();
             abort();
         }

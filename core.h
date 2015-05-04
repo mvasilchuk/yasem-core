@@ -64,6 +64,9 @@ public:
             void* callstack[CALLSTACK_SIZE];
             int i, frames = backtrace(callstack, CALLSTACK_SIZE);
             char** strs = backtrace_symbols(callstack, frames);
+
+            printf("\nCallstack:\n");
+
             for(i = 0; i < frames; i++){
                 printf("%d: %s\n", i, strs[i]);
             }
