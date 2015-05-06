@@ -42,6 +42,10 @@ public slots:
     // Core interface
 public:
     QString version();
+
+    // Core interface
+public:
+    QString revision();
 };
 
 }

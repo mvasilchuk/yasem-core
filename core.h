@@ -77,6 +77,7 @@ public:
     }
 
     virtual QString version() = 0;
+    virtual QString revision() = 0;
     QHash<QString, BlockDeviceInfo*> getBlockDeviceTree() {
         return block_device_tree;
     }

@@ -306,3 +306,9 @@ QString yasem::CoreImpl::version()
 {
     return MODULE_VERSION;
 }
+
+
+QString yasem::CoreImpl::revision()
+{
+    return GIT_VERSION;
+}
