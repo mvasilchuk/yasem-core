@@ -100,6 +100,8 @@ public:
     virtual QString getVersion();
     virtual void setVersion(const QString &version);
 
+    virtual QString getRevision() const;
+
     virtual QString getName();
     virtual void setName(const QString &name);
 

@@ -300,8 +300,6 @@ QHash<QString, RC_KEY> CoreImpl::getKeycodeHashes()
 }
 
 
-
-
 QString yasem::CoreImpl::version()
 {
     return MODULE_VERSION;

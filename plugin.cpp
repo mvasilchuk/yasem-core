@@ -110,6 +110,11 @@ void Plugin::setVersion(const QString &version)
     d->m_version = version;
 }
 
+QString Plugin::getRevision() const
+{
+    return GIT_VERSION;
+}
+
 QString Plugin::getName()
 {
     Q_D(Plugin);
