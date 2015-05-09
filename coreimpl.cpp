@@ -122,6 +122,8 @@ void CoreImpl::mountPointChanged()
 
     disksList.clear();
 
+    int counter = 1;
+
     QByteArray result;
     while(df.canReadLine())
     {
@@ -131,6 +133,7 @@ void CoreImpl::mountPointChanged()
         {
             //DEBUG(QString("DRIVES: ").append(result.remove(result.length()-1, 1)));
             DiskInfo* info = new DiskInfo();
+            info->index = counter;
             info->blockDevice = matcher.captured(1);
             info->size = matcher.captured(2).toLong();
             info->used = matcher.captured(3).toLong();
@@ -140,6 +143,8 @@ void CoreImpl::mountPointChanged()
             disksList.append(info);
 
             DEBUG() << info->toString();
+
+            counter++;
         }
     }
 

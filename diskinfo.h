@@ -8,6 +8,7 @@
 namespace yasem {
     class DiskInfo {
     public:
+        int index;
         QString blockDevice;
         QString mountPoint;
         int percentComplete;
