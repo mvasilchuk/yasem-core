@@ -48,7 +48,7 @@ public:
         QList<StbSubmodel> submodels = profilePlugin->getSubmodels();
         for(StbSubmodel model: submodels)
         {
-            models.insert(model.m_id, model.m_name);
+            models.insert(model.getId(), model.getName());
         }
 
         group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_SUBMODEL, QObject::tr("Model name"), "","options", "", models));

@@ -453,17 +453,24 @@ PluginErrorCodes PluginManagerImpl::initPlugins()
 
     // Draw a table
     DEBUG() << "Initialization finished";
-    DEBUG() << qPrintable(QString(65, '-'));
-    DEBUG() << qPrintable(QString("|%1|%2|")
+    LOG() << qPrintable(QString(66, '-'));
+    LOG() << qPrintable(QString("|%1|%2|%3|%4|")
                           .arg(QString("PLUGIN").leftJustified(30))
-                          .arg(QString("STATUS").leftJustified(32)));
-    DEBUG() << qPrintable(QString(65, '-')) ;
+                          .arg(QString("VERSION").leftJustified(7))
+                          .arg(QString("REVISION").leftJustified(8))
+                          .arg(QString("STATUS").leftJustified(16)));
+    LOG() << qPrintable(QString(66, '-')) ;
 
     for(Plugin* plugin: plugins)
     {
-        DEBUG() << qPrintable(QString("|%1|%2|").arg(plugin->getName().leftJustified(30)).arg(plugin->getStateDescription().toUpper().leftJustified(32)));
+        LOG() << qPrintable(QString("|%1|%2|%3|%4|")
+                              .arg(plugin->getName().leftJustified(30))
+                              .arg(plugin->getVersion().toUpper().leftJustified(7))
+                              .arg(plugin->getRevision().toUpper().leftJustified(8))
+                              .arg(plugin->getStateDescription().toUpper().leftJustified(16))
+                              );
     }
-    DEBUG() << qPrintable(QString(65, '-')) ;
+    LOG() << qPrintable(QString(66, '-')) ;
     return PLUGIN_ERROR_NO_ERROR;
 }
 

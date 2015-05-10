@@ -107,11 +107,11 @@ int main(int argc, char *argv[])
     #endif
     #endif //Q_OS_LINUX
 
-    qDebug() << "Library paths: " << QApplication::libraryPaths();
-
     Core::setInstance(new CoreImpl(qApp));
     a.setProperty("Core", QVariant::fromValue(Core::instance()));
 
+    qDebug() << "Library paths: " << QApplication::libraryPaths();
+	
     ProfileManager::setInstance(new ProfileManageImpl());
     a.setProperty("ProfileManager", QVariant::fromValue(ProfileManager::instance()));
 

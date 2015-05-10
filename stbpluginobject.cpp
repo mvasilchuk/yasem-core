@@ -123,7 +123,7 @@ StbSubmodel &StbPluginObject::findSubmodel(const QString &id)
 {
     Q_D(StbPluginObject);
     for(StbSubmodel &submodel: d->subModels)
-        if(submodel.m_id == id)
+        if(submodel.getId() == id)
             return submodel;
     throw new std::runtime_error(QString("Requested undefined submodel ID: %1").arg(id).toUtf8().constData());
 }
@@ -134,7 +134,7 @@ QString StbPluginObject::listSubmodels()
     QStringList result;
     for(StbSubmodel model: d->subModels)
     {
-        result << model.m_name;
+        result << model.getName();
     }
     return result.join(", ");
 }

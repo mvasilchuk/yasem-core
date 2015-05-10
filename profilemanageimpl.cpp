@@ -271,6 +271,7 @@ void ProfileManageImpl::loadProfiles()
         Q_ASSERT(profile);
         profile->datasource(dsPlugin->getDatasourceForProfile(profile));
         profile->setName(s.value("name").toString());
+        profile->setSubmodel(stbPlugin->getSubmodels().at(s.value("submodel").toInt()));
         DEBUG() << "Profile" << profile->getName() << "loaded";
 
         s.endGroup();

@@ -17,11 +17,11 @@ CoreImpl::CoreImpl(QObject *parent ): Core(parent)
     setObjectName("Core");
     appSettings = new QSettings(QSettings::IniFormat, QSettings::UserScope, CONFIG_DIR, CONFIG_NAME);
 
+    LOG() << qPrintable(QString("Starting YASEM... Core version: %1, rev. %2").arg(version()).arg(revision()));
     DEBUG() << "Settings directory" << QFileInfo(appSettings->fileName()).absoluteDir().absolutePath();
 
     networkObj = new NetworkImpl(parent);
     fillKeymapHashTable();
-
 
     // Regular expressions to extract information from hwinfo's output.
     hwinfo_regex_list.insert(HwinfoLineTypes::TITLE,           QRegularExpression("^(\\d+):\\s+(\\w+)\\s+\\d+\\.\\d+:\\s+\\d+\\s+\\w+\n"));
