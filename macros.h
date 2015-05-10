@@ -11,7 +11,7 @@ namespace yasem
     #define DEBUG() qDebug()
     #define LOG() qDebug() << "$LOG$"
     #define INFO() qDebug() << "$INFO$"
-    // FIXME: There is another ERROR macro in widgdi.h
+    #undef ERROR  // There is another ERROR macro in widgdi.h
     #define ERROR() qWarning()
     #define STUB() qDebug() << "$STUB$"
     #define WTF() qDebug() << "$WTF$"
