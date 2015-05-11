@@ -8,9 +8,10 @@
 
 #include "crashhandler.h"
 
-#include <QDebug>
 #include <signal.h>
 #include <stdio.h>
+
+#include <QDebug>
 #include <QPalette>
 #include <QStyleFactory>
 
@@ -143,9 +144,9 @@ int main(int argc, char *argv[])
     Core::setInstance(new CoreImpl(qApp));
     a.setProperty("Core", QVariant::fromValue(Core::instance()));
 
-    qDebug() << "Library paths: " << QApplication::libraryPaths();
-
     setupPalette();
+
+    qDebug() << "Library paths: " << QCoreApplication::libraryPaths();
 
     ProfileManager::setInstance(new ProfileManageImpl());
     a.setProperty("ProfileManager", QVariant::fromValue(ProfileManager::instance()));
@@ -177,11 +178,7 @@ int main(int argc, char *argv[])
         return listResult;
     }
 
-    //QObject::connect(&a, &QCoreApplication::aboutToQuit, Core::instance(), &Core::onClose);
-
-    QObject::connect(qApp, &QApplication::lastWindowClosed, [=]() {
-        qApp->exit();
-    });
+    qApp->setQuitOnLastWindowClosed(true);
 
     execCode = a.exec();
     qDebug() <<  "Closing application... code:"  << execCode;
@@ -189,7 +186,6 @@ int main(int argc, char *argv[])
     #ifdef Q_OS_LINUX
     //stopErrorRedirect(stdout_fd);
     #endif //Q_OS_LINUX
-
 
     return execCode;
 }
