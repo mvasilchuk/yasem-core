@@ -6,6 +6,8 @@
 #include "yasemapplication.h"
 #include "profileconfigparserimpl.h"
 
+#include "crashhandler.h"
+
 #include <QDebug>
 #include <signal.h>
 #include <stdio.h>
@@ -108,6 +110,9 @@ void setupPalette()
 using namespace yasem;
 int main(int argc, char *argv[])
 {
+#ifdef USE_BREAKPAD
+    Breakpad::CrashHandler::instance()->init();
+#endif //USE_BREAKPAD
     QString appPath = QFileInfo(argv[0]).dir().path();
     QStringList paths = QCoreApplication::libraryPaths();
     paths.append(appPath);

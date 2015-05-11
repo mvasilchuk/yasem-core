@@ -1,6 +1,7 @@
 #include "plugin.h"
 #include "plugin_p.h"
 #include "abstractpluginobject.h"
+#include "crashhandler.h"
 
 using namespace yasem;
 
@@ -8,7 +9,9 @@ Plugin::Plugin(QObject* parent):
     QObject(parent),
     d_ptr(new PluginPrivate(this))
 {
-
+#ifdef USE_BREAKPAD
+    Breakpad::CrashHandler::instance()->init();
+#endif //USE_BREAKPAD
 }
 
 Plugin::~Plugin()
