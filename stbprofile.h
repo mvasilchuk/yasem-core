@@ -14,6 +14,7 @@
 
 static const QString CONFIG_PROFILE_NAME = "name";
 static const QString CONFIG_SUBMODEL = "submodel";
+static const QString CONFIG_LIMIT_MAX_REQUESTS = "limit_max_requests";
 static const QString CONFIG_PORTAL_SIZE = "portal_size";
 static const QString CONFIG_PORTAL_URL = "portal";
 
@@ -52,6 +53,7 @@ public:
         }
 
         group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_SUBMODEL, QObject::tr("Model name"), "","options", "", models));
+        group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_LIMIT_MAX_REQUESTS, QObject::tr("Limit max. requests per second"), "false", "bool"));
 
         profileConfiguration.groups.append(group);
     }

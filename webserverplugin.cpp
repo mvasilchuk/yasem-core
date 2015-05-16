@@ -5,7 +5,8 @@
 using namespace yasem;
 
 
-WebServerPlugin::WebServerPlugin():
+WebServerPlugin::WebServerPlugin(Plugin* plugin):
+    AbstractPluginObject(plugin),
     d_ptr(new WebServerPluginPrivate(this)) {
 
 }

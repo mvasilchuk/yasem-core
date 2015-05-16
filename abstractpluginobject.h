@@ -19,7 +19,7 @@ public:
     explicit AbstractPluginObject(Plugin* plugin):
         QObject((QObject*)plugin),
         m_plugin(plugin){}
-    virtual ~AbstractPluginObject(){};
+    virtual ~AbstractPluginObject(){}
     virtual PluginObjectResult init() = 0;
     virtual PluginObjectResult deinit() = 0;
     Plugin* plugin() {
