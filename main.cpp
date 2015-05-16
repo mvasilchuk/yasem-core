@@ -8,12 +8,9 @@
 
 #include "crashhandler.h"
 
+#include <QDebug>
 #include <signal.h>
 #include <stdio.h>
-
-#include <QDebug>
-#include <QPalette>
-#include <QStyleFactory>
 
 #ifdef Q_OS_LINUX
 #ifndef Q_OS_ANDROID
@@ -82,32 +79,6 @@ void stopErrorRedirect(int stdout_fd)
 #endif //Q_OS_ANDROID
 #endif //Q_OS_LINUX
 
-void setupPalette()
-{
-    qDebug() << "Setting up dark palette...";
-    qApp->setStyle(QStyleFactory::create("Fusion"));
-
-    QPalette darkPalette;
-    darkPalette.setColor(QPalette::Window, QColor(53,53,53));
-    darkPalette.setColor(QPalette::WindowText, Qt::white);
-    darkPalette.setColor(QPalette::Base, QColor(25,25,25));
-    darkPalette.setColor(QPalette::AlternateBase, QColor(53,53,53));
-    darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
-    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
-    darkPalette.setColor(QPalette::Text, Qt::white);
-    darkPalette.setColor(QPalette::Button, QColor(53,53,53));
-    darkPalette.setColor(QPalette::ButtonText, Qt::white);
-    darkPalette.setColor(QPalette::BrightText, Qt::red);
-    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
-
-    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-    darkPalette.setColor(QPalette::HighlightedText, Qt::black);
-
-    qApp->setPalette(darkPalette);
-
-    qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
-}
-
 using namespace yasem;
 int main(int argc, char *argv[])
 {
@@ -144,9 +115,7 @@ int main(int argc, char *argv[])
     Core::setInstance(new CoreImpl(qApp));
     a.setProperty("Core", QVariant::fromValue(Core::instance()));
 
-    setupPalette();
-
-    qDebug() << "Library paths: " << QCoreApplication::libraryPaths();
+    qDebug() << "Library paths: " << QApplication::libraryPaths();
 
     ProfileManager::setInstance(new ProfileManageImpl());
     a.setProperty("ProfileManager", QVariant::fromValue(ProfileManager::instance()));
