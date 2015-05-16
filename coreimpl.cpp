@@ -2,6 +2,7 @@
 #include "pluginmanager.h"
 #include "networkimpl.h"
 #include "macros.h"
+#include "yasemsettingsimpl.h"
 
 #include <QDebug>
 #include <QProcess>
@@ -11,11 +12,13 @@
 
 using namespace yasem;
 
-CoreImpl::CoreImpl(QObject *parent ): Core(parent)
+CoreImpl::CoreImpl(QObject *parent ):
+    Core(parent),
+    m_yasem_settings(new YasemSettingsImpl(this))
 {
     Q_UNUSED(parent)
     setObjectName("Core");
-    appSettings = new QSettings(QSettings::IniFormat, QSettings::UserScope, CONFIG_DIR, CONFIG_NAME);
+    appSettings = new QSettings(QSettings::IniFormat, QSettings::UserScope, CONFIG_DIR, CONFIG_NAME, this);
 
     LOG() << qPrintable(QString("Starting YASEM... Core version: %1, rev. %2").arg(version()).arg(revision()));
     DEBUG() << "Settings directory" << QFileInfo(appSettings->fileName()).absoluteDir().absolutePath();
@@ -36,6 +39,8 @@ CoreImpl::CoreImpl(QObject *parent ): Core(parent)
     hwinfo_regex_list.insert(HwinfoLineTypes::DEVICE_FILE,     QRegularExpression("Device File:\\s+(/dev/\\w+)\n"));
 
     //mountPointChanged();
+
+    initBuiltInSettingsGroup();
 }
 
 CoreImpl::~CoreImpl()
@@ -99,10 +104,26 @@ QSettings *CoreImpl::settings()
     return appSettings;
 }
 
+QSettings *CoreImpl::settings(const QString &filename)
+{
+    return new QSettings(QSettings::IniFormat, QSettings::UserScope, CONFIG_DIR, filename, this);
+}
+
 void CoreImpl::onClose()
 {
     LOG() << "onClose";
     PluginManager::instance()->deinitPlugins();
+}
+
+void CoreImpl::initBuiltInSettingsGroup()
+{
+    ConfigTreeGroup* appearence = new ConfigTreeGroup(CONFIG_NAME, QString::number(YasemSettings::APPEARANCE),tr("Appearance"));
+    ConfigTreeGroup* media = new ConfigTreeGroup(CONFIG_NAME, QString::number(YasemSettings::MEDIA), tr("Media"));
+    ConfigTreeGroup* other = new ConfigTreeGroup(CONFIG_NAME, QString::number(YasemSettings::OTHER), tr("Other"));
+
+    m_yasem_settings->addBuiltInConfigGroup(appearence);
+    m_yasem_settings->addBuiltInConfigGroup(media);
+    m_yasem_settings->addBuiltInConfigGroup(other);
 }
 
 void CoreImpl::mountPointChanged()
@@ -314,4 +335,10 @@ QString yasem::CoreImpl::version()
 QString yasem::CoreImpl::revision()
 {
     return GIT_VERSION;
+}
+
+
+YasemSettings *yasem::CoreImpl::yasem_settings()
+{
+    return m_yasem_settings;
 }

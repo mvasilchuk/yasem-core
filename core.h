@@ -31,6 +31,8 @@
 namespace yasem
 {
 class DiskInfo;
+class YasemSettings;
+
 class Core: public QObject
 {
     Q_OBJECT
@@ -52,6 +54,8 @@ public:
     }
 
     virtual QSettings* settings() = 0;
+    virtual QSettings* settings(const QString &filename) = 0;
+    virtual YasemSettings* yasem_settings() = 0;
     virtual QList<DiskInfo*> disks() = 0;
     virtual CoreNetwork* network() = 0;
     virtual QThread* mainThread() = 0;

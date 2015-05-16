@@ -42,7 +42,8 @@ SOURCES += main.cpp \
     plugin.cpp \
     webserverplugin.cpp \
     mediaplayerpluginobject.cpp \
-    stbpluginobject.cpp
+    stbpluginobject.cpp \
+    yasemsettingsimpl.cpp
 
 HEADERS += \
     pluginmanager.h \
@@ -84,7 +85,9 @@ HEADERS += \
     mediaplayerpluginobject.h \
     browserpluginobject.h \
     guipluginobject.h \
-    datasourcepluginobject.h
+    datasourcepluginobject.h \
+    yasemsettings.h \
+    yasemsettingsimpl.h
 
 #unix:!mac{
 #  QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/

@@ -18,6 +18,7 @@ public slots:
     // Core interface
 public:
     QSettings *settings();
+    QSettings* settings(const QString &filename);
 
     // Core interface
     QHash<QString, RC_KEY> getKeycodeHashes();
@@ -29,6 +30,9 @@ protected:
     QSettings* appSettings;
     CoreNetwork* networkObj;
     QList<DiskInfo *> disksList;
+    YasemSettings* m_yasem_settings;
+
+    void initBuiltInSettingsGroup();
 
     // Core interface
     void fillKeymapHashTable();
@@ -46,6 +50,10 @@ public:
     // Core interface
 public:
     QString revision();
+
+    // Core interface
+public:
+    YasemSettings *yasem_settings();
 };
 
 }
