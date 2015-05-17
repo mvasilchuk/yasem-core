@@ -176,7 +176,8 @@ enum PluginRole {
     ROLE_BROWSER = 6,
     ROLE_DATASOURCE = 7,
     ROLE_WEB_SERVER = 8,
-    ROLE_WEB_GUI = 9
+    ROLE_WEB_GUI = 9,
+    ROLE_HTTP_PROXY = 10
 };
 
 enum PluginConflictType {

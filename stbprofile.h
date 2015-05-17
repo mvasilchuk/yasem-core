@@ -53,7 +53,7 @@ public:
         }
 
         group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_SUBMODEL, QObject::tr("Model name"), "","options", "", models));
-        group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_LIMIT_MAX_REQUESTS, QObject::tr("Limit max. requests per second"), "false", "bool"));
+        group.options.append(ConfigOption(DB_TAG_PROFILE, CONFIG_LIMIT_MAX_REQUESTS, QObject::tr("Limit max. requests per second"), "0", "string"));
 
         profileConfiguration.groups.append(group);
     }

@@ -43,7 +43,8 @@ SOURCES += main.cpp \
     webserverplugin.cpp \
     mediaplayerpluginobject.cpp \
     stbpluginobject.cpp \
-    yasemsettingsimpl.cpp
+    yasemsettingsimpl.cpp \
+    abstracthttpproxy.cpp
 
 HEADERS += \
     pluginmanager.h \
@@ -87,7 +88,9 @@ HEADERS += \
     guipluginobject.h \
     datasourcepluginobject.h \
     yasemsettings.h \
-    yasemsettingsimpl.h
+    yasemsettingsimpl.h \
+    abstracthttpproxy.h \
+    abstracthttpproxy_p.h
 
 #unix:!mac{
 #  QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/
