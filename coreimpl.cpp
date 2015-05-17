@@ -118,9 +118,9 @@ void CoreImpl::onClose()
 
 void CoreImpl::initBuiltInSettingsGroup()
 {
-    ConfigTreeGroup* appearence = new ConfigTreeGroup(CONFIG_NAME, QString::number(YasemSettings::APPEARANCE),tr("Appearance"));
-    ConfigTreeGroup* media = new ConfigTreeGroup(CONFIG_NAME, QString::number(YasemSettings::MEDIA), tr("Media"));
-    ConfigTreeGroup* other = new ConfigTreeGroup(CONFIG_NAME, QString::number(YasemSettings::OTHER), tr("Other"));
+    ConfigTreeGroup* appearence = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_APPEARANCE,tr("Appearance"));
+    ConfigTreeGroup* media = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_MEDIA, tr("Media"));
+    ConfigTreeGroup* other = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_OTHER, tr("Other"));
 
     m_yasem_settings->addBuiltInConfigGroup(appearence);
     m_yasem_settings->addBuiltInConfigGroup(media);
