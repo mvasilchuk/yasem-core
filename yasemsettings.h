@@ -89,11 +89,6 @@ public:
         return m_value;
     }
 
-    void setOptions(QMap<QString, QVariant> options)
-    {
-        this->m_options = options;
-    }
-
     void reset()
     {
         this->setDirty(false);
@@ -105,7 +100,6 @@ public:
         }
     }
 
-    QMap<QString, QVariant>& options() { return m_options; }
     bool isContainer() { return m_type == CONTAINER; }
 
     ConfigItem* findItemByKey(const QString& key)
@@ -152,11 +146,30 @@ protected:
     ItemType m_type;
     ConfigItem* m_parent_item;
     bool m_is_dirty;
-    QMap<QString, QVariant> m_options;
     QList<ConfigItem*> m_items;
 
 friend class YasemSettings;
 friend class YasemSettingsImpl;
+};
+
+class ListConfigItem: public ConfigItem
+{
+    Q_OBJECT
+public:
+    ListConfigItem(const QString &key, const QString &title, const QVariant &value = ""):
+        ConfigItem(key, title, value, ConfigItem::LIST)
+    {
+
+    }
+
+    QMap<QString, QVariant>& options() { return m_options; }
+    void setOptions(QMap<QString, QVariant> options)
+    {
+        this->m_options = options;
+    }
+
+protected:
+    QMap<QString, QVariant> m_options;
 };
 
 class ConfigContainer: public ConfigItem
@@ -233,11 +246,9 @@ class YasemSettings: public QObject
     Q_OBJECT
 
 public:
-    enum ConfigDefaultGroups {
-        APPEARANCE,
-        MEDIA,
-        OTHER
-    };
+    static QString SETTINGS_GROUP_APPEARANCE;
+    static QString SETTINGS_GROUP_MEDIA;
+    static QString SETTINGS_GROUP_OTHER;
 
     YasemSettings(QObject* parent): QObject(parent) {};
     virtual ~YasemSettings() {}
@@ -245,7 +256,7 @@ public:
     virtual bool addConfigGroup(ConfigTreeGroup* group) = 0;
 
     virtual QHash<const QString&, ConfigTreeGroup*> getConfigGroups() = 0;
-    virtual ConfigTreeGroup* getDefaultGroup(ConfigDefaultGroups id) = 0;
+    virtual ConfigTreeGroup* getDefaultGroup(const QString &id) = 0;
 
 public slots:
     virtual void save(ConfigContainer* container = 0) = 0;

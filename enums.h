@@ -32,7 +32,6 @@ enum AspectRatio {
     ASPECT_RATIO_16_9,
     ASPECT_RATIO_2_35_1,
     ASPECT_RATIO_20_9
-
 };
 
 enum PluginErrorCodes {

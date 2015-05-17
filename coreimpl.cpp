@@ -41,6 +41,7 @@ CoreImpl::CoreImpl(QObject *parent ):
     //mountPointChanged();
 
     initBuiltInSettingsGroup();
+    initSettings();
 }
 
 CoreImpl::~CoreImpl()
@@ -124,6 +125,31 @@ void CoreImpl::initBuiltInSettingsGroup()
     m_yasem_settings->addBuiltInConfigGroup(appearence);
     m_yasem_settings->addBuiltInConfigGroup(media);
     m_yasem_settings->addBuiltInConfigGroup(other);
+}
+
+void CoreImpl::initSettings()
+{
+    ConfigTreeGroup* media = m_yasem_settings->getDefaultGroup(YasemSettings::SETTINGS_GROUP_MEDIA);
+    ConfigTreeGroup* video = new ConfigTreeGroup("video", tr("Video"));
+
+    ListConfigItem* aspect_ratio = new ListConfigItem("aspect_ratio", tr("Default aspect ratio"), ASPECT_RATIO_16_9);
+    QMap<QString, QVariant>& ar_list = aspect_ratio->options();
+
+    ar_list.insert(tr("Auto"),      ASPECT_RATIO_AUTO);
+    ar_list.insert(tr("1:1"),       ASPECT_RATIO_1_1);
+    ar_list.insert(tr("5:4"),       ASPECT_RATIO_5_4);
+    ar_list.insert(tr("4:3"),       ASPECT_RATIO_4_3);
+    ar_list.insert(tr("11:8"),      ASPECT_RATIO_11_8);
+    ar_list.insert(tr("14:10"),     ASPECT_RATIO_14_10);
+    ar_list.insert(tr("3:2"),       ASPECT_RATIO_3_2);
+    ar_list.insert(tr("14:9"),      ASPECT_RATIO_14_9);
+    ar_list.insert(tr("16:10"),     ASPECT_RATIO_16_10);
+    ar_list.insert(tr("16:9"),      ASPECT_RATIO_16_9);
+    ar_list.insert(tr("2.35:1"),    ASPECT_RATIO_2_35_1);
+    ar_list.insert(tr("20:9"),      ASPECT_RATIO_20_9);
+
+    video->addItem(aspect_ratio);
+    media->addItem(video);
 }
 
 void CoreImpl::mountPointChanged()

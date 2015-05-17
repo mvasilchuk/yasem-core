@@ -3,13 +3,15 @@
 
 using namespace yasem;
 
+QString YasemSettings::SETTINGS_GROUP_APPEARANCE = "appearance";
+QString YasemSettings::SETTINGS_GROUP_MEDIA = "media";
+QString YasemSettings::SETTINGS_GROUP_OTHER = "other";
+
 YasemSettingsImpl::YasemSettingsImpl(QObject *parent) :
     YasemSettings(parent)
 {
 
 }
-
-
 
 bool yasem::YasemSettingsImpl::addConfigGroup(ConfigTreeGroup *group)
 {
@@ -37,11 +39,10 @@ bool yasem::YasemSettingsImpl::addBuiltInConfigGroup(ConfigTreeGroup *group)
 }
 
 
-ConfigTreeGroup *yasem::YasemSettingsImpl::getDefaultGroup(ConfigDefaultGroups id)
+ConfigTreeGroup *yasem::YasemSettingsImpl::getDefaultGroup(const QString &id)
 {
-    QString str_id = QString::number(id);
-    if(m_config_groups.contains(str_id))
-        return m_config_groups.value(str_id);
+    if(m_config_groups.contains(id))
+        return m_config_groups.value(id);
 
     WARN() << "Default group" << id << "not found!";
     return NULL;
@@ -142,7 +143,13 @@ void yasem::YasemSettingsImpl::load(ConfigContainer *container)
     {
         item->setDirty(false);
         if(!item->isContainer())
-            item->setValue(settings->value(item->getKey()));
+        {
+            QVariant val = settings->value(item->getKey());
+            if(val.isNull())
+                item->setValue(item->getDefaultValue());
+            else
+                item->setValue(val);
+        }
     }
 
     settings->endGroup();

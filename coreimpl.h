@@ -33,6 +33,7 @@ protected:
     YasemSettings* m_yasem_settings;
 
     void initBuiltInSettingsGroup();
+    void initSettings();
 
     // Core interface
     void fillKeymapHashTable();

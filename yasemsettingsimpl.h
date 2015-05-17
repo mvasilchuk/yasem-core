@@ -21,7 +21,7 @@ public slots:
 public:
     bool addConfigGroup(ConfigTreeGroup *group);
     QHash<const QString&, ConfigTreeGroup *> getConfigGroups();
-    ConfigTreeGroup *getDefaultGroup(ConfigDefaultGroups id);
+    ConfigTreeGroup *getDefaultGroup(const QString &id);
 
 protected:
     bool addBuiltInConfigGroup(ConfigTreeGroup *group);
