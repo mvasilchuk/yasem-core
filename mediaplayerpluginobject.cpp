@@ -3,7 +3,8 @@
 using namespace yasem;
 
 MediaPlayerPluginObject::MediaPlayerPluginObject(Plugin *plugin):
-    AbstractPluginObject(plugin)
+    AbstractPluginObject(plugin),
+    m_virtual_viewport(QRect(0, 0, 1920, 1080))
 {
     reset();
 }
@@ -26,7 +27,8 @@ void MediaPlayerPluginObject::reset()
 void MediaPlayerPluginObject::setViewport(const QRect &requestedRect)
 {
     DEBUG() << "setViewport" << requestedRect << isFullscreen();
-    m_videoStoredRect = requestedRect;
+    m_player_viewport = requestedRect;
+    recalculateViewportScale();
     resize();
 }
 
@@ -51,7 +53,9 @@ void MediaPlayerPluginObject::setViewport(const QRect &containerRect, const qrea
         }
         else
         {
-            m_videoStoredRect = requestedRect;
+            m_player_viewport = requestedRect;
+            m_container_rect = containerRect;
+            recalculateViewportScale();
 
             QRect currentVideoWidgetRect = rect();
 
@@ -59,13 +63,16 @@ void MediaPlayerPluginObject::setViewport(const QRect &containerRect, const qrea
             DEBUG() << "containerScale: " << containerScale;
             DEBUG() << "currentVideoWidgetRect:" << currentVideoWidgetRect;
             DEBUG() << "requestedRect:" << requestedRect;
+            DEBUG() << "vm scale x" << m_vp_scale_x;
+            DEBUG() << "vm scale y" << m_vp_scale_y;
+
 
         #ifdef USE_RELATIVE_RECT
             QRect zoomedRect = QRect(
-                        (int)((float)requestedRect.left() * containerScale + containerRect.left()),
-                        (int)((float)requestedRect.top() * containerScale + containerRect.top()),
-                        (int)((float)requestedRect.width() * containerScale),
-                        (int)((float)requestedRect.height() * containerScale)
+                        (int)((float)requestedRect.left() / m_vp_scale_x + containerRect.left()),
+                        (int)((float)requestedRect.top() / m_vp_scale_y + containerRect.top()),
+                        (int)((float)requestedRect.width() / m_vp_scale_x),
+                        (int)((float)requestedRect.height() / m_vp_scale_y)
                         );
 
         #else
@@ -104,6 +111,39 @@ QRect MediaPlayerPluginObject::getViewport() const
     return rect();
 }
 
+/**
+ * @brief MediaPlayerPluginObject::setVirtualViewport
+ *
+ * Sets a virtaul viewport for a player.
+ *
+ * @param virtual_viewport
+ */
+void MediaPlayerPluginObject::setVirtualViewport(const QRect &virtual_viewport)
+{
+    m_virtual_viewport = virtual_viewport;
+    recalculateViewportScale();
+}
+
+QRect MediaPlayerPluginObject::getVirtualViewport() const
+{
+    return m_virtual_viewport;
+}
+
+void MediaPlayerPluginObject::recalculateViewportScale()
+{
+    if(m_container_rect.width() > 0 && m_container_rect.height() > 0)
+    {
+        m_vp_scale_x = (qreal)m_virtual_viewport.width() / m_container_rect.width();
+        m_vp_scale_y = (qreal)m_virtual_viewport.height() / m_container_rect.height();
+    }
+    else
+    {
+        m_vp_scale_x = 1;
+        m_vp_scale_y = 1;
+    }
+
+}
+
 void MediaPlayerPluginObject::setFullscreen(bool value) {
     this->m_is_fullscreen = value;
 }
@@ -121,7 +161,7 @@ void MediaPlayerPluginObject::resize() {
         {
             QRect rect = page->getPageRect();
             qreal scale = page->scale();
-            setViewport(rect, scale, m_videoStoredRect);
+            setViewport(rect, scale, m_player_viewport);
         }
     }
 }

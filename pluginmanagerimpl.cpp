@@ -29,7 +29,7 @@ PluginManagerImpl::PluginManagerImpl()
    this->setObjectName("PluginManager");
    setPluginDir("plugins");
    blacklistedPlugins.append("vlc-mediaplayer");
-   blacklistedPlugins.append("qt-mediaplayer");
+   //blacklistedPlugins.append("qt-mediaplayer");
    //blacklistedPlugins.append("dunehd-plugin");
    //blacklistedPlugins.append("mag-api");
    //blacklistedPlugins.append("samsung-smart-tv-plugin");

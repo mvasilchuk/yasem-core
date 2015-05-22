@@ -120,6 +120,12 @@ public:
     virtual void setViewport(const QRect &requestedRect);
     virtual void setViewport(const QRect &containerRect, const qreal containerScale, const QRect &requestedRect);
     virtual QRect getViewport() const;
+
+    virtual void setVirtualViewport(const QRect &virtual_viewport);
+    virtual QRect getVirtualViewport() const;
+
+    virtual void recalculateViewportScale();
+
     virtual QPoint getWidgetPos() const = 0;
 
     virtual void setFullscreen(bool value);
@@ -170,9 +176,14 @@ signals:
     void statusChanged(MediaStatus status);
 
 protected:
-    QRect m_videoStoredRect;
+    QRect m_player_viewport;
     bool m_is_fullscreen;
     qreal m_opacity;
+    QRect m_virtual_viewport;
+    QRect m_container_rect;
+
+    qreal m_vp_scale_x;
+    qreal m_vp_scale_y;
 
     //QString udpxyServer;
     //bool useUdpxyServer;
