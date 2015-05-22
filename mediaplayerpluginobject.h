@@ -55,7 +55,7 @@ public:
     virtual QWidget* parent() = 0;
 
     virtual void widget(QWidget* videoWidget) = 0;
-    virtual QWidget* widget() = 0;
+    virtual QWidget* widget() const = 0;
 
     virtual bool mediaPlay(const QString &url) = 0;
     virtual bool mediaContinue() = 0;
