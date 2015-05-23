@@ -105,6 +105,8 @@ int main(int argc, char *argv[])
     YasemApplication a(argc, argv);
     int execCode;
 
+    LoggerCore::initLogFile(qApp);
+
     #ifdef Q_OS_LINUX
     #ifndef Q_OS_ANDROID
     //int stdout_fd = startErrorRedirect();

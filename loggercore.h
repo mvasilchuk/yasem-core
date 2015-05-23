@@ -1,14 +1,20 @@
 #ifndef LOGGERCORE_H
 #define LOGGERCORE_H
 
+#include "stdio.h"
+
 #include <QObject>
 #include <QRegExp>
+#include <QFile>
 
 class LoggerCore : public QObject
 {
     Q_OBJECT
 public:
     explicit LoggerCore(QObject *parent = 0);
+    virtual ~LoggerCore();
+
+    static void initLogFile(QObject* parent);
 
 signals:
 
@@ -20,6 +26,8 @@ public slots:
     static void MessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 protected:
     static QString colorize(const QString &str);
+
+    static QFile* m_log_file;
 
     class Colorizer: public QString {
         QString data;

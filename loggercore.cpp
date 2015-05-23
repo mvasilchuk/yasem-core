@@ -3,6 +3,9 @@
 
 #include <cstdio>
 #include <QDateTime>
+#include <QFile>
+#include <QDir>
+#include <QFileInfo>
 
 #define LOG_TYPE_DEBUG QtDebugMsg
 #define LOG_TYPE_WARN QtWarningMsg
@@ -25,10 +28,16 @@ static const char* LOG_PREFIX_FIXME = "$FIXME$";
 
 using namespace yasem;
 
+QFile* LoggerCore::m_log_file = NULL;
+
 LoggerCore::LoggerCore(QObject *parent) :
     QObject(parent)
 {
 
+}
+
+LoggerCore::~LoggerCore()
+{
 }
 
 void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -179,6 +188,8 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
     }
 
     fprintf(output_channel, "%s", output_line.toUtf8().constData());
+    if(LoggerCore::m_log_file != NULL && LoggerCore::m_log_file->isOpen() && m_log_file->isWritable())
+        LoggerCore::m_log_file->write(output_line.toUtf8());
 
     fflush(stdout);
     fflush(stderr);
@@ -232,4 +243,42 @@ QString LoggerCore::colorize(const QString &str)
         fprintf(stderr, "%s", e.what());
     }
     return str;
+}
+
+void LoggerCore::initLogFile(QObject* parent)
+{
+    for(const QString& arg: qApp->arguments())
+    {
+        qDebug() << "arg:" << arg;
+        if(arg.startsWith("--log"))
+        {
+            QStringList data = arg.split('=');
+            if(data.length() != 2)
+            {
+                qWarning() << qPrintable(QString("Incorrect argument %1!").arg(arg));
+            }
+            else
+            {
+                qDebug() << "Trying to open log file " << data.at(1);
+                LoggerCore::m_log_file = new QFile(parent);
+                LoggerCore::m_log_file->setFileName(data.at(1));
+                QFileInfo f_info(*LoggerCore::m_log_file);
+                QDir dir = f_info.absoluteDir();
+                if(!dir.exists())
+                {
+                    bool ok = dir.mkdir(dir.absolutePath());
+                    if(!ok)
+                    {
+                        qWarning() << qPrintable(QString("Cannot create a directory %1 to write logs!").arg(dir.absolutePath()));
+                        return;
+                    }
+                }
+                if(!LoggerCore::m_log_file->open(QFile::ReadWrite | QIODevice::Text))
+                {
+                    qWarning() << qPrintable(QString("Cannot open a log file %1!").arg(LoggerCore::m_log_file->fileName()));
+                }
+            }
+            break;
+        }
+    }
 }
