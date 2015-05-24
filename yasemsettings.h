@@ -30,110 +30,39 @@ public:
         GROUPBOX
     };
 
-    ConfigItem(const QString &key, const QString &title, const QVariant &value = "", ItemType type = STRING):
-        QObject(),
-        m_key(key),
-        m_title(title),
-        m_value(value),
-        m_default_value(value),
-        m_type(type),
-        m_parent_item(NULL),
-        m_is_dirty(false)
-    {
+    ConfigItem(const QString &key, const QString &title, const QVariant &value = "", ItemType type = STRING);
 
-    }
+    virtual ~ConfigItem();
 
-    virtual ~ConfigItem() {}
+    ItemType getType();
+    QVariant getValue();
+    QString getTitle();
+    QString getKey() const;
+    ConfigItem* getParentItem();
 
-    ItemType getType() { return m_type; }
-    QVariant getValue() { return m_value; }
-    QString getTitle() { return m_title; }
-    QString getKey() const { return m_key; }
-    ConfigItem* getParentItem() { return m_parent_item; }
+    QList<ConfigItem*> getItems() const;
 
-    QList<ConfigItem*> getItems() const { return m_items; }
+    void addItem(ConfigItem* item);
 
-    void addItem(ConfigItem* item)
-    {
-        item->m_parent_item = this;
-        m_items.append(item);
-    }
+    ConfigItem* item(const QString &key) const;
 
-    ConfigItem* item(const QString &key) const
-    {
-        for(ConfigItem* item: m_items)
-        {
-            if(item->getKey() == key) return item;
-        }
-        return NULL;
-    }
+    void setDirty(bool dirty = true);
 
-    void setDirty(bool dirty = true)
-    {
-        m_is_dirty = dirty;
-    }
+    bool isDirty() const;
 
-    bool isDirty() const
-    {
-        return m_is_dirty;
-    }
+    QVariant value() const;
+    void setValue(const QVariant& value);
+    QVariant getDefaultValue() const;
 
-    QVariant value() const { return m_value; }
-    void setValue(const QVariant& value) {
-        if(!m_is_dirty)
-            m_default_value = m_value;
-        m_value = value;
-    }
-    QVariant getDefaultValue() const
-    {
-        return m_value;
-    }
+    void reset();
 
-    void reset()
-    {
-        this->setDirty(false);
-        this->setValue(getDefaultValue());
-        emit reseted();
-        for(ConfigItem* item: m_items)
-        {
-            item->reset();
-        }
-    }
+    bool isContainer();
 
-    bool isContainer() { return m_type == CONTAINER; }
+    ConfigItem* findItemByKey(const QString& key);
 
-    ConfigItem* findItemByKey(const QString& key)
-    {
-        ConfigItem* result = NULL;
-        for(ConfigItem* item: m_items)
-        {
-            if(item->getKey() == key)
-                result = item;
-        }
-        Q_ASSERT(result != NULL);
-        return result;
-    }
+    ConfigItem* findItemByPath(const QString &path);
 
-    ConfigItem* findItemByPath(const QString &path)
-    {
-        return findItemByPath(path.split("/"));
-    }
-
-    ConfigItem* findItemByPath(const QStringList &path)
-    {
-        DEBUG() << "Looking in " << getKey() << path;
-        if(path.isEmpty()) return NULL;
-        for(ConfigItem* item: m_items)
-        {
-            if(item->getKey() == path.at(0))
-            {
-                if(path.length() == 1)
-                    return item;
-                return item->findItemByPath(path.mid(1));
-            }
-        }
-        return NULL;
-    }
+    ConfigItem* findItemByPath(const QStringList &path);
 signals:
     void reseted();
     void saved();
@@ -156,17 +85,10 @@ class ListConfigItem: public ConfigItem
 {
     Q_OBJECT
 public:
-    ListConfigItem(const QString &key, const QString &title, const QVariant &value = ""):
-        ConfigItem(key, title, value, ConfigItem::LIST)
-    {
+    ListConfigItem(const QString &key, const QString &title, const QVariant &value = "");
 
-    }
-
-    QMap<QString, QVariant>& options() { return m_options; }
-    void setOptions(QMap<QString, QVariant> options)
-    {
-        this->m_options = options;
-    }
+    QMap<QString, QVariant>& options();
+    void setOptions(QMap<QString, QVariant> options);
 
 protected:
     QMap<QString, QVariant> m_options;
@@ -183,29 +105,11 @@ public:
     };
 
 
-    ConfigContainer(const QString &config_file, const QString& id, const QString &title, ContainerType type):
-        ConfigItem(id, title, QVariant(), CONTAINER),
-        m_container_type(type),
-        m_config_file(config_file),
-        m_is_built_in(false)
-    {
-    }
-    virtual ~ConfigContainer() {}
+    ConfigContainer(const QString &config_file, const QString& id, const QString &title, ContainerType type);
+    virtual ~ConfigContainer();
 
-    ContainerType getContainerType() { return m_container_type; }
-    QString getConfigFile() const {
-        QString config = "";
-        if(!m_config_file.isEmpty())
-            config = m_config_file;
-        else if(m_parent_item != NULL)
-        {
-            ConfigContainer* parent = dynamic_cast<ConfigContainer*>(m_parent_item);
-            Q_ASSERT(parent != NULL);
-            config = parent->getConfigFile();
-        }
-        Q_ASSERT_X(!config.isEmpty(), "YasemSettings", "Configuration item should belongs to a configuration file!");
-        return config;
-    }
+    ContainerType getContainerType();
+    QString getConfigFile() const;
 
 protected:
     ContainerType m_container_type;
@@ -220,19 +124,11 @@ class ConfigTreeGroup: public ConfigContainer {
     Q_OBJECT
 public:
 
-    ConfigTreeGroup(const QString &config_file, const QString& id, const QString &title):
-        ConfigContainer(config_file, id, title, CONFIG_GROUP)
-    {
+    ConfigTreeGroup(const QString &config_file, const QString& id, const QString &title);
+    ConfigTreeGroup(const QString& id, const QString &title);
+    virtual ~ConfigTreeGroup();
 
-    }
-    ConfigTreeGroup(const QString& id, const QString &title):
-        ConfigTreeGroup("", id, title)
-    {
-
-    }
-    virtual ~ConfigTreeGroup() {}
-
-    bool isBuiltInGroup() { return m_is_built_in; }
+    bool isBuiltInGroup();
 
 protected:
 
@@ -248,6 +144,7 @@ class YasemSettings: public QObject
 public:
     static QString SETTINGS_GROUP_APPEARANCE;
     static QString SETTINGS_GROUP_MEDIA;
+    static QString SETTINGS_GROUP_PLUGINS;
     static QString SETTINGS_GROUP_OTHER;
 
     YasemSettings(QObject* parent): QObject(parent) {};

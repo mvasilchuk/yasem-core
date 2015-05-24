@@ -4,7 +4,8 @@ using namespace yasem;
 
 MediaPlayerPluginObject::MediaPlayerPluginObject(Plugin *plugin):
     AbstractPluginObject(plugin),
-    m_virtual_viewport(QRect(0, 0, 1920, 1080))
+    m_virtual_viewport(QRect(0, 0, 1920, 1080)),
+    m_support_opengl(false)
 {
     reset();
 }
@@ -206,4 +207,9 @@ bool MediaPlayerPluginObject::processHooks(MediaPlayerPluginObject::HookEvent ty
 QString MediaPlayerPluginObject::getQmlComponentName() const
 {
     return "";
+}
+
+bool MediaPlayerPluginObject::isSupportOpenGL()
+{
+    return m_support_opengl;
 }

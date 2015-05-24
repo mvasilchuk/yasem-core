@@ -67,7 +67,7 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
             profile->start();
 
             MediaPlayerPluginObject* player = dynamic_cast<MediaPlayerPluginObject*>(PluginManager::instance()->getByRole(ROLE_MEDIA));
-            if(player != NULL)
+            if(player != NULL && player->isInitialized())
                 player->mediaStop();
             else
                 qDebug() << "[V] No player found!";

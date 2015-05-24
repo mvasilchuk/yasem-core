@@ -120,10 +120,12 @@ void CoreImpl::initBuiltInSettingsGroup()
 {
     ConfigTreeGroup* appearence = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_APPEARANCE,tr("Appearance"));
     ConfigTreeGroup* media = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_MEDIA, tr("Media"));
+    ConfigTreeGroup* plugins = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_PLUGINS, tr("Plugins"));
     ConfigTreeGroup* other = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_OTHER, tr("Other"));
 
     m_yasem_settings->addBuiltInConfigGroup(appearence);
     m_yasem_settings->addBuiltInConfigGroup(media);
+    m_yasem_settings->addBuiltInConfigGroup(plugins);
     m_yasem_settings->addBuiltInConfigGroup(other);
 }
 

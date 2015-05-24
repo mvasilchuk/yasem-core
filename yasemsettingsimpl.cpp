@@ -3,10 +3,6 @@
 
 using namespace yasem;
 
-QString YasemSettings::SETTINGS_GROUP_APPEARANCE = "appearance";
-QString YasemSettings::SETTINGS_GROUP_MEDIA = "media";
-QString YasemSettings::SETTINGS_GROUP_OTHER = "other";
-
 YasemSettingsImpl::YasemSettingsImpl(QObject *parent) :
     YasemSettings(parent)
 {
@@ -76,7 +72,6 @@ void yasem::YasemSettingsImpl::save(ConfigContainer *container)
         {
             if(!item->isContainer() && item->isDirty())
             {
-                DEBUG() << "item" << item->getKey() << item->isDirty() << item->getValue();
                 QVariant value = item->getValue();
                 if(value.isNull())
                     value = item->getDefaultValue();
@@ -163,15 +158,29 @@ ConfigItem *yasem::YasemSettingsImpl::findItem(const QString &path)
 ConfigItem *YasemSettingsImpl::findItem(const QStringList &path)
 {
     ConfigItem* result = NULL;
-    if(!path.isEmpty() && path.length() >= 2)
+    if(!path.isEmpty())
     {
         DEBUG() << "Looking in root";
-        for(ConfigItem* item: m_config_groups)
+        if(path.length() >= 2)
         {
-            if(item->getKey() == path.at(1))
+            for(ConfigItem* item: m_config_groups)
             {
-                result = item->findItemByPath(path.mid(2));
-                break;
+                if(item->getKey() == path.at(1))
+                {
+                    result = item->findItemByPath(path.mid(2));
+                    break;
+                }
+            }
+        }
+        else
+        {
+            for(ConfigItem* item: m_config_groups)
+            {
+                if(item->getKey() == path.at(0))
+                {
+                    result = item;
+                    break;
+                }
             }
         }
     }

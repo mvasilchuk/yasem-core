@@ -2,6 +2,7 @@
 #define PLUGINMANAGER_H
 
 #include "pluginmanager.h"
+#include "yasemsettings.h"
 
 #include <QObject>
 
@@ -40,6 +41,8 @@ protected:
     void registerPluginRole(const PluginRole &role, const PluginRoleData &data);
     bool isCircularDependency(Plugin* plugin, const PluginDependency &dependency) const;
     PluginErrorCodes loadDependency(Plugin* plugin, const PluginDependency &dependency);
+
+    ConfigContainer* m_plugins_config;
 
 };
 

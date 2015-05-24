@@ -4,6 +4,7 @@
 #include "stbpluginobject.h"
 #include "profilemanager.h"
 #include "pluginthread.h"
+#include "yasemsettings.h"
 
 #include <QDir>
 #include <QDebug>
@@ -24,7 +25,8 @@ static const QString PLUGIN_FLAG_NAME_SYSTEM = "system";
 static const QString PLUGIN_FLAG_NAME_HIDDEN = "hidden";
 static const QString PLUGIN_FLAG_NAME_GUI    = "gui";
 
-PluginManagerImpl::PluginManagerImpl()
+PluginManagerImpl::PluginManagerImpl():
+    m_plugins_config(dynamic_cast<ConfigContainer*>(Core::instance()->yasem_settings()->findItem(YasemSettings::SETTINGS_GROUP_PLUGINS)))
 {
    this->setObjectName("PluginManager");
    setPluginDir("plugins");
@@ -51,12 +53,6 @@ PluginManagerImpl::PluginManagerImpl()
 PluginErrorCodes PluginManagerImpl::listPlugins()
 {
     DEBUG() << "Looking for plugins...";
-    QSettings* settings = Core::instance()->settings();
-
-    QStringList pluginsToLoad = settings->value("plugins", "").toString().split(",");
-
-    DEBUG() << "pluginsToLoad:" << pluginsToLoad;
-
 
     DEBUG() << "PluginManager::listPlugins()";
     QStringList pluginIds;
@@ -127,6 +123,9 @@ PluginErrorCodes PluginManagerImpl::listPlugins()
                 plugins.append(plugin);
 
                 DEBUG() << "Plugin loaded:" << plugin->getName();
+
+                ConfigItem* plugin_info = new ConfigItem(plugin->getId(), plugin->getName(), true, ConfigItem::BOOL);
+                m_plugins_config->addItem(plugin_info);
             }
 
         }
@@ -135,12 +134,11 @@ PluginErrorCodes PluginManagerImpl::listPlugins()
            WARN() << pluginLoader.errorString();
         }
 
-    settings->setValue("plugins", pluginIds.join(","));
+        Core::instance()->yasem_settings()->load(m_plugins_config);
 
     }
     return PLUGIN_ERROR_NO_ERROR;
 }
-
 
 
 QList<Plugin*> PluginManagerImpl::getPlugins(PluginRole role, bool active_only)
@@ -169,6 +167,13 @@ PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin)
 {
     DEBUG() << qPrintable("Initialization of") << plugin->getName();
     Q_ASSERT(plugin != NULL);
+    ConfigItem* plugin_info = m_plugins_config->findItemByKey(plugin->getId());
+    if(!plugin_info->value().toBool())
+    {
+        DEBUG() << "Plugin" << plugin->getName() << "is disabled in config. Skipping.";
+        plugin->setState(PLUGIN_STATE_DISABLED);
+        return PLUGIN_ERROR_PLUGIN_DISABLED;
+    }
 
     if(plugin->getState() == PLUGIN_STATE_INITIALIZED)
     {
@@ -210,7 +215,7 @@ PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin)
             if(dependencyResult != PLUGIN_ERROR_NO_ERROR)
             {
                 WARN() << "Error" << dependencyResult << "occured while initializing plugin" << plugin->getName() << "dependency" << dependency.roleName();
-                plugin->setState(PLUGIN_STATE_INITIALIZED);
+                plugin->setState(PLUGIN_STATE_DISABLED_BY_DEPENDENCY);
                 result = PLUGIN_ERROR_DEPENDENCY_MISSING;
             }
         }
@@ -265,6 +270,7 @@ PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin)
     DEBUG() << "Plugin" << plugin->getId() << "initialized";
 
     plugin->setState(PLUGIN_STATE_INITIALIZED);
+
     return PLUGIN_ERROR_NO_ERROR;
 }
 
@@ -300,8 +306,9 @@ AbstractPluginObject* PluginManagerImpl::getByRole(PluginRole role)
             if(pluginRole == role)
             {
                 Q_ASSERT(plugin);
-                //qDebug() << "Found plugin" << plugin->getName() << plugin->getClassName();
-                return plugin->roles().value(pluginRole);
+                AbstractPluginObject* obj = plugin->roles().value(pluginRole);
+                if(obj->isInitialized())
+                    return obj;
             }
         }
     }
@@ -321,7 +328,9 @@ QList<AbstractPluginObject *> PluginManagerImpl::getAllByRole(PluginRole role, b
         {
             if(pluginRole == role)
             {
-                result.append(plugin->roles().value(pluginRole));
+                AbstractPluginObject* obj = plugin->roles().value(pluginRole);
+                if(!active_only || obj->isInitialized())
+                    result.append(obj);
             }
         }
     }
@@ -553,16 +562,35 @@ PluginErrorCodes PluginManagerImpl::loadDependency(Plugin *plugin, const PluginD
                 << qPrintable(depPlugin->getStateDescription().toUpper());
 
         PluginErrorCodes code;
-        if(dependencyObject->plugin()->getState() == PLUGIN_STATE_WAITING_FOR_DEPENDENCY)
+        switch(dependencyObject->plugin()->getState())
         {
-            // Usually this code should never be executed if plugin doesn't have circular dependency
-            WARN() << "Circular dependency in plugin" << plugin->getId() << "with" << dependencyObject->plugin()->getId();
+            case PLUGIN_STATE_WAITING_FOR_DEPENDENCY: {
+                WARN() << "Circular dependency in plugin" << plugin->getId() << "with" << dependencyObject->plugin()->getId();
+                code = PLUGIN_ERROR_NO_ERROR;
+                break;
+            }
+            case PLUGIN_STATE_CONFLICT: {
+                WARN() << "Plugin" << plugin->getId() << "conflicts with" << dependencyObject->plugin()->getId();
+                code = PLUGIN_ERROR_CONFLICT;
+                break;
+            }
+            case PLUGIN_STATE_DISABLED:
+            case PLUGIN_STATE_DISABLED_BY_DEPENDENCY: {
+                WARN() << "Plugin" << plugin->getId() << "disabled";
+                code = PLUGIN_ERROR_PLUGIN_DISABLED;
+
+                break;
+            }
+            default: {
+                code = initPlugin(dependencyObject->plugin());
+            }
+        }
+
+        if(code != PLUGIN_ERROR_NO_ERROR && dependency.doSkipIfFailed())
+        {
             code = PLUGIN_ERROR_NO_ERROR;
         }
-        else
-        {
-            code = initPlugin(dependencyObject->plugin());
-        }
+
 
         if(code == PLUGIN_ERROR_NO_ERROR) ///< At least one of dependency plugins should be loaded
             result = PLUGIN_ERROR_NO_ERROR;

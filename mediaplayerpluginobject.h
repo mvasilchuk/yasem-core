@@ -158,6 +158,8 @@ public:
 
     virtual QPixmap& render() = 0;
 
+    bool isSupportOpenGL();
+
 signals:
     //void mediaStatusChanged(QtAV::MediaStatus status); //explictly use QtAV::MediaStatus
     //void error(const QtAV::AVError& e); //explictly use QtAV::AVError in connection for Qt4 syntax
@@ -184,6 +186,8 @@ protected:
 
     qreal m_vp_scale_x;
     qreal m_vp_scale_y;
+
+    bool m_support_opengl;
 
     //QString udpxyServer;
     //bool useUdpxyServer;

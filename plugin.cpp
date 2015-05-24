@@ -34,6 +34,7 @@ PluginErrorCodes Plugin::initialize()
     for(AbstractPluginObject* obj: roles().values())
     {
         obj->init();
+        obj->setInitialized(true);
     }
     return PLUGIN_ERROR_NO_ERROR;
 }
@@ -43,6 +44,7 @@ PluginErrorCodes Plugin::deinitialize()
     for(AbstractPluginObject* obj: roles().values())
     {
         obj->deinit();
+        obj->setInitialized(false);
     }
     return PLUGIN_ERROR_NO_ERROR;
 }
@@ -178,6 +180,7 @@ QString Plugin::getStateDescription()
         case PLUGIN_STATE_WAITING_FOR_DEPENDENCY:   { result = "Wait4dependency"; break; }
         case PLUGIN_STATE_DISABLED:                 { result = "Disabled"; break; }
         case PLUGIN_STATE_CONFLICT:                 { result = "Conflict"; break; }
+        case PLUGIN_STATE_DISABLED_BY_DEPENDENCY:   { result = "Disabled by dep."; break; }
         default:                                    { result = QString::number(getState()); break; }
     }
     return result;

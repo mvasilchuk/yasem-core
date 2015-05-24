@@ -44,7 +44,8 @@ SOURCES += main.cpp \
     mediaplayerpluginobject.cpp \
     stbpluginobject.cpp \
     yasemsettingsimpl.cpp \
-    abstracthttpproxy.cpp
+    abstracthttpproxy.cpp \
+    yasemsettings.cpp
 
 HEADERS += \
     pluginmanager.h \

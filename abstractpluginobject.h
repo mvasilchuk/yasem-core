@@ -18,16 +18,31 @@ class AbstractPluginObject: public QObject
 public:
     explicit AbstractPluginObject(Plugin* plugin):
         QObject((QObject*)plugin),
-        m_plugin(plugin){}
+        m_plugin(plugin),
+        m_is_initialized(false)
+    {}
     virtual ~AbstractPluginObject(){}
+
     virtual PluginObjectResult init() = 0;
     virtual PluginObjectResult deinit() = 0;
+
+    void setInitialized(bool value)
+    {
+        m_is_initialized = value;
+    }
+
+    bool isInitialized()
+    {
+        return m_is_initialized;
+    }
+
     Plugin* plugin() {
         return m_plugin;
     }
 
 protected:
     Plugin* m_plugin;
+    bool m_is_initialized;
 };
 
 }
