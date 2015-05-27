@@ -3,6 +3,7 @@
 #include "networkimpl.h"
 #include "macros.h"
 #include "yasemsettingsimpl.h"
+#include "statisticsimpl.h"
 
 #include <QDebug>
 #include <QProcess>
@@ -14,16 +15,16 @@ using namespace yasem;
 
 CoreImpl::CoreImpl(QObject *parent ):
     Core(parent),
-    m_yasem_settings(new YasemSettingsImpl(this))
+    m_network(new NetworkImpl(this)),
+    m_yasem_settings(new YasemSettingsImpl(this)),
+    m_statistics(new StatisticsImpl(this))
 {
     Q_UNUSED(parent)
     setObjectName("Core");
-    appSettings = new QSettings(QSettings::IniFormat, QSettings::UserScope, CONFIG_DIR, CONFIG_NAME, this);
+    m_app_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, CONFIG_DIR, CONFIG_NAME, this);
 
     LOG() << qPrintable(QString("Starting YASEM... Core version: %1, rev. %2").arg(version()).arg(revision()));
-    DEBUG() << "Settings directory" << QFileInfo(appSettings->fileName()).absoluteDir().absolutePath();
-
-    networkObj = new NetworkImpl(parent);
+    DEBUG() << "Settings directory" << QFileInfo(m_app_settings->fileName()).absoluteDir().absolutePath();
     fillKeymapHashTable();
 
     // Regular expressions to extract information from hwinfo's output.
@@ -46,8 +47,7 @@ CoreImpl::CoreImpl(QObject *parent ):
 
 CoreImpl::~CoreImpl()
 {
-    STUB();
-    delete networkObj;
+
 }
 
 void CoreImpl::fillKeymapHashTable()
@@ -102,7 +102,7 @@ void CoreImpl::fillKeymapHashTable()
 
 QSettings *CoreImpl::settings()
 {
-    return appSettings;
+    return m_app_settings;
 }
 
 QSettings *CoreImpl::settings(const QString &filename)
@@ -169,7 +169,7 @@ void CoreImpl::mountPointChanged()
         return;
     }
 
-    disksList.clear();
+    m_disks.clear();
 
     int counter = 1;
 
@@ -189,7 +189,7 @@ void CoreImpl::mountPointChanged()
             info->available = matcher.captured(4).toLong();
             info->percentComplete = matcher.captured(5).toInt();
             info->mountPoint = matcher.captured(6);
-            disksList.append(info);
+            m_disks.append(info);
 
             DEBUG() << info->toString();
 
@@ -207,7 +207,7 @@ void CoreImpl::mountPointChanged()
     df.waitForFinished();
     buildBlockDeviceTree();
 
-    for(DiskInfo* disk: disksList)
+    for(DiskInfo* disk: m_disks)
     {
         QString device = disk->blockDevice;
         for(BlockDeviceInfo* block_device: block_device_tree)
@@ -334,12 +334,12 @@ void CoreImpl::buildBlockDeviceTree()
 
 QList<DiskInfo *> CoreImpl::disks()
 {
-    return disksList;
+    return m_disks;
 }
 
 CoreNetwork* CoreImpl::network()
 {
-    return networkObj;
+    return m_network;
 }
 
 QThread* CoreImpl::mainThread()
@@ -369,4 +369,10 @@ QString yasem::CoreImpl::revision()
 YasemSettings *yasem::CoreImpl::yasem_settings()
 {
     return m_yasem_settings;
+}
+
+
+Statistics *yasem::CoreImpl::statistics()
+{
+    return m_statistics;
 }

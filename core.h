@@ -32,6 +32,7 @@ namespace yasem
 {
 class DiskInfo;
 class YasemSettings;
+class Statistics;
 
 class Core: public QObject
 {
@@ -60,6 +61,7 @@ public:
     virtual CoreNetwork* network() = 0;
     virtual QThread* mainThread() = 0;
     virtual QHash<QString, RC_KEY> getKeycodeHashes() = 0;
+    virtual Statistics* statistics() = 0;
 
     static void printCallStack()
     {

@@ -7,6 +7,7 @@
 #include "browserpluginobject.h"
 #include "mediaplayerpluginobject.h"
 #include "stbprofile.h"
+#include "statistics.h"
 
 #include <QFile>
 #include <QDir>
@@ -64,6 +65,7 @@ void ProfileManageImpl::setActiveProfile(Profile *profile)
 
             loadProfileKeymap(profile);
 
+            Core::instance()->statistics()->reset();
             profile->start();
 
             MediaPlayerPluginObject* player = dynamic_cast<MediaPlayerPluginObject*>(PluginManager::instance()->getByRole(ROLE_MEDIA));

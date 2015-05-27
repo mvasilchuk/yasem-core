@@ -6,6 +6,8 @@
 
 namespace yasem {
 
+class Statistics;
+
 class CoreImpl : public Core
 {
     Q_OBJECT
@@ -14,23 +16,12 @@ public:
     virtual ~CoreImpl();
 signals:
 
-public slots:
-    // Core interface
-public:
-    QSettings *settings();
-    QSettings* settings(const QString &filename);
-
-    // Core interface
-    QHash<QString, RC_KEY> getKeycodeHashes();
-public slots:
-    void onClose();
-
 protected:
-    Core* coreInstance;
-    QSettings* appSettings;
-    CoreNetwork* networkObj;
-    QList<DiskInfo *> disksList;
+    QSettings* m_app_settings;
+    CoreNetwork* m_network;
     YasemSettings* m_yasem_settings;
+    Statistics* m_statistics;
+    QList<DiskInfo *> m_disks;
 
     void initBuiltInSettingsGroup();
     void initSettings();
@@ -38,6 +29,7 @@ protected:
     // Core interface
     void fillKeymapHashTable();
 public slots:
+    void onClose();
     void mountPointChanged();
     void buildBlockDeviceTree();
     QList<DiskInfo *> disks();
@@ -46,15 +38,15 @@ public slots:
 
     // Core interface
 public:
-    QString version();
-
-    // Core interface
-public:
-    QString revision();
-
-    // Core interface
-public:
+    QSettings *settings();
+    QSettings* settings(const QString &filename);
     YasemSettings *yasem_settings();
+    virtual Statistics *statistics();
+
+    // Core interface
+    QHash<QString, RC_KEY> getKeycodeHashes();
+    QString version();
+    QString revision();
 };
 
 }

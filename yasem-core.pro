@@ -45,7 +45,9 @@ SOURCES += main.cpp \
     stbpluginobject.cpp \
     yasemsettingsimpl.cpp \
     abstracthttpproxy.cpp \
-    yasemsettings.cpp
+    yasemsettings.cpp \
+    networkstatisticsimpl.cpp \
+    statisticsimpl.cpp
 
 HEADERS += \
     pluginmanager.h \
@@ -91,7 +93,11 @@ HEADERS += \
     yasemsettings.h \
     yasemsettingsimpl.h \
     abstracthttpproxy.h \
-    abstracthttpproxy_p.h
+    abstracthttpproxy_p.h \
+    statistics.h \
+    networkstatistics.h \
+    networkstatisticsimpl.h \
+    statisticsimpl.h
 
 #unix:!mac{
 #  QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/
