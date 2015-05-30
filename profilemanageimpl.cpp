@@ -43,6 +43,9 @@ void ProfileManageImpl::addProfile(Profile *profile)
 
 void ProfileManageImpl::setActiveProfile(Profile *profile)
 {
+    if(activeProfile != NULL)
+        activeProfile->stop();
+
     Q_ASSERT(profile);
     foreach (Profile* item, profilesList) {
         if(item == profile)

@@ -31,6 +31,7 @@ public slots:
     virtual void setOpacity(float opacity) = 0;
 
     virtual void reset() = 0;
+    virtual void execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol) = 0;
 };
 
 }

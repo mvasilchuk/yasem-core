@@ -22,6 +22,7 @@ namespace yasem
 {
 
 class StbPluginObject;
+class AbstractWebPage;
 
 class Profile
 {
@@ -129,6 +130,9 @@ public:
         this->submodel = submodel;
     }
 
+    void setPage(AbstractWebPage* page) { this->m_page = page; }
+    AbstractWebPage* page() const { return m_page; }
+
 
 protected:
     StbPluginObject* m_profile_plugin;
@@ -143,6 +147,7 @@ protected:
     QHash<QString, QSize> portalResolutions;
     QHash<QString, QSize> videoResolutions;
     ProfileConfiguration profileConfiguration;
+    AbstractWebPage* m_page;
 
 signals:
 
