@@ -148,7 +148,7 @@ void ProfileManageImpl::loadProfileKeymap(Profile *profile)
     DEBUG() << "Loading keymap for profile" << profile->getName();
     QString classId = profile->getProfilePlugin()->getProfileClassId();
 
-    QSettings keymap(QSettings::IniFormat, QSettings::UserScope, QString(CONFIG_DIR).append("/keymaps/%1/default").arg(classId));
+    QSettings keymap(Core::instance()->getConfigDir().append("keymaps/%1/default.ini").arg(classId), QSettings::IniFormat, this);
 
     loadDefaultKeymapFileIfNotExists(keymap, classId);
 

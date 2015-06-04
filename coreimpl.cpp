@@ -10,6 +10,7 @@
 #include <QRegularExpression>
 #include <QFileInfo>
 #include <QDir>
+#include <QStandardPaths>
 
 using namespace yasem;
 
@@ -21,7 +22,16 @@ CoreImpl::CoreImpl(QObject *parent ):
 {
     Q_UNUSED(parent)
     setObjectName("Core");
-    m_app_settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, CONFIG_DIR, CONFIG_NAME, this);
+
+    QDir config_dir("config");
+    if(config_dir.exists())
+        m_config_dir = config_dir.absolutePath().append("/");
+    else
+        m_config_dir = QStandardPaths::locate(QStandardPaths::ConfigLocation, QFileInfo(qAppName()).baseName(), QStandardPaths::LocateDirectory).append("/");
+
+    DEBUG() << "PATH" << qAppName() << m_config_dir;
+
+    m_app_settings = new QSettings(getConfigDir().append(CONFIG_NAME), QSettings::IniFormat, this);
 
     LOG() << qPrintable(QString("Starting YASEM... Core version: %1, rev. %2").arg(version()).arg(revision()));
     DEBUG() << "Settings directory" << QFileInfo(m_app_settings->fileName()).absoluteDir().absolutePath();
@@ -107,7 +117,7 @@ QSettings *CoreImpl::settings()
 
 QSettings *CoreImpl::settings(const QString &filename)
 {
-    return new QSettings(QSettings::IniFormat, QSettings::UserScope, CONFIG_DIR, filename, this);
+    return new QSettings(getConfigDir().append(filename), QSettings::IniFormat, this);
 }
 
 void CoreImpl::onClose()
@@ -362,6 +372,11 @@ QString yasem::CoreImpl::version()
 QString yasem::CoreImpl::revision()
 {
     return GIT_VERSION;
+}
+
+QString CoreImpl::getConfigDir() const
+{
+    return m_config_dir;
 }
 
 

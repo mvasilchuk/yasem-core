@@ -23,6 +23,8 @@ protected:
     Statistics* m_statistics;
     QList<DiskInfo *> m_disks;
 
+    QString m_config_dir;
+
     void initBuiltInSettingsGroup();
     void initSettings();
 
@@ -47,6 +49,7 @@ public:
     QHash<QString, RC_KEY> getKeycodeHashes();
     QString version();
     QString revision();
+    QString getConfigDir() const;
 };
 
 }

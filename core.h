@@ -21,8 +21,7 @@
 #include <QThread>
 #include <QRegularExpression>
 
-#define CONFIG_DIR "yasem"
-#define CONFIG_NAME "config"
+#define CONFIG_NAME "config.ini"
 #define CONFIG_PROFILES_DIR "profiles"
 
 
@@ -87,6 +86,7 @@ public:
     QHash<QString, BlockDeviceInfo*> getBlockDeviceTree() {
         return block_device_tree;
     }
+    virtual QString getConfigDir() const = 0;
 
 protected:
     Core(QObject* parent): QObject(parent){}
