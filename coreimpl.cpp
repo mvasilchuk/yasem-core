@@ -347,7 +347,6 @@ QThread* CoreImpl::mainThread()
     return this->thread();
 }
 
-
 QHash<QString, RC_KEY> CoreImpl::getKeycodeHashes()
 {
     return keycode_hashes;

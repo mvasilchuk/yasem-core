@@ -5,6 +5,7 @@
 #include "profilemanager.h"
 #include "pluginthread.h"
 #include "yasemsettings.h"
+#include "guipluginobject.h"
 
 #include <QDir>
 #include <QDebug>
@@ -243,18 +244,21 @@ PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin)
     else
         DEBUG() << "No dependencies for" << plugin->getId() << "have been found";
 
-
     #ifdef THREAD_SAFE_PLUGINS
-    int initValue = PLUGIN_ERROR_NO_ERROR;
-    if(plugin->hasFlag(Plugin::GUI))
+    PluginErrorCodes initValue = PLUGIN_ERROR_NOT_INITIALIZED;
+    if(plugin->has_role(ROLE_GUI) || plugin->has_role(ROLE_MEDIA))
     {
         qDebug() << "HAS GUI FLAG";
-
+        initValue = plugin->initialize();
+//
     }
     else
     {
+        qRegisterMetaType<PluginErrorCodes>("PluginErrorCodes");
         PluginThread* thread = new PluginThread(plugin);
+        plugin->moveToThread(thread);
         thread->start();
+        DEBUG() << "invoke ok" << QMetaObject::invokeMethod(plugin, "initialize", Qt::BlockingQueuedConnection, Q_RETURN_ARG(PluginErrorCodes, initValue));
     }
     #else
     int initValue = plugin->initialize();

@@ -47,9 +47,9 @@ public:
     explicit Plugin(QObject* parent = NULL);
     virtual ~Plugin();
 
-    virtual bool hasFlag(PluginFlag flag);
+    Q_INVOKABLE virtual bool hasFlag(PluginFlag flag);
 
-    virtual void addFlag(PluginFlag flag);
+    Q_INVOKABLE virtual void addFlag(PluginFlag flag);
 
     /**
      * @brief initialize.
@@ -57,72 +57,72 @@ public:
      * Method will be called from PluginManager for all plugins after they are loaded and ready to be initialized.
      * @return
      */
-    virtual PluginErrorCodes initialize();
+    Q_INVOKABLE virtual PluginErrorCodes initialize();
     /**
      * @brief deinitialize.
      *
      * Method is called from PluginManager before app is closed.
      * @return
      */
-    virtual PluginErrorCodes deinitialize();
+    Q_INVOKABLE virtual PluginErrorCodes deinitialize();
 
     /**
      * @brief register_dependencies
      * Plugin should call add_dependency() method for each dependency it requires
      */
-    virtual void register_dependencies() = 0;
+    Q_INVOKABLE virtual void register_dependencies() = 0;
 
     /**
      * @brief register_roles
      */
-    virtual void register_roles() = 0;
+    Q_INVOKABLE virtual void register_roles() = 0;
 
     /**
      * @brief has_role
      * @param role
      * @return Plugin has a role
      */
-    virtual bool has_role(PluginRole role);
+    Q_INVOKABLE virtual bool has_role(PluginRole role);
 
-    virtual QHash<PluginRole, AbstractPluginObject*> roles();
+    Q_INVOKABLE virtual QHash<PluginRole, AbstractPluginObject*> roles();
 
-    virtual QList<PluginDependency> dependencies();
+    Q_INVOKABLE virtual QList<PluginDependency> dependencies();
 
-    virtual QString getIID();
-    virtual void setIID(const QString &iid);
+    Q_INVOKABLE virtual QString getIID();
+    Q_INVOKABLE virtual void setIID(const QString &iid);
 
-    virtual QString getClassName();
-    virtual void setClassName(const QString &className);
+    Q_INVOKABLE virtual QString getClassName();
+    Q_INVOKABLE virtual void setClassName(const QString &className);
 
-    virtual QString getId();
-    virtual void setId(const QString &id);
+    Q_INVOKABLE virtual QString getId();
+    Q_INVOKABLE virtual void setId(const QString &id);
 
-    virtual QString getVersion();
-    virtual void setVersion(const QString &version);
+    Q_INVOKABLE virtual QString getVersion();
+    Q_INVOKABLE virtual void setVersion(const QString &version);
 
-    virtual QString getRevision() const;
+    Q_INVOKABLE virtual QString getRevision() const;
 
-    virtual QString getName();
-    virtual void setName(const QString &name);
+    Q_INVOKABLE virtual QString getName();
+    Q_INVOKABLE virtual void setName(const QString &name);
 
-    virtual QJsonObject getMetadata();
-    virtual void setMetadata(const QJsonObject &metadata);
+    Q_INVOKABLE virtual QJsonObject getMetadata();
+    Q_INVOKABLE virtual void setMetadata(const QJsonObject &metadata);
 
-    virtual PluginFlag getFlags();
-    virtual void setFlags(const PluginFlag &flags);
+    Q_INVOKABLE virtual PluginFlag getFlags();
+    Q_INVOKABLE virtual void setFlags(const PluginFlag &flags);
 
-    virtual PluginState getState();
-    virtual void setState(const PluginState &state);
+    Q_INVOKABLE virtual PluginState getState();
+    Q_INVOKABLE virtual void setState(const PluginState &state);
 
-    virtual QString getStateDescription();
+    Q_INVOKABLE virtual QString getStateDescription();
 
-    virtual bool isActive();
-    virtual void setActive(bool active);
+    Q_INVOKABLE virtual bool isActive();
+    Q_INVOKABLE virtual void setActive(bool active);
 
-    virtual QList<Plugin*> getRuntimeConflicts();
-    virtual void addRuntimeConflict(Plugin* plugin);
+    Q_INVOKABLE virtual QList<Plugin*> getRuntimeConflicts();
+    Q_INVOKABLE virtual void addRuntimeConflict(Plugin* plugin);
 
-    virtual QList<PluginConflict> getStaticConflicts();
+    Q_INVOKABLE virtual QList<PluginConflict> getStaticConflicts();
 
 signals:
     void started();

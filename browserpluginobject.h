@@ -64,7 +64,7 @@ public:
 
     virtual QString getQmlComponentName() { return ""; }
 
-    virtual AbstractWebPage* createNewPage(QWidget* parent) = 0;
+    virtual AbstractWebPage* createNewPage(bool child = false) = 0;
     virtual AbstractWebPage* getActiveWebPage() = 0;
 
     virtual void setUseQml(bool use) { m_use_qml = use; }
