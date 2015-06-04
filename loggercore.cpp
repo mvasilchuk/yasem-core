@@ -101,12 +101,26 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
         line = QString("(%1:%2) ").arg(context.file).arg(QString::number(context.line));
 #endif
 
-   QString current_time = QDateTime::currentDateTime().toString("hh:mm:ss:zzz");
+    QDateTime time = QDateTime::currentDateTime();
+    QString current_time;
+
+    if(time.isValid())
+    {
+        try {
+            current_time = time.toString(TIME_FORMAT);
+            //Sometimes it throws exception if the app is going to close
+        }catch(...)
+        {
+            current_time = "";
+        }
+    }
+    else
+    {
+        current_time = "";
+    }
 
     FILE* output_channel = stdout;
     QString output_line;
-
-
 
     switch (msgType) {
         case LOG_TYPE_DEBUG:
