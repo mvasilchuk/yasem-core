@@ -24,7 +24,6 @@ ConfigTreeGroup::~ConfigTreeGroup() {}
 
 bool ConfigTreeGroup::isBuiltInGroup() { return m_is_built_in; }
 
-
 ConfigItem::ConfigItem(const QString &key, const QString &title, const QVariant &value, ConfigItem::ItemType type):
     QObject(),
     m_key(key),
@@ -32,7 +31,6 @@ ConfigItem::ConfigItem(const QString &key, const QString &title, const QVariant 
     m_value(value),
     m_default_value(value),
     m_type(type),
-    m_parent_item(NULL),
     m_is_dirty(false)
 {
 
@@ -48,13 +46,13 @@ QString ConfigItem::getTitle() { return m_title; }
 
 QString ConfigItem::getKey() const { return m_key; }
 
-ConfigItem *ConfigItem::getParentItem() { return m_parent_item; }
+ConfigItem *ConfigItem::getParentItem() const { return dynamic_cast<ConfigItem*>(parent()); }
 
 QList<ConfigItem *> ConfigItem::getItems() const { return m_items; }
 
 void ConfigItem::addItem(ConfigItem *item)
 {
-    item->m_parent_item = this;
+    item->setParent(this);
     m_items.append(item);
 }
 
@@ -136,7 +134,6 @@ ConfigItem *ConfigItem::findItemByPath(const QStringList &path)
     return NULL;
 }
 
-
 ListConfigItem::ListConfigItem(const QString &key, const QString &title, const QVariant &value):
     ConfigItem(key, title, value, ConfigItem::LIST)
 {
@@ -167,11 +164,11 @@ QString ConfigContainer::getConfigFile() const {
     QString config = "";
     if(!m_config_file.isEmpty())
         config = m_config_file;
-    else if(m_parent_item != NULL)
+    else
     {
-        ConfigContainer* parent = dynamic_cast<ConfigContainer*>(m_parent_item);
-        Q_ASSERT(parent != NULL);
-        config = parent->getConfigFile();
+        ConfigContainer* cont = dynamic_cast<ConfigContainer*>(parent());
+        Q_ASSERT(cont);
+        config = cont->getConfigFile();
     }
     Q_ASSERT_X(!config.isEmpty(), "YasemSettings", "Configuration item should belongs to a configuration file!");
     return config;

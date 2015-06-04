@@ -26,6 +26,8 @@ static const char* LOG_PREFIX_INFO = "$INFO$";
 static const char* LOG_PREFIX_WTF = "$WTF$";
 static const char* LOG_PREFIX_FIXME = "$FIXME$";
 
+static const QString TIME_FORMAT = "hh:mm:ss:zzz";
+
 using namespace yasem;
 
 QFile* LoggerCore::m_log_file = NULL;

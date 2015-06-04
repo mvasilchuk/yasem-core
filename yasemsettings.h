@@ -16,7 +16,8 @@ class YasemSettingsImpl;
 class Core;
 class CoreImpl;
 
-class ConfigItem: public QObject {
+class ConfigItem: public QObject
+{
     Q_OBJECT
 public:
     enum ItemType {
@@ -31,37 +32,25 @@ public:
     };
 
     ConfigItem(const QString &key, const QString &title, const QVariant &value = "", ItemType type = STRING);
-
     virtual ~ConfigItem();
 
     ItemType getType();
     QVariant getValue();
     QString getTitle();
     QString getKey() const;
-    ConfigItem* getParentItem();
-
+    ConfigItem* getParentItem() const;
     QList<ConfigItem*> getItems() const;
-
     void addItem(ConfigItem* item);
-
     ConfigItem* item(const QString &key) const;
-
     void setDirty(bool dirty = true);
-
     bool isDirty() const;
-
     QVariant value() const;
     void setValue(const QVariant& value);
     QVariant getDefaultValue() const;
-
     void reset();
-
     bool isContainer();
-
     ConfigItem* findItemByKey(const QString& key);
-
     ConfigItem* findItemByPath(const QString &path);
-
     ConfigItem* findItemByPath(const QStringList &path);
 signals:
     void reseted();
@@ -73,7 +62,6 @@ protected:
     QVariant m_value;
     QVariant m_default_value;
     ItemType m_type;
-    ConfigItem* m_parent_item;
     bool m_is_dirty;
     QList<ConfigItem*> m_items;
 
@@ -132,7 +120,6 @@ public:
 
 protected:
 
-
     friend class YasemSettings;
     friend class YasemSettingsImpl;
 };
@@ -147,7 +134,7 @@ public:
     static QString SETTINGS_GROUP_PLUGINS;
     static QString SETTINGS_GROUP_OTHER;
 
-    YasemSettings(QObject* parent): QObject(parent) {};
+    YasemSettings(QObject* parent): QObject(parent) {}
     virtual ~YasemSettings() {}
 
     virtual bool addConfigGroup(ConfigTreeGroup* group) = 0;

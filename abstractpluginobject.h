@@ -21,7 +21,8 @@ public:
         m_plugin(plugin),
         m_is_initialized(false)
     {}
-    virtual ~AbstractPluginObject(){}
+
+    virtual ~AbstractPluginObject() {}
 
     virtual PluginObjectResult init() = 0;
     virtual PluginObjectResult deinit() = 0;

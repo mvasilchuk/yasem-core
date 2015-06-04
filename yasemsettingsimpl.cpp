@@ -25,7 +25,7 @@ void yasem::YasemSettingsImpl::setItemDirty(ConfigItem* item, bool value)
 {
     if(item == NULL) return;
     item->m_is_dirty = value;
-    setItemDirty(item->m_parent_item, value);
+    setItemDirty(item->getParentItem(), value);
 }
 
 bool yasem::YasemSettingsImpl::addBuiltInConfigGroup(ConfigTreeGroup *group)

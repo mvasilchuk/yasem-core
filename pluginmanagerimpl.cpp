@@ -29,7 +29,11 @@ PluginManagerImpl::PluginManagerImpl():
     m_plugins_config(dynamic_cast<ConfigContainer*>(Core::instance()->yasem_settings()->findItem(YasemSettings::SETTINGS_GROUP_PLUGINS)))
 {
    this->setObjectName("PluginManager");
-   setPluginDir("plugins");
+   #ifdef Q_OS_DARWIN
+   setPluginDir("Plugins");
+#else
+    setPluginDir("plugins");
+#endif //Q_OS_DARWIN
    blacklistedPlugins.append("vlc-mediaplayer");
    //blacklistedPlugins.append("qt-mediaplayer");
    //blacklistedPlugins.append("dunehd-plugin");
