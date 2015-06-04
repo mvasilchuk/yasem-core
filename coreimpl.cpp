@@ -23,7 +23,7 @@ CoreImpl::CoreImpl(QObject *parent ):
     Q_UNUSED(parent)
     setObjectName("Core");
 
-    QDir config_dir("config");
+    QDir config_dir(qApp->applicationDirPath().append("/config"));
     if(config_dir.exists())
         m_config_dir = config_dir.absolutePath().append("/");
     else
