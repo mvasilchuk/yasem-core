@@ -29,18 +29,6 @@ PluginObjectResult StbPluginObject::init()
     return PLUGIN_OBJECT_RESULT_OK;
 }
 
-void StbPluginObject::gui(GuiPluginObject *gui)
-{
-    Q_D(StbPluginObject);
-    d->guiPlugin = gui;
-}
-
-GuiPluginObject *StbPluginObject::gui()
-{
-    Q_D(StbPluginObject);
-    return d->guiPlugin;
-}
-
 void StbPluginObject::player(MediaPlayerPluginObject *player)
 {
     Q_D(StbPluginObject);

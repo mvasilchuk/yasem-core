@@ -43,9 +43,6 @@ public:
 public slots:
     virtual PluginObjectResult init();
 
-    virtual void gui(GuiPluginObject* gui);
-    virtual GuiPluginObject *gui();
-
     virtual void player(MediaPlayerPluginObject* player);
     virtual MediaPlayerPluginObject* player();
 

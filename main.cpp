@@ -150,7 +150,6 @@ int main(int argc, char *argv[])
     }
 
     qApp->setQuitOnLastWindowClosed(true);
-
     execCode = a.exec();
     qDebug() <<  "Closing application... code:"  << execCode;
 

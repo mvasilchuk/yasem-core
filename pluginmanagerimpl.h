@@ -3,6 +3,7 @@
 
 #include "pluginmanager.h"
 #include "yasemsettings.h"
+#include "plugindependency.h"
 
 #include <QObject>
 
@@ -21,9 +22,7 @@ public:
     virtual PluginErrorCodes deinitPlugins();
     //virtual PLUGIN_ERROR_CODES connectSlots();
     virtual QList<Plugin*> getPlugins(PluginRole role = ROLE_ANY, bool active_only = true);
-    virtual PluginErrorCodes initPlugin(Plugin* plugin);
-    virtual PluginErrorCodes deinitPlugin(Plugin* plugin);
-    virtual AbstractPluginObject* getByRole(PluginRole role);
+    virtual AbstractPluginObject* getByRole(PluginRole role, bool show_warning = true);
     virtual QList<AbstractPluginObject*> getAllByRole(PluginRole role, bool active_only = true);
     virtual Plugin*getByIID(const QString &iid);
     virtual void setPluginDir(const QString &pluginDir);
@@ -31,18 +30,25 @@ public:
 
     PluginFlag parseFlags(const QString &flagsStr);
 
-    QStringList blacklistedPlugins;
-
     bool pluginHasConflicts(Plugin* plugin);
 
 
     // PluginManager interface
 protected:
     void registerPluginRole(const PluginRole &role, const PluginRoleData &data);
-    bool isCircularDependency(Plugin* plugin, const PluginDependency &dependency) const;
-    PluginErrorCodes loadDependency(Plugin* plugin, const PluginDependency &dependency);
 
     ConfigContainer* m_plugins_config;
+
+protected slots:
+    void onPluginLoaded();
+    void onPluginUnloaded();
+    void onPluginInitialized();
+    void onPluginDeinitialized();
+
+    PluginErrorCodes initializePlugin(Plugin* plugin, bool go_deeper = true, bool ignore_dependencies = false);
+    PluginErrorCodes deinitializePlugin(Plugin* plugin);
+    QList<PluginDependency> getUnresolvedDependencies(Plugin* plugin);
+    QStringList getDependencyNames(QList<PluginDependency> list);
 
 };
 

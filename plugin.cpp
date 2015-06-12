@@ -166,6 +166,21 @@ void Plugin::setState(const PluginState &state)
 {
     Q_D(Plugin);
     d->m_state = state;
+
+    switch(state)
+    {
+        case PLUGIN_STATE_INITIALIZED:              { emit initialized();  break; }
+        case PLUGIN_STATE_NOT_INITIALIZED:          { emit deinitialized();  break; }
+        case PLUGIN_STATE_CONFLICT:                 { emit got_conflict();  break; }
+        case PLUGIN_STATE_DISABLED:                 { emit disabled();  break; }
+        case PLUGIN_STATE_ERROR_STATE:              { emit error_happened();  break; }
+        case PLUGIN_STATE_DISABLED_BY_DEPENDENCY:   { emit disabled_by_dependency();  break; }
+        case PLUGIN_STATE_WAITING_FOR_DEPENDENCY:   { emit waiting_for_dependency();  break; }
+        default: {
+            WARN() << "Unknown plugin state" << state << "for" << getName();
+            break;
+        }
+    }
 }
 
 QString Plugin::getStateDescription()

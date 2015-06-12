@@ -2,6 +2,7 @@
 #define DATASOURCEPLUGIN_H
 
 #include "enums.h"
+#include "abstractpluginobject.h"
 
 #include <QtPlugin>
 #include <QHash>
@@ -12,21 +13,23 @@ namespace yasem {
 class Profile;
 class DatasourcePluginObject;
 
-class DatasourcePlugin
+class DatasourcePlugin: public AbstractPluginObject
 {
+    Q_OBJECT
 public:
+    DatasourcePlugin(Plugin* plugin):
+        AbstractPluginObject(plugin)
+    {
+
+    }
+    virtual ~DatasourcePlugin(){}
+
     virtual DatasourcePluginObject* getDatasourceForProfile(Profile* profile) = 0;
+
 
 protected:
     QHash<Profile*, DatasourcePluginObject*> datasources;
 };
 
 }
-
-#define DatasourcePlugin_iid "com.mvas.yasem.DatasourcePlugin/1.0"
-
-QT_BEGIN_NAMESPACE
-Q_DECLARE_INTERFACE(yasem::DatasourcePlugin, DatasourcePlugin_iid)
-QT_END_NAMESPACE
-
 #endif // DATASOURCEPLUGIN_H

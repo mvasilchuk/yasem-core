@@ -14,6 +14,7 @@ namespace yasem
 
 class GuiPluginObject: public AbstractPluginObject
 {
+    Q_OBJECT
 public:
     explicit GuiPluginObject(Plugin* plugin):
         AbstractPluginObject(plugin) {}

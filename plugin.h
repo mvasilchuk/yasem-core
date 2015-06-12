@@ -125,9 +125,16 @@ public:
     Q_INVOKABLE virtual QList<PluginConflict> getStaticConflicts();
 
 signals:
-    void started();
-    void error_happened(int code);
-    void finished();
+    void loaded();
+    void unloaded();
+
+    void initialized();
+    void deinitialized();
+    void got_conflict();
+    void error_happened();
+    void disabled();
+    void waiting_for_dependency();
+    void disabled_by_dependency();
 
 protected:
     virtual void add_dependency(const PluginDependency &dependency);

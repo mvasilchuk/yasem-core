@@ -412,7 +412,6 @@ QString ProfileManageImpl::createUniqueName(const QString &classId, const QStrin
                     maxIndex = currIndex;
             }
         }
-
     }
 
     maxIndex++;

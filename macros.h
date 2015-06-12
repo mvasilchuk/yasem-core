@@ -2,6 +2,7 @@
 #define MACROS_H
 
 #include "core.h"
+#include "pluginmanager.h"
 
 #include <QDebug>
 
@@ -28,6 +29,12 @@ namespace yasem
     #define ONLY_SUPPORTED_ON_UNIX ONLY_SUPPORTED_ON("unix")
     #define ONLY_SUPPORTED_ON_LINUX ONLY_SUPPORTED_ON("linux")
     #define ONLY_SUPPORTED_ON_WINDOWS ONLY_SUPPORTED_ON("Windows")
+
+    template <typename T, typename R>
+    T __get_plugin(R role)
+    {
+        return dynamic_cast<T>(PluginManager::instance()->getByRole(role));
+    }
 }
 
 #endif // MACROS_H

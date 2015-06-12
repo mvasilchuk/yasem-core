@@ -26,6 +26,7 @@ public:
 
     virtual bool isRpsLimited();
 
+public slots:
     virtual bool startServer() = 0;
     virtual bool stopServer() = 0;
     virtual bool isRunning() = 0;

@@ -9,13 +9,14 @@
 
 namespace yasem
 {
+class Plugin;
 
-class DatasourcePluginObject: public AbstractPluginObject, public DatasourcePlugin
+class DatasourcePluginObject: public DatasourcePlugin
 {
     Q_OBJECT
 public:
     DatasourcePluginObject(Plugin* plugin):
-        AbstractPluginObject(plugin){}
+        DatasourcePlugin(plugin){}
 
     virtual ~DatasourcePluginObject() {};
 

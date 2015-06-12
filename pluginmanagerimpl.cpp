@@ -35,12 +35,6 @@ PluginManagerImpl::PluginManagerImpl():
 #else
     setPluginDir("plugins");
 #endif //Q_OS_DARWIN
-   blacklistedPlugins.append("vlc-mediaplayer");
-   //blacklistedPlugins.append("qt-mediaplayer");
-   //blacklistedPlugins.append("dunehd-plugin");
-   //blacklistedPlugins.append("mag-api");
-   //blacklistedPlugins.append("samsung-smart-tv-plugin");
-   //blacklistedPlugins.append("libav-mediaplayer");
 
    registerPluginRole(ROLE_ANY,          PluginRoleData(tr("Any role"),      tr("Any role")));
    registerPluginRole(ROLE_STB_API,      PluginRoleData(tr("STB API"),       tr("STB API implementation")));
@@ -76,31 +70,24 @@ PluginErrorCodes PluginManagerImpl::listPlugins()
         return PLUGIN_ERROR_DIR_NOT_FOUND;
     }
 
-    qDebug() << "Blacklisted plugins:" << blacklistedPlugins;
-
     DEBUG() << "Searching for plugins in" << pluginsDir.path();
 
     foreach (QString fileName, pluginsDir.entryList(QDir::Files | QDir::NoSymLinks | QDir::Readable))
     {
-        qDebug() << "Found file:" << fileName;
+
         QPluginLoader pluginLoader(pluginsDir.absoluteFilePath(fileName));
 
         Plugin *plugin = qobject_cast<Plugin*>(pluginLoader.instance());
 
         if (plugin != NULL)
         {
+            qDebug() << "Loading plugin from file" << fileName;
             QJsonObject metadata = pluginLoader.metaData().value("MetaData").toObject();
             QString id = metadata.value("id").toString();
 
             if(!pluginIds.contains(id))
             {
-                if(blacklistedPlugins.contains(id))
-                {
-                    DEBUG() << "Plugin" << id << "is ignored and won't be activated.";
-                    plugin->setActive(false);
-                }
-                else
-                    plugin->setActive(true);
+                plugin->setActive(true);
 
                 QString name = metadata.value("name").toString();
                 QString version = metadata.value("version").toString();
@@ -115,15 +102,20 @@ PluginErrorCodes PluginManagerImpl::listPlugins()
                 plugin->setState(PLUGIN_STATE_NOT_INITIALIZED);
                 plugin->setFlags(parseFlags(metadata.value("flags").toString()));
 
-                DEBUG() << "Registering plugin roles...";
+                DEBUG() << "....Registering plugin roles...";
                 plugin->register_roles();
-                DEBUG() << "Registering plugin dependencies...";
+                DEBUG() << "....Registering plugin dependencies...";
                 plugin->register_dependencies();
 
                 pluginIds.append(id);
                 plugins.append(plugin);
 
-                DEBUG() << "Plugin loaded:" << plugin->getName();
+                DEBUG() << "....Plugin loaded:" << plugin->getName();
+
+                connect(plugin, &Plugin::loaded, this, &PluginManagerImpl::onPluginLoaded);
+                connect(plugin, &Plugin::unloaded, this, &PluginManagerImpl::onPluginUnloaded);
+                connect(plugin, &Plugin::initialized, this, &PluginManagerImpl::onPluginInitialized);
+                connect(plugin, &Plugin::deinitialized, this, &PluginManagerImpl::onPluginDeinitialized);
 
                 ConfigItem* plugin_info = new ConfigItem(plugin->getId(), plugin->getName(), true, ConfigItem::BOOL);
                 m_plugins_config->addItem(plugin_info);
@@ -134,10 +126,8 @@ PluginErrorCodes PluginManagerImpl::listPlugins()
         {
            WARN() << pluginLoader.errorString();
         }
-
-        Core::instance()->yasem_settings()->load(m_plugins_config);
-
     }
+    Core::instance()->yasem_settings()->load(m_plugins_config);
     return PLUGIN_ERROR_NO_ERROR;
 }
 
@@ -164,142 +154,7 @@ QList<Plugin*> PluginManagerImpl::getPlugins(PluginRole role, bool active_only)
     return result;
 }
 
-PluginErrorCodes PluginManagerImpl::initPlugin(Plugin *plugin)
-{
-    DEBUG() << qPrintable("Initialization of") << plugin->getName();
-    Q_ASSERT(plugin != NULL);
-    ConfigItem* plugin_info = m_plugins_config->findItemByKey(plugin->getId());
-    if(!plugin_info->value().toBool())
-    {
-        DEBUG() << "Plugin" << plugin->getName() << "is disabled in config. Skipping.";
-        plugin->setState(PLUGIN_STATE_DISABLED);
-        return PLUGIN_ERROR_PLUGIN_DISABLED;
-    }
-
-    if(plugin->getState() == PLUGIN_STATE_INITIALIZED)
-    {
-        //INFO(QString("Plugin '%1' is already initialized").arg(plugin->name));
-        return PLUGIN_ERROR_NO_ERROR;
-    }
-
-    Q_ASSERT(plugin->getId() != NULL);
-    Q_ASSERT(plugin->getId().length() > 0);
-    if(plugin->getId() == NULL || plugin->getId() == "")
-        return PLUGIN_ERROR_NO_PLUGIN_ID;
-
-    //DEBUG() << "Plugin" << plugin->getId() << "initialization...";
-
-    if(pluginHasConflicts(plugin))
-    {
-        plugin->setState(PLUGIN_STATE_CONFLICT);
-        return PLUGIN_ERROR_CONFLICT;
-    }
-
-
-    //DEBUG() << "Loading dependencies for" << plugin->getId() << "...";
-
-    if(plugin->dependencies().size() > 0)
-    {
-        plugin->setState(PLUGIN_STATE_WAITING_FOR_DEPENDENCY);
-        PluginErrorCodes result = PLUGIN_ERROR_NO_ERROR;
-
-        for (const PluginDependency &dependency: plugin->dependencies())
-        {
-            if(isCircularDependency(plugin, dependency))
-            {
-                WARN() << "Circular dependency in" << plugin->getId() << "with role" << dependency.roleName();
-                continue;
-            }
-
-            PluginErrorCodes dependencyResult = loadDependency(plugin, dependency);
-
-            if(dependencyResult != PLUGIN_ERROR_NO_ERROR)
-            {
-                WARN() << "Error" << dependencyResult << "occured while initializing plugin" << plugin->getName() << "dependency" << dependency.roleName();
-                plugin->setState(PLUGIN_STATE_DISABLED_BY_DEPENDENCY);
-                result = PLUGIN_ERROR_DEPENDENCY_MISSING;
-            }
-        }
-
-
-        switch(result)
-        {
-            case PLUGIN_ERROR_NO_ERROR:
-            {
-                //DEBUG() << "Dependencies for" << plugin->getId() << "have been loaded.";
-                break;
-            }
-            case PLUGIN_ERROR_DEPENDENCY_MISSING:
-            {
-                WARN() << "Plugin" << plugin->getId() << "won't be loaded because of missing dependencies!";
-                return PLUGIN_ERROR_DEPENDENCY_MISSING;
-            }
-            default:
-            {
-                WARN() << "Plugin" << plugin->getId() << "unknown initialization code" << result;
-                return PLUGIN_ERROR_UNKNOWN_ERROR;
-            }
-        }            
-    }
-    else
-        DEBUG() << "No dependencies for" << plugin->getId() << "have been found";
-
-    #ifdef THREAD_SAFE_PLUGINS
-    PluginErrorCodes initValue = PLUGIN_ERROR_NOT_INITIALIZED;
-    if(plugin->has_role(ROLE_GUI) || plugin->has_role(ROLE_MEDIA))
-    {
-        qDebug() << "HAS GUI FLAG";
-        initValue = plugin->initialize();
-//
-    }
-    else
-    {
-        qRegisterMetaType<PluginErrorCodes>("PluginErrorCodes");
-        PluginThread* thread = new PluginThread(plugin);
-        plugin->moveToThread(thread);
-        thread->start();
-        DEBUG() << "invoke ok" << QMetaObject::invokeMethod(plugin, "initialize", Qt::BlockingQueuedConnection, Q_RETURN_ARG(PluginErrorCodes, initValue));
-    }
-    #else
-    int initValue = plugin->initialize();
-    #endif // THREAD_SAFE_PLUGINS
-
-    if(initValue != PLUGIN_ERROR_NO_ERROR)
-    {
-        WARN() <<"Plugin initialization failed. Code:" << initValue;
-        plugin->setState(PLUGIN_STATE_ERROR_STATE);
-        return PLUGIN_ERROR_NOT_INITIALIZED;
-    }
-
-    DEBUG() << "Plugin" << plugin->getId() << "initialized";
-
-    plugin->setState(PLUGIN_STATE_INITIALIZED);
-
-    return PLUGIN_ERROR_NO_ERROR;
-}
-
-PluginErrorCodes  PluginManagerImpl::deinitPlugin(Plugin *plugin)
-{
-    DEBUG() << "deinitPlugin(" << plugin->getName() << ")";
-
-    PluginErrorCodes result = plugin->deinitialize();
-    if(result == PLUGIN_ERROR_NO_ERROR)
-        plugin->setState(PLUGIN_STATE_ERROR_STATE);
-
-
-    /*
-        while (!plugins.isEmpty()) {
-           QPluginLoader* pluginLoader = plugins.takeFirst();
-           pluginLoader->unload();
-           delete pluginLoader;
-        }
-     */
-
-
-    return result;
-}
-
-AbstractPluginObject* PluginManagerImpl::getByRole(PluginRole role)
+AbstractPluginObject* PluginManagerImpl::getByRole(PluginRole role, bool show_warning)
 {
     for(int index = 0; index < plugins.size(); index++)
     {
@@ -316,7 +171,8 @@ AbstractPluginObject* PluginManagerImpl::getByRole(PluginRole role)
             }
         }
     }
-    ERROR() << qPrintable(QString("Plugin for role %1 not found!").arg(role));
+    if(show_warning)
+        ERROR() << qPrintable(QString("Plugin for role %1 not found!").arg(role));
     return NULL;
 }
 
@@ -460,8 +316,37 @@ PluginErrorCodes PluginManagerImpl::initPlugins()
 
     for(Plugin* plugin: plugins)
     {
+        for(PluginDependency dep: plugin->dependencies())
+        {
+            for(Plugin* pl: plugins)
+            {
+                if(pl == plugin) continue;
+
+                if(pl->has_role(dep.getRole()))
+                {
+                    connect(pl, &Plugin::initialized, [=]() {
+                        initializePlugin(plugin, true);
+                    });
+                    connect(pl, &Plugin::deinitialized, [=]() {
+                        deinitializePlugin(plugin);
+                    });
+                    connect(pl, &Plugin::error_happened, [=, &dep]() {
+                        if(dep.isRequired())
+                            deinitializePlugin(plugin);
+                        else if(dep.doSkipIfFailed())
+                            initializePlugin(plugin);
+                    });
+                }
+            }
+        }
+    }
+
+    for(Plugin* plugin: plugins)
+    {
         if(plugin->isActive() && plugin->getState() == PLUGIN_STATE_NOT_INITIALIZED)
-            initPlugin(plugin);
+        {
+            initializePlugin(plugin, false);
+        }
     }
 
     // Draw a table
@@ -493,7 +378,7 @@ PluginErrorCodes PluginManagerImpl::deinitPlugins()
     for(Plugin* plugin: plugins)
     {
         if(plugin->isActive() && plugin->getState() == PLUGIN_STATE_INITIALIZED)
-            deinitPlugin(plugin);
+            deinitializePlugin(plugin);
     }
     return PLUGIN_ERROR_NO_ERROR;
 }
@@ -514,90 +399,132 @@ void yasem::PluginManagerImpl::registerPluginRole(const PluginRole &role, const 
     m_plugin_roles.insert(role, data);
 }
 
-bool PluginManagerImpl::isCircularDependency(Plugin *plugin, const PluginDependency &dependency) const
-{
-    bool circular = false;
-    for(PluginRole role: plugin->roles().keys())
-    {
-        if(role == dependency.getRole())
-        {
-            circular = true;
-            break;
-        }
-    }
 
-    return circular;
+void PluginManagerImpl::onPluginLoaded()
+{
+    Plugin* plugin = qobject_cast<Plugin*>(sender());
+    STUB() << plugin->getName();
 }
 
-PluginErrorCodes PluginManagerImpl::loadDependency(Plugin *plugin, const PluginDependency &dependency)
+void PluginManagerImpl::onPluginUnloaded()
 {
-    PluginErrorCodes result = PLUGIN_ERROR_DEPENDENCY_MISSING;
-    //DEBUG() << qPrintable(QString("Trying to load dependency %1 for %2").arg(dependency.roleName()).arg(plugin->getName()));
+    Plugin* plugin = qobject_cast<Plugin*>(sender());
+    STUB() << plugin->getName();
+}
 
-    DEBUG() << qPrintable(QString("    DEPENDENCY: %1").arg(dependency.roleName()));
-
-    QList<AbstractPluginObject*> dependencyList = getAllByRole(dependency.getRole(), false);
-
-    if(dependencyList.isEmpty())
+void PluginManagerImpl::onPluginInitialized()
+{
+    Plugin* plugin = qobject_cast<Plugin*>(sender());
+    STUB() << plugin->getName();
+    for(Plugin* plugin: plugins)
     {
-        QString resString = QString("Required plugin with role %1 for %2 not found!").arg(dependency.roleName()).arg(plugin->getId());
+        initializePlugin(plugin);
+    }
+}
 
-        if(dependency.isRequired())
-        {
-            if(dependency.doSkipIfFailed())
-            {
-                WARN() << qPrintable(resString) << qPrintable("Failed to load. Skipped");
-                return PLUGIN_ERROR_NO_ERROR;
-            }
-            WARN() << qPrintable(resString) << resString;
-            return PLUGIN_ERROR_DEPENDENCY_MISSING;
-        }
+void PluginManagerImpl::onPluginDeinitialized()
+{
+    Plugin* plugin = qobject_cast<Plugin*>(sender());
+    STUB() << plugin->getName();
+}
 
-        LOG() << qPrintable(resString) << qPrintable("Not required. Skipping...");
-        return PLUGIN_ERROR_NO_ERROR;
+PluginErrorCodes PluginManagerImpl::initializePlugin(Plugin *plugin, bool go_deeper, bool ignore_dependencies)
+{
+    switch(plugin->getState())
+    {
+        case PLUGIN_STATE_INITIALIZED:  return PLUGIN_ERROR_NO_ERROR;
+        case PLUGIN_STATE_CONFLICT:     return PLUGIN_ERROR_CONFLICT;
+        case PLUGIN_STATE_DISABLED:     return PLUGIN_ERROR_PLUGIN_DISABLED;
+        case PLUGIN_STATE_ERROR_STATE:  return PLUGIN_ERROR_UNKNOWN_ERROR;
+        default: { }
     }
 
-    for(AbstractPluginObject* dependencyObject: dependencyList)
+
+    ConfigItem* plugin_info = m_plugins_config->findItemByKey(plugin->getId());
+    if(!plugin_info->value().toBool())
     {
-        Plugin* depPlugin = dependencyObject->plugin();
-        DEBUG() << qPrintable(QString("        %1")
-                              .arg(depPlugin->getId())
-                              .leftJustified(32, '.'))
-                << qPrintable(depPlugin->getStateDescription().toUpper());
+        DEBUG() << "Plugin" << plugin->getName() << "is disabled in config. Skipping.";
+        plugin->setState(PLUGIN_STATE_DISABLED);
+        return PLUGIN_ERROR_PLUGIN_DISABLED;
+    }
 
-        PluginErrorCodes code;
-        switch(dependencyObject->plugin()->getState())
+    if(pluginHasConflicts(plugin))
+    {
+        plugin->setState(PLUGIN_STATE_CONFLICT);
+        return PLUGIN_ERROR_CONFLICT;
+    }
+
+    QList<PluginDependency> unresolved_dependencies = getUnresolvedDependencies(plugin);
+    if(unresolved_dependencies.isEmpty() || ignore_dependencies)
+    {
+        LOG() << "Initializing plugin" << plugin->getName();
+        PluginErrorCodes result = plugin->initialize();
+        if(result == PLUGIN_ERROR_NO_ERROR)
+            plugin->setState(PLUGIN_STATE_INITIALIZED);
+        else
+            plugin->setState(PLUGIN_STATE_ERROR_STATE);
+        return result;
+    }
+    else if(go_deeper)
+    {
+        for(Plugin* pl: plugins)
         {
-            case PLUGIN_STATE_WAITING_FOR_DEPENDENCY: {
-                WARN() << "Circular dependency in plugin" << plugin->getId() << "with" << dependencyObject->plugin()->getId();
-                code = PLUGIN_ERROR_NO_ERROR;
-                break;
-            }
-            case PLUGIN_STATE_CONFLICT: {
-                WARN() << "Plugin" << plugin->getId() << "conflicts with" << dependencyObject->plugin()->getId();
-                code = PLUGIN_ERROR_CONFLICT;
-                break;
-            }
-            case PLUGIN_STATE_DISABLED:
-            case PLUGIN_STATE_DISABLED_BY_DEPENDENCY: {
-                WARN() << "Plugin" << plugin->getId() << "disabled";
-                code = PLUGIN_ERROR_PLUGIN_DISABLED;
-
-                break;
-            }
-            default: {
-                code = initPlugin(dependencyObject->plugin());
+            if(pl == plugin) continue;
+            for(PluginDependency dep: unresolved_dependencies)
+            {
+                if(pl->has_role(dep.getRole()))
+                {
+                    for(PluginDependency dep2: pl->dependencies())
+                    {
+                        if(plugin->has_role(dep2.getRole()))
+                        {
+                            QString msg("Circular dependencies %1 <-> %2");
+                            WARN() << qPrintable(msg.arg(plugin->getName()) .arg(pl->getName()));
+                            //return initializePlugin(plugin, false, true);
+                        }
+                    }
+                }
             }
         }
+    }
+    //else
+    //{
+        plugin->setState(PLUGIN_STATE_WAITING_FOR_DEPENDENCY);
+        //LOG() << "....Waiting for dependency(s) for " << plugin->getName() << getDependencyNames(unresolved_dependencies);
+        return PLUGIN_ERROR_DEPENDENCY_MISSING;
+    //}
+}
 
-        if(code != PLUGIN_ERROR_NO_ERROR && dependency.doSkipIfFailed())
-        {
-            code = PLUGIN_ERROR_NO_ERROR;
-        }
+PluginErrorCodes PluginManagerImpl::deinitializePlugin(Plugin *plugin)
+{
+    if(plugin->getState() == PLUGIN_STATE_NOT_INITIALIZED) return PLUGIN_ERROR_NO_ERROR;
 
+    LOG() << "Deinitialization of" << plugin->getName();
+    PluginErrorCodes result = plugin->deinitialize();
+    if(result == PLUGIN_ERROR_NO_ERROR)
+        plugin->setState(PLUGIN_STATE_NOT_INITIALIZED);
+    else
+        plugin->setState(PLUGIN_STATE_ERROR_STATE);
+    return result;
+}
 
-        if(code == PLUGIN_ERROR_NO_ERROR) ///< At least one of dependency plugins should be loaded
-            result = PLUGIN_ERROR_NO_ERROR;
+QList<PluginDependency> PluginManagerImpl::getUnresolvedDependencies(Plugin *plugin)
+{
+    QList<PluginDependency> result;
+    for(PluginDependency dep: plugin->dependencies())
+    {
+        if(getByRole(dep.getRole(), false)) continue;
+        if(!dep.isRequired()) continue;
+        result.append(dep);
     }
     return result;
 }
+
+QStringList PluginManagerImpl::getDependencyNames(QList<PluginDependency> list)
+{
+    QStringList result;
+    for(PluginDependency item: list)
+        result.append(item.roleName());
+    return result;
+}
+
