@@ -24,6 +24,7 @@ protected:
     QList<DiskInfo *> m_disks;
 
     QString m_config_dir;
+    VirtualMachine m_detected_vm;
 
     void initBuiltInSettingsGroup();
     void initSettings();
@@ -50,6 +51,10 @@ public:
     QString version();
     QString revision();
     QString getConfigDir() const;
+
+    // Core interface
+public:
+    VirtualMachine getVM();
 };
 
 }

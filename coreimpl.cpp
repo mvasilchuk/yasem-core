@@ -5,12 +5,17 @@
 #include "yasemsettingsimpl.h"
 #include "statisticsimpl.h"
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif //Q_OS_WIN
+
 #include <QDebug>
 #include <QProcess>
 #include <QRegularExpression>
 #include <QFileInfo>
 #include <QDir>
 #include <QStandardPaths>
+#include <QMetaEnum>
 
 using namespace yasem;
 
@@ -18,7 +23,8 @@ CoreImpl::CoreImpl(QObject *parent ):
     Core(parent),
     m_network(new NetworkImpl(this)),
     m_yasem_settings(new YasemSettingsImpl(this)),
-    m_statistics(new StatisticsImpl(this))
+    m_statistics(new StatisticsImpl(this)),
+    m_detected_vm(VM_NOT_SET)
 {
     Q_UNUSED(parent)
     setObjectName("Core");
@@ -377,6 +383,40 @@ QString yasem::CoreImpl::revision()
 QString CoreImpl::getConfigDir() const
 {
     return m_config_dir;
+}
+
+Core::VirtualMachine CoreImpl::getVM()
+{
+    if(m_detected_vm != VM_NOT_SET) return m_detected_vm;
+
+#ifdef Q_OS_WIN
+    if(LoadLibrary(L"VBoxHook.dll") != NULL)
+    {
+        m_detected_vm = VM_VIRTUAL_BOX;
+    }
+    else if(CreateFile(L"\\\\.\\VBoxMiniRdrDN", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL) != INVALID_HANDLE_VALUE)
+    {
+        m_detected_vm = VM_VIRTUAL_BOX;
+    }
+    else
+#endif // Q_OS_WIN
+     if(m_detected_vm == VM_NOT_SET)
+     {
+        // Blue pill, red pill detection
+        // http://stackoverflow.com/questions/154163/detect-virtualized-os-from-an-application
+        unsigned char m[2+4], rpill[] = "\x0f\x01\x0d\x00\x00\x00\x00\xc3";
+           *((unsigned*)&rpill[3]) = (unsigned)m;
+           ((void(*)())&rpill)();
+        m_detected_vm = (m[5]>0xd0) ? VM_UNKNOWN : VM_NONE;
+    }
+
+    if(m_detected_vm != VM_NONE)
+    {
+        int keyEnumIndex = staticMetaObject.indexOfEnumerator("VirtualMachine");
+        LOG() << "Virtual machine" << staticMetaObject.enumerator(keyEnumIndex).valueToKey(m_detected_vm) << "detected. OpenGL rendering will be disabled.";
+    }
+
+    return m_detected_vm;
 }
 
 

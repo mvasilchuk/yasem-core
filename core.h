@@ -9,9 +9,9 @@
 #include <stdio.h>
 
 // Includes for backtrace
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include <execinfo.h>
-#endif // defined(Q_OS_LINUX)
+#endif // defined(Q_OS_UNIX)
 
 #include <QObject>
 #include <QSettings>
@@ -36,7 +36,16 @@ class Statistics;
 class Core: public QObject
 {
     Q_OBJECT
+    Q_ENUMS(VirtualMachine)
 public:
+    enum VirtualMachine {
+        VM_NOT_SET, // VM value is not set yet
+        VM_NONE,
+        VM_UNKNOWN,
+        VM_VIRTUAL_BOX,
+        VM_VMWARE
+    };
+
     static Core* setInstance(Core* inst = 0)
     {
         static Core* instance = inst;// Guaranteed to be destroyed.
@@ -61,10 +70,11 @@ public:
     virtual QThread* mainThread() = 0;
     virtual QHash<QString, RC_KEY> getKeycodeHashes() = 0;
     virtual Statistics* statistics() = 0;
+    virtual VirtualMachine getVM() = 0;
 
     static void printCallStack()
     {
-        #ifdef Q_OS_LINUX
+        #ifdef Q_OS_UNIX
             //print call stack (needs #include <execinfo.h>)
             void* callstack[CALLSTACK_SIZE];
             int i, frames = backtrace(callstack, CALLSTACK_SIZE);
@@ -78,7 +88,7 @@ public:
             free(strs);
         #else
             printf("[FIXME]: printCallStack() is only supported under desktop Unix-based systems\n");
-        #endif // Q_OS_LINUX
+        #endif // Q_OS_UNIX
     }
 
     virtual QString version() = 0;
