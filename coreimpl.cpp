@@ -400,15 +400,21 @@ Core::VirtualMachine CoreImpl::getVM()
     }
     else
 #endif // Q_OS_WIN
+        /*
      if(m_detected_vm == VM_NOT_SET)
      {
         // Blue pill, red pill detection
         // http://stackoverflow.com/questions/154163/detect-virtualized-os-from-an-application
+        // I have no idea what does this code do,
         unsigned char m[2+4], rpill[] = "\x0f\x01\x0d\x00\x00\x00\x00\xc3";
            *((unsigned*)&rpill[3]) = (unsigned)m;
            ((void(*)())&rpill)();
         m_detected_vm = (m[5]>0xd0) ? VM_UNKNOWN : VM_NONE;
     }
+    */
+
+    // TODO: Write virtual machine detection
+    m_detected_vm = VM_NONE;
 
     if(m_detected_vm != VM_NONE)
     {
