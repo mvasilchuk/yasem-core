@@ -29,13 +29,35 @@ CoreImpl::CoreImpl(QObject *parent ):
     Q_UNUSED(parent)
     setObjectName("Core");
 
+#ifdef USE_OSX_BUNDLE
+    LOG() << "App dir" << qApp->applicationDirPath();
+    QDir config_dir(qApp->applicationDirPath().append("/../../../config"));
+#else
     QDir config_dir(qApp->applicationDirPath().append("/config"));
-    if(config_dir.exists())
-        m_config_dir = config_dir.absolutePath().append("/");
-    else
-        m_config_dir = QStandardPaths::locate(QStandardPaths::ConfigLocation, QFileInfo(qAppName()).baseName(), QStandardPaths::LocateDirectory).append("/");
+#endif //Q_OS_DARWIN
 
-    DEBUG() << "PATH" << qAppName() << m_config_dir;
+    if(config_dir.exists())
+    {
+        LOG() << "Found local config directory. Trying to use it.";
+        m_config_dir = config_dir.absolutePath().append("/");
+    }
+    else
+    {
+        QString app_name = QFileInfo(qAppName()).baseName();
+        m_config_dir = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation).append("/%1/").arg(app_name);
+        config_dir.setPath(m_config_dir);
+
+        if(!config_dir.exists())
+        {
+            LOG() << "Config dir " << m_config_dir << "doesn't exists. Creating...";
+            if(config_dir.mkdir(m_config_dir))
+                LOG() << "... successful";
+            else
+                WARN() << "...failed";
+        }
+    }
+
+    LOG() << "Using config directory" << m_config_dir;
 
     m_app_settings = new QSettings(getConfigDir().append(CONFIG_NAME), QSettings::IniFormat, this);
 

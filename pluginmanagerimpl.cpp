@@ -30,11 +30,11 @@ PluginManagerImpl::PluginManagerImpl():
     m_plugins_config(dynamic_cast<ConfigContainer*>(Core::instance()->yasem_settings()->findItem(YasemSettings::SETTINGS_GROUP_PLUGINS)))
 {
    this->setObjectName("PluginManager");
-   #ifdef Q_OS_DARWIN
+   #ifdef USE_OSX_BUNDLE
    setPluginDir("Plugins");
 #else
     setPluginDir("plugins");
-#endif //Q_OS_DARWIN
+#endif //USE_OSX_BUNDLE
 
    registerPluginRole(ROLE_ANY,          PluginRoleData(tr("Any role"),      tr("Any role")));
    registerPluginRole(ROLE_STB_API,      PluginRoleData(tr("STB API"),       tr("STB API implementation")));

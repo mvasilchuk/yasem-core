@@ -87,9 +87,27 @@ int main(int argc, char *argv[])
 #endif //USE_BREAKPAD
     QString appPath = QFileInfo(argv[0]).dir().path();
     QStringList paths = QCoreApplication::libraryPaths();
+    qDebug() << paths << appPath;
+
+
+#ifdef Q_OS_DARWIN
+#if (defined(QT_DEBUG) or (USE_SYS_LIBS))
     paths.append(appPath);
     paths.append(appPath.append("/libs"));
     paths.append(appPath.append("/plugins"));
+#else
+    // Release shouldn't use system libs
+    paths.clear();
+    paths.append(appPath.append("/../PlugIns"));
+#endif
+
+#else
+    paths.append(appPath);
+    paths.append(appPath.append("/libs"));
+    paths.append(appPath.append("/plugins"));
+#endif
+
+//#endif //Q_OS_DARWIN
 
 #ifdef Q_OS_WIN
     // A patch for Windows to support LD_LIBRARY_PATH
