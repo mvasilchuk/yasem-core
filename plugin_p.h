@@ -23,7 +23,8 @@ public:
         m_loader(NULL),
         m_active(false),
         m_flags(PluginFlag::PLUGIN_FLAG_NONE),
-        m_state(PLUGIN_STATE_UNKNOWN)
+        m_state(PLUGIN_STATE_UNKNOWN),
+        m_multithreading_enabled(true)
     {
     }
 
@@ -47,6 +48,7 @@ public:
     bool m_active;
     PluginFlag m_flags;
     PluginState m_state;
+    bool m_multithreading_enabled;
 
 protected:
     PluginPrivate(Plugin &p):

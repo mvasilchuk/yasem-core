@@ -6,7 +6,7 @@
 #include <QStringList>
 
 namespace yasem {
-    class DiskInfo {
+    class StorageInfo {
     public:
         int index;
         QString blockDevice;

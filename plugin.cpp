@@ -176,6 +176,7 @@ void Plugin::setState(const PluginState &state)
         case PLUGIN_STATE_ERROR_STATE:              { emit error_happened();  break; }
         case PLUGIN_STATE_DISABLED_BY_DEPENDENCY:   { emit disabled_by_dependency();  break; }
         case PLUGIN_STATE_WAITING_FOR_DEPENDENCY:   { emit waiting_for_dependency();  break; }
+        case PLUGIN_STATE_THREAD_STARTED:           { emit plugin_thread_started();  break; }
         default: {
             WARN() << "Unknown plugin state" << state << "for" << getName();
             break;
@@ -196,6 +197,7 @@ QString Plugin::getStateDescription()
         case PLUGIN_STATE_DISABLED:                 { result = "Disabled"; break; }
         case PLUGIN_STATE_CONFLICT:                 { result = "Conflict"; break; }
         case PLUGIN_STATE_DISABLED_BY_DEPENDENCY:   { result = "Disabled by dep."; break; }
+        case PLUGIN_STATE_THREAD_STARTED:           { result = "Thread started."; break; }
         default:                                    { result = QString::number(getState()); break; }
     }
     return result;
@@ -231,6 +233,12 @@ QList<PluginConflict> Plugin::getStaticConflicts()
     return d->m_static_conflicts;
 }
 
+bool Plugin::isMultithreadingEnabled()
+{
+    Q_D(Plugin);
+    return d->m_multithreading_enabled;
+}
+
 void Plugin::add_dependency(const PluginDependency &dependency)
 {
     Q_D(Plugin);
@@ -247,5 +255,11 @@ void Plugin::register_role(PluginRole role, AbstractPluginObject* obj)
 {
     Q_D(Plugin);
     d->m_role_list.insert(role, obj);
+}
+
+void Plugin::setMultithreading(bool enable)
+{
+    Q_D(Plugin);
+    d->m_multithreading_enabled = enable;
 }
 

@@ -29,7 +29,7 @@
 
 namespace yasem
 {
-class DiskInfo;
+class StorageInfo;
 class YasemSettings;
 class Statistics;
 
@@ -59,18 +59,20 @@ public:
 
     static Core* instance()
     {
-       return setInstance();
+        return setInstance();
     }
 
     virtual QSettings* settings() = 0;
     virtual QSettings* settings(const QString &filename) = 0;
     virtual YasemSettings* yasem_settings() = 0;
-    virtual QList<DiskInfo*> disks() = 0;
+
+    virtual QList<StorageInfo*> storages() = 0;
     virtual CoreNetwork* network() = 0;
-    virtual QThread* mainThread() = 0;
-    virtual QHash<QString, RC_KEY> getKeycodeHashes() = 0;
     virtual Statistics* statistics() = 0;
     virtual VirtualMachine getVM() = 0;
+
+    virtual QThread* mainThread() = 0;
+    virtual QHash<QString, RC_KEY> getKeycodeHashes() = 0;
 
     static void printCallStack()
     {
@@ -87,7 +89,7 @@ public:
             }
             free(strs);
         #else
-            printf("[FIXME]: printCallStack() is only supported under desktop Unix-based systems\n");
+            printf("[FIXME]: printCallStack() is only supported in desktop Unix-based systems\n");
         #endif // Q_OS_UNIX
     }
 
@@ -105,7 +107,6 @@ protected:
     QHash<QString, RC_KEY> keycode_hashes;
     QHash<QString, BlockDeviceInfo*> block_device_tree;
     QHash<HwinfoLineTypes, QRegularExpression> hwinfo_regex_list;
-
 private:
 
     void operator=(Core const&);

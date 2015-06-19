@@ -219,7 +219,7 @@ void CoreImpl::mountPointChanged()
         if(matcher.hasMatch())
         {
             //DEBUG(QString("DRIVES: ").append(result.remove(result.length()-1, 1)));
-            DiskInfo* info = new DiskInfo();
+            StorageInfo* info = new StorageInfo();
             info->index = counter;
             info->blockDevice = matcher.captured(1);
             info->size = matcher.captured(2).toLong();
@@ -245,7 +245,7 @@ void CoreImpl::mountPointChanged()
     df.waitForFinished();
     buildBlockDeviceTree();
 
-    for(DiskInfo* disk: m_disks)
+    for(StorageInfo* disk: m_disks)
     {
         QString device = disk->blockDevice;
         for(BlockDeviceInfo* block_device: block_device_tree)
@@ -370,7 +370,7 @@ void CoreImpl::buildBlockDeviceTree()
     }
 }
 
-QList<DiskInfo *> CoreImpl::disks()
+QList<StorageInfo *> CoreImpl::storages()
 {
     return m_disks;
 }
@@ -450,11 +450,13 @@ Core::VirtualMachine CoreImpl::getVM()
 
 YasemSettings *yasem::CoreImpl::yasem_settings()
 {
+    Q_ASSERT(m_yasem_settings);
     return m_yasem_settings;
 }
 
 
 Statistics *yasem::CoreImpl::statistics()
 {
+    Q_ASSERT(m_statistics);
     return m_statistics;
 }

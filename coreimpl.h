@@ -21,7 +21,7 @@ protected:
     CoreNetwork* m_network;
     YasemSettings* m_yasem_settings;
     Statistics* m_statistics;
-    QList<DiskInfo *> m_disks;
+    QList<StorageInfo *> m_disks;
 
     QString m_config_dir;
     VirtualMachine m_detected_vm;
@@ -35,8 +35,7 @@ public slots:
     void onClose();
     void mountPointChanged();
     void buildBlockDeviceTree();
-    QList<DiskInfo *> disks();
-    CoreNetwork* network();
+
     QThread* mainThread();
 
     // Core interface
@@ -44,7 +43,11 @@ public:
     QSettings *settings();
     QSettings* settings(const QString &filename);
     YasemSettings *yasem_settings();
-    virtual Statistics *statistics();
+
+    QList<StorageInfo *> storages();
+    CoreNetwork* network();
+    Statistics* statistics();
+    VirtualMachine getVM();
 
     // Core interface
     QHash<QString, RC_KEY> getKeycodeHashes();
@@ -52,9 +55,6 @@ public:
     QString revision();
     QString getConfigDir() const;
 
-    // Core interface
-public:
-    VirtualMachine getVM();
 };
 
 }

@@ -124,6 +124,8 @@ public:
 
     Q_INVOKABLE virtual QList<PluginConflict> getStaticConflicts();
 
+    Q_INVOKABLE virtual bool isMultithreadingEnabled();
+
 signals:
     void loaded();
     void unloaded();
@@ -135,11 +137,13 @@ signals:
     void disabled();
     void waiting_for_dependency();
     void disabled_by_dependency();
+    void plugin_thread_started();
 
 protected:
     virtual void add_dependency(const PluginDependency &dependency);
     virtual void add_static_conflict(const PluginConflict &conflict_info);
     virtual void register_role(PluginRole role, AbstractPluginObject* obj);
+    virtual void setMultithreading(bool enable);
 
 protected:
     Plugin(PluginPrivate &d): d_ptr(&d) {}

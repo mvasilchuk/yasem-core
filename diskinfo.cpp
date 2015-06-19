@@ -3,7 +3,7 @@
 using namespace yasem;
 
 
-QString DiskInfo::toString()
+QString StorageInfo::toString()
 {
     return QString("disk: [%1, %2, %3, %4, %5, %6, %7, %8]")
             .arg(blockDevice)

@@ -156,8 +156,6 @@ public:
 
     virtual QString getQmlComponentName() const;
 
-    virtual QPixmap& render() = 0;
-
     bool isSupportOpenGL();
 
 signals:

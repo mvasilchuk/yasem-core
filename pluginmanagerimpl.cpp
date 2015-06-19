@@ -30,7 +30,7 @@ PluginManagerImpl::PluginManagerImpl():
     m_plugins_config(dynamic_cast<ConfigContainer*>(Core::instance()->yasem_settings()->findItem(YasemSettings::SETTINGS_GROUP_PLUGINS)))
 {
    this->setObjectName("PluginManager");
-   #ifdef USE_OSX_BUNDLE
+#ifdef USE_OSX_BUNDLE
    setPluginDir("Plugins");
 #else
     setPluginDir("plugins");
@@ -433,14 +433,17 @@ void PluginManagerImpl::onPluginDeinitialized()
     STUB() << plugin->getName();
 }
 
+//#define MULTITHREADED_PLUGINS
+
 PluginErrorCodes PluginManagerImpl::initializePlugin(Plugin *plugin, bool go_deeper, bool ignore_dependencies)
 {
     switch(plugin->getState())
     {
-        case PLUGIN_STATE_INITIALIZED:  return PLUGIN_ERROR_NO_ERROR;
-        case PLUGIN_STATE_CONFLICT:     return PLUGIN_ERROR_CONFLICT;
-        case PLUGIN_STATE_DISABLED:     return PLUGIN_ERROR_PLUGIN_DISABLED;
-        case PLUGIN_STATE_ERROR_STATE:  return PLUGIN_ERROR_UNKNOWN_ERROR;
+        case PLUGIN_STATE_INITIALIZED:      return PLUGIN_ERROR_NO_ERROR;
+        case PLUGIN_STATE_CONFLICT:         return PLUGIN_ERROR_CONFLICT;
+        case PLUGIN_STATE_DISABLED:         return PLUGIN_ERROR_PLUGIN_DISABLED;
+        case PLUGIN_STATE_ERROR_STATE:      return PLUGIN_ERROR_UNKNOWN_ERROR;
+        case PLUGIN_STATE_THREAD_STARTED:   return PLUGIN_ERROR_NO_ERROR;
         default: { }
     }
 
@@ -463,12 +466,35 @@ PluginErrorCodes PluginManagerImpl::initializePlugin(Plugin *plugin, bool go_dee
     if(unresolved_dependencies.isEmpty() || ignore_dependencies)
     {
         LOG() << "Initializing plugin" << plugin->getName();
+
+#ifdef MULTITHREADED_PLUGINS
+        if(plugin->isMultithreadingEnabled() && plugin->thread() == QThread::currentThread())
+        {
+            PluginThread* thread = new PluginThread(plugin, QThread::currentThread());
+            plugin->moveToThread(thread);
+            plugin->setState(PLUGIN_STATE_THREAD_STARTED);
+            thread->start();
+            DEBUG() << plugin->thread()->objectName();
+        }
+        else
+        {
+            PluginErrorCodes result = plugin->initialize();
+
+            if(result == PLUGIN_ERROR_NO_ERROR)
+                plugin->setState(PLUGIN_STATE_INITIALIZED);
+            else
+                plugin->setState(PLUGIN_STATE_ERROR_STATE);
+        }
+        return PLUGIN_ERROR_NO_ERROR;
+#else
         PluginErrorCodes result = plugin->initialize();
+
         if(result == PLUGIN_ERROR_NO_ERROR)
             plugin->setState(PLUGIN_STATE_INITIALIZED);
         else
             plugin->setState(PLUGIN_STATE_ERROR_STATE);
         return result;
+#endif //MULTITHREADED_PLUGINS
     }
     else if(go_deeper)
     {
