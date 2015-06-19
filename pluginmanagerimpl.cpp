@@ -62,7 +62,12 @@ PluginErrorCodes PluginManagerImpl::listPlugins()
         if (pluginsDir.dirName().toLower() == "debug" || pluginsDir.dirName().toLower() == "release")
             pluginsDir.cdUp();
     #elif defined(Q_OS_DARWIN)
+        #ifdef USE_OSX_BUNDLE
             pluginsDir.cdUp();
+        #else
+            pluginsDir.cd("../../..");
+        #endif
+
     #endif
     if(!pluginsDir.cd(getPluginDir()))
     {
