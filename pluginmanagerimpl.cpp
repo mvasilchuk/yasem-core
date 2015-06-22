@@ -443,10 +443,12 @@ PluginErrorCodes PluginManagerImpl::initializePlugin(Plugin *plugin, bool go_dee
         case PLUGIN_STATE_CONFLICT:         return PLUGIN_ERROR_CONFLICT;
         case PLUGIN_STATE_DISABLED:         return PLUGIN_ERROR_PLUGIN_DISABLED;
         case PLUGIN_STATE_ERROR_STATE:      return PLUGIN_ERROR_UNKNOWN_ERROR;
+        case PLUGIN_STATE_THREAD_CREATING:  return PLUGIN_ERROR_NO_ERROR;
         case PLUGIN_STATE_THREAD_STARTED:   return PLUGIN_ERROR_NO_ERROR;
-        default: { }
+        default: {
+            plugin->setState(PLUGIN_STATE_THREAD_CREATING);
+        }
     }
-
 
     ConfigItem* plugin_info = m_plugins_config->findItemByKey(plugin->getId());
     if(!plugin_info->value().toBool())
@@ -472,7 +474,6 @@ PluginErrorCodes PluginManagerImpl::initializePlugin(Plugin *plugin, bool go_dee
         {
             PluginThread* thread = new PluginThread(plugin, QThread::currentThread());
             plugin->moveToThread(thread);
-            plugin->setState(PLUGIN_STATE_THREAD_STARTED);
             thread->start();
             DEBUG() << plugin->thread()->objectName();
         }

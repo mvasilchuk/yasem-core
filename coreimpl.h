@@ -51,9 +51,10 @@ public:
 
     // Core interface
     QHash<QString, RC_KEY> getKeycodeHashes();
-    QString version();
-    QString revision();
-    QString getConfigDir() const;
+    Q_INVOKABLE QString version();
+    Q_INVOKABLE QString revision();
+    Q_INVOKABLE QString compiler();
+    Q_INVOKABLE QString getConfigDir() const;
 
 };
 

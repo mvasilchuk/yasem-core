@@ -14,6 +14,7 @@ PluginThread::PluginThread(Plugin* plugin, QObject *parent) :
 
 void PluginThread::run()
 {
+    plugin->setState(PLUGIN_STATE_THREAD_STARTED);
     PluginErrorCodes result = plugin->initialize();
 
     if(result == PLUGIN_ERROR_NO_ERROR)

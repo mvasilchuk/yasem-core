@@ -137,6 +137,7 @@ signals:
     void disabled();
     void waiting_for_dependency();
     void disabled_by_dependency();
+    void plugin_thread_starting();
     void plugin_thread_started();
 
 protected:

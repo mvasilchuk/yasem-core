@@ -402,6 +402,11 @@ QString yasem::CoreImpl::revision()
     return GIT_VERSION;
 }
 
+QString CoreImpl::compiler()
+{
+    return __VERSION__;
+}
+
 QString CoreImpl::getConfigDir() const
 {
     return m_config_dir;
