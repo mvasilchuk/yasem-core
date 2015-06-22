@@ -129,11 +129,6 @@ class YasemSettings: public QObject
     Q_OBJECT
 
 public:
-    static QString SETTINGS_GROUP_APPEARANCE;
-    static QString SETTINGS_GROUP_MEDIA;
-    static QString SETTINGS_GROUP_PLUGINS;
-    static QString SETTINGS_GROUP_OTHER;
-
     YasemSettings(QObject* parent): QObject(parent) {}
     virtual ~YasemSettings() {}
 

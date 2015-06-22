@@ -4,6 +4,7 @@
 #include "macros.h"
 #include "yasemsettingsimpl.h"
 #include "statisticsimpl.h"
+#include "configuration_items.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -156,10 +157,10 @@ void CoreImpl::onClose()
 
 void CoreImpl::initBuiltInSettingsGroup()
 {
-    ConfigTreeGroup* appearence = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_APPEARANCE,tr("Appearance"));
-    ConfigTreeGroup* media = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_MEDIA, tr("Media"));
-    ConfigTreeGroup* plugins = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_PLUGINS, tr("Plugins"));
-    ConfigTreeGroup* other = new ConfigTreeGroup(CONFIG_NAME, YasemSettings::SETTINGS_GROUP_OTHER, tr("Other"));
+    ConfigTreeGroup* appearence = new ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_APPEARANCE,   tr("Appearance"));
+    ConfigTreeGroup* media      = new ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_MEDIA,        tr("Media"));
+    ConfigTreeGroup* plugins    = new ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_PLUGINS,      tr("Plugins"));
+    ConfigTreeGroup* other      = new ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_OTHER,        tr("Other"));
 
     m_yasem_settings->addBuiltInConfigGroup(appearence);
     m_yasem_settings->addBuiltInConfigGroup(media);
@@ -169,7 +170,9 @@ void CoreImpl::initBuiltInSettingsGroup()
 
 void CoreImpl::initSettings()
 {
-    ConfigTreeGroup* media = m_yasem_settings->getDefaultGroup(YasemSettings::SETTINGS_GROUP_MEDIA);
+    ConfigTreeGroup* media = m_yasem_settings->getDefaultGroup(SETTINGS_GROUP_MEDIA);
+    ConfigTreeGroup* other = m_yasem_settings->getDefaultGroup(SETTINGS_GROUP_OTHER);
+
     ConfigTreeGroup* video = new ConfigTreeGroup("video", tr("Video"));
 
     ListConfigItem* aspect_ratio = new ListConfigItem("aspect_ratio", tr("Default aspect ratio"), ASPECT_RATIO_16_9);
@@ -190,6 +193,16 @@ void CoreImpl::initSettings()
 
     video->addItem(aspect_ratio);
     media->addItem(video);
+
+    ConfigTreeGroup* network_statistics     = new ConfigTreeGroup(NETWORK_STATISTICS, tr("Network statistics"));
+    ConfigItem* enable_network_statistics   = new ConfigItem(NETWORK_STATISTICS_ENABLED, tr("Enable statistics"), "true", ConfigItem::BOOL);
+    ConfigItem* slow_request_timeout        = new ConfigItem(NETWORK_STATISTICS_SLOW_REQ_TIMEOUT,
+                                                             tr("Mark request as slow if it takes, ms"), "5000", ConfigItem::INT);
+
+    network_statistics->addItem(enable_network_statistics);
+    network_statistics->addItem(slow_request_timeout);
+
+    other->addItem(network_statistics);
 }
 
 void CoreImpl::mountPointChanged()
@@ -464,4 +477,10 @@ Statistics *yasem::CoreImpl::statistics()
 {
     Q_ASSERT(m_statistics);
     return m_statistics;
+}
+
+
+void yasem::CoreImpl::init()
+{
+    m_yasem_settings->load();
 }

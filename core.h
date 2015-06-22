@@ -62,6 +62,8 @@ public:
         return setInstance();
     }
 
+    virtual void init() = 0;
+
     virtual QSettings* settings() = 0;
     virtual QSettings* settings(const QString &filename) = 0;
     virtual YasemSettings* yasem_settings() = 0;

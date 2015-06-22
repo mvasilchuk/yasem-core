@@ -6,6 +6,7 @@
 #include "pluginthread.h"
 #include "yasemsettings.h"
 #include "guipluginobject.h"
+#include "configuration_items.h"
 
 #include <QDir>
 #include <QDebug>
@@ -27,7 +28,7 @@ static const QString PLUGIN_FLAG_NAME_HIDDEN = "hidden";
 static const QString PLUGIN_FLAG_NAME_GUI    = "gui";
 
 PluginManagerImpl::PluginManagerImpl():
-    m_plugins_config(dynamic_cast<ConfigContainer*>(Core::instance()->yasem_settings()->findItem(YasemSettings::SETTINGS_GROUP_PLUGINS)))
+    m_plugins_config(dynamic_cast<ConfigContainer*>(Core::instance()->yasem_settings()->findItem(SETTINGS_GROUP_PLUGINS)))
 {
    this->setObjectName("PluginManager");
 #ifdef USE_OSX_BUNDLE

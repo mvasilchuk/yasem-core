@@ -56,6 +56,10 @@ public:
     Q_INVOKABLE QString compiler();
     Q_INVOKABLE QString getConfigDir() const;
 
+
+    // Core interface
+public:
+    virtual void init();
 };
 
 }

@@ -134,6 +134,7 @@ int main(int argc, char *argv[])
 
     Core::setInstance(new CoreImpl(qApp));
     a.setProperty("Core", QVariant::fromValue(Core::instance()));
+    Core::instance()->init();
 
     qDebug() << "Library paths: " << QApplication::libraryPaths();
 

@@ -140,10 +140,16 @@ void yasem::YasemSettingsImpl::load(ConfigContainer *container)
         if(!item->isContainer())
         {
             QVariant val = settings->value(item->getKey());
+            DEBUG() << "....loading item " << item->getKey() << ", value " << val;
             if(val.isNull())
                 item->setValue(item->getDefaultValue());
             else
                 item->setValue(val);
+        }
+        else
+        {
+            DEBUG() << ".... Loading settings container " << item->getKey();
+            load(dynamic_cast<ConfigContainer*>(item));
         }
     }
 
@@ -163,11 +169,15 @@ ConfigItem *YasemSettingsImpl::findItem(const QStringList &path)
         DEBUG() << "Looking in root";
         if(path.length() >= 2)
         {
+            int first_index = 0;
+            if(path.at(0).isEmpty())
+                first_index = 1;
+
             for(ConfigItem* item: m_config_groups)
             {
-                if(item->getKey() == path.at(1))
+                if(item->getKey() == path.at(first_index))
                 {
-                    result = item->findItemByPath(path.mid(2));
+                    result = item->findItemByPath(path.mid(first_index+1));
                     break;
                 }
             }

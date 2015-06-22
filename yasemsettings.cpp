@@ -2,12 +2,6 @@
 
 using namespace yasem;
 
-QString YasemSettings::SETTINGS_GROUP_APPEARANCE = "appearance";
-QString YasemSettings::SETTINGS_GROUP_MEDIA = "media";
-QString YasemSettings::SETTINGS_GROUP_PLUGINS = "plugins";
-QString YasemSettings::SETTINGS_GROUP_OTHER = "other";
-
-
 ConfigTreeGroup::ConfigTreeGroup(const QString &config_file, const QString &id, const QString &title):
     ConfigContainer(config_file, id, title, CONFIG_GROUP)
 {
