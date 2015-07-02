@@ -82,13 +82,9 @@ void stopErrorRedirect(int stdout_fd)
 using namespace yasem;
 int main(int argc, char *argv[])
 {
-#ifdef USE_BREAKPAD
-    Breakpad::CrashHandler::instance()->init();
-#endif //USE_BREAKPAD
     QString appPath = QFileInfo(argv[0]).dir().path();
     QStringList paths = QCoreApplication::libraryPaths();
     qDebug() << paths << appPath;
-
 
 #ifdef Q_OS_DARWIN
 #if (defined(QT_DEBUG) or (USE_SYS_LIBS))
@@ -102,10 +98,16 @@ int main(int argc, char *argv[])
 #endif
 
 #else
+    paths.append("./");
     paths.append(appPath);
     paths.append(appPath.append("/libs"));
     paths.append(appPath.append("/plugins"));
 #endif
+
+#ifdef USE_BREAKPAD
+    Breakpad::CrashHandler::instance()->init();
+#endif //USE_BREAKPAD
+
 
 //#endif //Q_OS_DARWIN
 
