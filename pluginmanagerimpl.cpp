@@ -103,7 +103,6 @@ PluginErrorCodes PluginManagerImpl::listPlugins()
                 plugin->setClassName(pluginLoader.metaData().value("className").toString());
                 plugin->setMetadata(metadata);
                 plugin->setId(id);
-                plugin->setVersion(version);
                 plugin->setName(name);
                 plugin->setState(PLUGIN_STATE_NOT_INITIALIZED);
                 plugin->setFlags(parseFlags(metadata.value("flags").toString()));
