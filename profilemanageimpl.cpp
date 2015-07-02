@@ -8,6 +8,7 @@
 #include "mediaplayerpluginobject.h"
 #include "stbprofile.h"
 #include "statistics.h"
+#include "abstractwebpage.h"
 
 #include <QFile>
 #include <QDir>
