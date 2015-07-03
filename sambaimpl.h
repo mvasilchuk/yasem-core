@@ -7,9 +7,7 @@
 
 namespace yasem {
 
-
-
-class SambaImpl : public Samba
+class SambaImpl : public SDK::Samba
 {
     Q_OBJECT
 public:
@@ -19,9 +17,9 @@ public:
 
     // Samba interface
 public:
-    virtual QList<SambaNode*> domains();
-    virtual QList<SambaNode*> hosts(const QString &domainName);
-    virtual QList<SambaNode*> shares(const QString &hostName);
+    virtual QList<SDK::SambaNode*> domains();
+    virtual QList<SDK::SambaNode*> hosts(const QString &domainName);
+    virtual QList<SDK::SambaNode*> shares(const QString &hostName);
     virtual void makeTree();
     virtual bool mount(const QString &what, const QString &where, const QString &options);
     virtual bool unmount(const QString &path);
@@ -29,7 +27,7 @@ public:
 
 protected:
     QList<MountPointInfo*> mountPoints;
-    SambaNode* sambaTree;
+    SDK::SambaNode* sambaTree;
 };
 
 }

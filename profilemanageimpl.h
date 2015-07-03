@@ -12,7 +12,7 @@
 namespace yasem
 {
 
-class ProfileManageImpl : public ProfileManager
+class ProfileManageImpl : public SDK::ProfileManager
 {
     Q_OBJECT
 public:
@@ -24,21 +24,21 @@ public slots:
 
     // ProfileManager interface
 public:
-    QSet<Profile *> getProfiles();
-    Profile *getActiveProfile();
-    void addProfile(Profile *profile);
-    void setActiveProfile(Profile *profile);
-    bool removeProfile(Profile *profile);
+    QSet<SDK::Profile *> getProfiles();
+    SDK::Profile *getActiveProfile();
+    void addProfile(SDK::Profile *profile);
+    void setActiveProfile(SDK::Profile *profile);
+    bool removeProfile(SDK::Profile *profile);
     void loadProfiles();
-    Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName, bool overwrite);
-    void registerProfileClassId(const QString &classId, StbPluginObject* profilePlugin);
-    QMap<QString, StbPluginObject*> getRegisteredClasses();
-    StbPluginObject *getProfilePluginByClassId(const QString &idclassId);
-    Profile *findById(const QString &id);
-    Profile *findByName(const QString &id);
-    Profile* backToPreviousProfile();
+    SDK::Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName, bool overwrite);
+    void registerProfileClassId(const QString &classId, SDK::StbPluginObject* profilePlugin);
+    QMap<QString, SDK::StbPluginObject*> getRegisteredClasses();
+    SDK::StbPluginObject *getProfilePluginByClassId(const QString &idclassId);
+    SDK::Profile *findById(const QString &id);
+    SDK::Profile *findByName(const QString &id);
+    SDK::Profile* backToPreviousProfile();
 
-    void loadProfileKeymap(Profile *profile);
+    void loadProfileKeymap(SDK::Profile *profile);
 protected:
     QDir profilesDir;
     QString createUniqueName(const QString &classId, const QString &baseName, bool overwrite);

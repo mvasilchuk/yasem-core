@@ -8,7 +8,7 @@
 namespace yasem
 {
 
-class NetworkImpl : public QObject, public CoreNetwork
+class NetworkImpl : public QObject, public SDK::CoreNetwork
 {
     Q_OBJECT
 public:
@@ -20,7 +20,7 @@ public:
     bool isInterfaceConnected(QNetworkInterface iface);
     QList<QNetworkInterface> getInterfaces();
 
-    Samba* samba();
+    SDK::Samba* samba();
 };
 
 }

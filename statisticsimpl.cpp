@@ -4,7 +4,7 @@
 using namespace yasem;
 
 StatisticsImpl::StatisticsImpl(QObject* parent):
-    Statistics(parent),
+    SDK::Statistics(parent),
     m_network(new NetworkStatisticsImpl(this))
 {
 
@@ -15,7 +15,7 @@ StatisticsImpl::~StatisticsImpl()
 
 }
 
-NetworkStatistics *yasem::StatisticsImpl::network()
+SDK::NetworkStatistics *yasem::StatisticsImpl::network()
 {
     return m_network;
 }

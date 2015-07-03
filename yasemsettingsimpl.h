@@ -7,7 +7,7 @@
 
 namespace yasem {
 
-class YasemSettingsImpl : public YasemSettings
+class YasemSettingsImpl : public SDK::YasemSettings
 {
     Q_OBJECT
 public:
@@ -19,21 +19,21 @@ public slots:
 
     // YasemSettings interface
 public:
-    bool addConfigGroup(ConfigTreeGroup *group);
-    QHash<const QString&, ConfigTreeGroup *> getConfigGroups();
-    ConfigTreeGroup *getDefaultGroup(const QString &id);
+    bool addConfigGroup(SDK::ConfigTreeGroup *group);
+    QHash<const QString&, SDK::ConfigTreeGroup *> getConfigGroups();
+    SDK::ConfigTreeGroup *getDefaultGroup(const QString &id);
 
 protected:
-    bool addBuiltInConfigGroup(ConfigTreeGroup *group);
+    bool addBuiltInConfigGroup(SDK::ConfigTreeGroup *group);
 
     // YasemSettings interface
 public slots:
-    void save(ConfigContainer *container = 0);
-    void reset(ConfigContainer *container = 0);
-    void load(ConfigContainer *container = 0);
-    void setItemDirty(ConfigItem* item, bool value = true);
-    ConfigItem* findItem(const QStringList& path);
-    ConfigItem* findItem(const QString& path);
+    void save(SDK::ConfigContainer *container = 0);
+    void reset(SDK::ConfigContainer *container = 0);
+    void load(SDK::ConfigContainer *container = 0);
+    void setItemDirty(SDK::ConfigItem* item, bool value = true);
+    SDK::ConfigItem* findItem(const QStringList& path);
+    SDK::ConfigItem* findItem(const QString& path);
     // YasemSettings interface
 public slots:
 

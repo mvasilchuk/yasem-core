@@ -9,35 +9,34 @@
 
 namespace yasem {
 
-class PluginDependency;
-class PluginManagerImpl : public PluginManager
+class PluginManagerImpl : public SDK::PluginManager
 {
     Q_OBJECT
 public:
     PluginManagerImpl();
 
 // PluginManager interface
-    virtual PluginErrorCodes listPlugins();
-    virtual PluginErrorCodes initPlugins();
-    virtual PluginErrorCodes deinitPlugins();
+    virtual SDK::PluginErrorCodes listPlugins();
+    virtual SDK::PluginErrorCodes initPlugins();
+    virtual SDK::PluginErrorCodes deinitPlugins();
     //virtual PLUGIN_ERROR_CODES connectSlots();
-    virtual QList<Plugin*> getPlugins(PluginRole role = ROLE_ANY, bool active_only = true);
-    virtual AbstractPluginObject* getByRole(PluginRole role, bool show_warning = true);
-    virtual QList<AbstractPluginObject*> getAllByRole(PluginRole role, bool active_only = true);
-    virtual Plugin*getByIID(const QString &iid);
+    virtual QList<SDK::Plugin*> getPlugins(SDK::PluginRole role = SDK::ROLE_ANY, bool active_only = true);
+    virtual SDK::AbstractPluginObject* getByRole(SDK::PluginRole role, bool show_warning = true);
+    virtual QList<SDK::AbstractPluginObject*> getAllByRole(SDK::PluginRole role, bool active_only = true);
+    virtual SDK::Plugin* getByIID(const QString &iid);
     virtual void setPluginDir(const QString &pluginDir);
     virtual QString getPluginDir();
 
-    PluginFlag parseFlags(const QString &flagsStr);
+    SDK::PluginFlag parseFlags(const QString &flagsStr);
 
-    bool pluginHasConflicts(Plugin* plugin);
+    bool pluginHasConflicts(SDK::Plugin* plugin);
 
 
     // PluginManager interface
 protected:
-    void registerPluginRole(const PluginRole &role, const PluginRoleData &data);
+    void registerPluginRole(const SDK::PluginRole &role, const SDK::PluginRoleData &data);
 
-    ConfigContainer* m_plugins_config;
+    SDK::ConfigContainer* m_plugins_config;
 
 protected slots:
     void onPluginLoaded();
@@ -45,10 +44,10 @@ protected slots:
     void onPluginInitialized();
     void onPluginDeinitialized();
 
-    PluginErrorCodes initializePlugin(Plugin* plugin, bool go_deeper = true, bool ignore_dependencies = false);
-    PluginErrorCodes deinitializePlugin(Plugin* plugin);
-    QList<PluginDependency> getUnresolvedDependencies(Plugin* plugin);
-    QStringList getDependencyNames(QList<PluginDependency> list);
+    SDK::PluginErrorCodes initializePlugin(SDK::Plugin* plugin, bool go_deeper = true, bool ignore_dependencies = false);
+    SDK::PluginErrorCodes deinitializePlugin(SDK::Plugin* plugin);
+    QList<SDK::PluginDependency> getUnresolvedDependencies(SDK::Plugin* plugin);
+    QStringList getDependencyNames(QList<SDK::PluginDependency> list);
 
 };
 

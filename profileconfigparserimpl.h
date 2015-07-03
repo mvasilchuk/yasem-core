@@ -5,7 +5,7 @@
 
 namespace yasem {
 
-class ProfileConfigParserImpl : public ProfileConfigParser
+class ProfileConfigParserImpl : public SDK::ProfileConfigParser
 {
 
 public:
@@ -13,11 +13,11 @@ public:
 
     // ProfileConfigParser interface
 public:
-    ProfileConfiguration parseOptions(ProfileConfiguration &config, const QByteArray &data);
+    SDK::ProfileConfiguration parseOptions(SDK::ProfileConfiguration &config, const QByteArray &data);
 
 protected:
-    ProfileConfigGroup parseGroup(ProfileConfigGroup &group, const QJsonObject &data);
-    ConfigOption parseOption(ConfigOption &option, const QJsonObject &data);
+    SDK::ProfileConfigGroup parseGroup(SDK::ProfileConfigGroup &group, const QJsonObject &data);
+    SDK::ConfigOption parseOption(SDK::ConfigOption &option, const QJsonObject &data);
     QHash<QString, QString> parseSubOptions(const QJsonObject &data);
 };
 }

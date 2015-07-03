@@ -3,15 +3,16 @@
 
 #include "networkstatistics.h"
 
-namespace yasem
-{
+namespace yasem {
 
+namespace SDK {
 class Statistics;
+}
 
-class NetworkStatisticsImpl: public NetworkStatistics
+class NetworkStatisticsImpl: public SDK::NetworkStatistics
 {
 public:
-    NetworkStatisticsImpl(Statistics* statistics);
+    NetworkStatisticsImpl(SDK::Statistics* statistics);
     virtual ~NetworkStatisticsImpl();
 
     // NetworkStatistics interface
@@ -30,7 +31,7 @@ public:
     virtual quint32 tooSlowConnectionsCount() const;
 
 protected:
-    Statistics* m_statistics;
+    SDK::Statistics* m_statistics;
     quint32 m_total_count;
     quint32 m_successful_count;
     quint32 m_failed_count;

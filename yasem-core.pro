@@ -33,7 +33,6 @@ SOURCES += main.cpp \
     pluginthread.cpp \
     loggercore.cpp \
     yasemapplication.cpp \
-    diskinfo.cpp \
     stacktrace.cxx \
     profileconfigparserimpl.cpp \
     sambaimpl.cpp \

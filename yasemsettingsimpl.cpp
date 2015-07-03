@@ -4,38 +4,38 @@
 using namespace yasem;
 
 YasemSettingsImpl::YasemSettingsImpl(QObject *parent) :
-    YasemSettings(parent)
+    SDK::YasemSettings(parent)
 {
 
 }
 
-bool yasem::YasemSettingsImpl::addConfigGroup(ConfigTreeGroup *group)
+bool YasemSettingsImpl::addConfigGroup(SDK::ConfigTreeGroup *group)
 {
     if(!m_config_groups.contains(group->m_key))
         m_config_groups.insert(group->m_key, group);
     return true;
 }
 
-QHash<const QString&, ConfigTreeGroup *> yasem::YasemSettingsImpl::getConfigGroups()
+QHash<const QString&, SDK::ConfigTreeGroup *> YasemSettingsImpl::getConfigGroups()
 {
     return m_config_groups;
 }
 
-void yasem::YasemSettingsImpl::setItemDirty(ConfigItem* item, bool value)
+void YasemSettingsImpl::setItemDirty(SDK::ConfigItem* item, bool value)
 {
     if(item == NULL) return;
     item->m_is_dirty = value;
     setItemDirty(item->getParentItem(), value);
 }
 
-bool yasem::YasemSettingsImpl::addBuiltInConfigGroup(ConfigTreeGroup *group)
+bool YasemSettingsImpl::addBuiltInConfigGroup(SDK::ConfigTreeGroup *group)
 {
     group->m_is_built_in = true;
     return addConfigGroup(group);
 }
 
 
-ConfigTreeGroup *yasem::YasemSettingsImpl::getDefaultGroup(const QString &id)
+SDK::ConfigTreeGroup *YasemSettingsImpl::getDefaultGroup(const QString &id)
 {
     if(m_config_groups.contains(id))
         return m_config_groups.value(id);
@@ -45,12 +45,12 @@ ConfigTreeGroup *yasem::YasemSettingsImpl::getDefaultGroup(const QString &id)
 
 }
 
-void yasem::YasemSettingsImpl::save(ConfigContainer *container)
+void YasemSettingsImpl::save(SDK::ConfigContainer *container)
 {    
     if(container == NULL)
     {
         DEBUG() << "Saving entire config tree...";
-        for(ConfigTreeGroup* gr: m_config_groups)
+        for(SDK::ConfigTreeGroup* gr: m_config_groups)
             save(gr);
         return;
     }
@@ -65,10 +65,10 @@ void yasem::YasemSettingsImpl::save(ConfigContainer *container)
     if(!config_file.isEmpty())
     {
         DEBUG() << "Saving container" << container->getKey() << "to" << config_file << "...";
-        QSettings* settings = Core::instance()->settings(config_file);
+        QSettings* settings = SDK::Core::instance()->settings(config_file);
         settings->beginGroup(container->getKey());
 
-        for(ConfigItem* item: container->getItems())
+        for(SDK::ConfigItem* item: container->getItems())
         {
             if(!item->isContainer() && item->isDirty())
             {
@@ -87,23 +87,23 @@ void yasem::YasemSettingsImpl::save(ConfigContainer *container)
     //    DEBUG() << "Config tree item" << container->getTitle() << "doesn't have config file";
 
     //... then tree groups, pages, etc.
-    for(ConfigItem* item: container->getItems())
+    for(SDK::ConfigItem* item: container->getItems())
     {
         if(item->isContainer())
         {
-            ConfigContainer* subcontainer = static_cast<ConfigContainer*>(item);
+            SDK::ConfigContainer* subcontainer = static_cast<SDK::ConfigContainer*>(item);
             Q_ASSERT(subcontainer != NULL);
             save(subcontainer);
         }
     }
 }
 
-void yasem::YasemSettingsImpl::reset(ConfigContainer *container)
+void YasemSettingsImpl::reset(SDK::ConfigContainer *container)
 {
     if(container == NULL)
     {
         DEBUG() << "Reseting entire config tree...";
-        for(ConfigTreeGroup* gr: m_config_groups)
+        for(SDK::ConfigTreeGroup* gr: m_config_groups)
             reset(gr);
         return;
     }
@@ -112,12 +112,12 @@ void yasem::YasemSettingsImpl::reset(ConfigContainer *container)
 }
 
 
-void yasem::YasemSettingsImpl::load(ConfigContainer *container)
+void YasemSettingsImpl::load(SDK::ConfigContainer *container)
 {
     if(container == NULL)
     {
         DEBUG() << "Loading entire config tree...";
-        for(ConfigTreeGroup* gr: m_config_groups)
+        for(SDK::ConfigTreeGroup* gr: m_config_groups)
             load(gr);
         return;
     }
@@ -131,10 +131,10 @@ void yasem::YasemSettingsImpl::load(ConfigContainer *container)
         return;
     }
 
-    QSettings* settings = Core::instance()->settings(config_file);
+    QSettings* settings = SDK::Core::instance()->settings(config_file);
     settings->beginGroup(container->getKey());
 
-    for(ConfigItem* item: container->getItems())
+    for(SDK::ConfigItem* item: container->getItems())
     {
         item->setDirty(false);
         if(!item->isContainer())
@@ -149,21 +149,21 @@ void yasem::YasemSettingsImpl::load(ConfigContainer *container)
         else
         {
             DEBUG() << ".... Loading settings container " << item->getKey();
-            load(dynamic_cast<ConfigContainer*>(item));
+            load(dynamic_cast<SDK::ConfigContainer*>(item));
         }
     }
 
     settings->endGroup();
 }
 
-ConfigItem *yasem::YasemSettingsImpl::findItem(const QString &path)
+SDK::ConfigItem *YasemSettingsImpl::findItem(const QString &path)
 {
     return findItem(path.split("/"));
 }
 
-ConfigItem *YasemSettingsImpl::findItem(const QStringList &path)
+SDK::ConfigItem *YasemSettingsImpl::findItem(const QStringList &path)
 {
-    ConfigItem* result = NULL;
+    SDK::ConfigItem* result = NULL;
     if(!path.isEmpty())
     {
         DEBUG() << "Looking in root";
@@ -173,7 +173,7 @@ ConfigItem *YasemSettingsImpl::findItem(const QStringList &path)
             if(path.at(0).isEmpty())
                 first_index = 1;
 
-            for(ConfigItem* item: m_config_groups)
+            for(SDK::ConfigItem* item: m_config_groups)
             {
                 if(item->getKey() == path.at(first_index))
                 {
@@ -184,7 +184,7 @@ ConfigItem *YasemSettingsImpl::findItem(const QStringList &path)
         }
         else
         {
-            for(ConfigItem* item: m_config_groups)
+            for(SDK::ConfigItem* item: m_config_groups)
             {
                 if(item->getKey() == path.at(0))
                 {

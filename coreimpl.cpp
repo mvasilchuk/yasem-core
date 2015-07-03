@@ -67,16 +67,16 @@ CoreImpl::CoreImpl(QObject *parent ):
     fillKeymapHashTable();
 
     // Regular expressions to extract information from hwinfo's output.
-    hwinfo_regex_list.insert(HwinfoLineTypes::TITLE,           QRegularExpression("^(\\d+):\\s+(\\w+)\\s+\\d+\\.\\d+:\\s+\\d+\\s+\\w+\n"));
-    hwinfo_regex_list.insert(HwinfoLineTypes::HARDWARE_CLASS,  QRegularExpression("Hardware Class:\\s+(\\w+)\n"));
-    hwinfo_regex_list.insert(HwinfoLineTypes::UNIQUE_ID,       QRegularExpression("Unique ID:\\s+(.*)\n"));
-    hwinfo_regex_list.insert(HwinfoLineTypes::PARENT_ID,       QRegularExpression("Parent ID:\\s+(.*)\n"));
-    hwinfo_regex_list.insert(HwinfoLineTypes::SYS_FS_ID,       QRegularExpression("SysFS ID:\\s+(.*)\n"));
-    hwinfo_regex_list.insert(HwinfoLineTypes::MODEL,           QRegularExpression("Model:\\s+\\\"(.*)\\\"\n"));
-    hwinfo_regex_list.insert(HwinfoLineTypes::VENDOR,          QRegularExpression("Vendor:\\s+(?:.*\\s+)?\\\"(.*)\\\"\n"));
-    hwinfo_regex_list.insert(HwinfoLineTypes::DEVICE,          QRegularExpression("Device:\\s+(?:.*\\s+)?\\\"(.*)\\\"\n"));
-    hwinfo_regex_list.insert(HwinfoLineTypes::REVISION,        QRegularExpression("Revision:\\s+\\\"(.*)\\\"\n"));
-    hwinfo_regex_list.insert(HwinfoLineTypes::DEVICE_FILE,     QRegularExpression("Device File:\\s+(/dev/\\w+)\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::TITLE,           QRegularExpression("^(\\d+):\\s+(\\w+)\\s+\\d+\\.\\d+:\\s+\\d+\\s+\\w+\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::HARDWARE_CLASS,  QRegularExpression("Hardware Class:\\s+(\\w+)\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::UNIQUE_ID,       QRegularExpression("Unique ID:\\s+(.*)\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::PARENT_ID,       QRegularExpression("Parent ID:\\s+(.*)\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::SYS_FS_ID,       QRegularExpression("SysFS ID:\\s+(.*)\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::MODEL,           QRegularExpression("Model:\\s+\\\"(.*)\\\"\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::VENDOR,          QRegularExpression("Vendor:\\s+(?:.*\\s+)?\\\"(.*)\\\"\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::DEVICE,          QRegularExpression("Device:\\s+(?:.*\\s+)?\\\"(.*)\\\"\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::REVISION,        QRegularExpression("Revision:\\s+\\\"(.*)\\\"\n"));
+    hwinfo_regex_list.insert(SDK::HwinfoLineTypes::DEVICE_FILE,     QRegularExpression("Device File:\\s+(/dev/\\w+)\n"));
 
     //mountPointChanged();
 
@@ -91,52 +91,52 @@ CoreImpl::~CoreImpl()
 
 void CoreImpl::fillKeymapHashTable()
 {
-    keycode_hashes["RC_KEY_NO_KEY"]         = RC_KEY_NO_KEY;
+    keycode_hashes["RC_KEY_NO_KEY"]         = SDK::RC_KEY_NO_KEY;
 
-    keycode_hashes["RC_KEY_OK"]             = RC_KEY_OK;
-    keycode_hashes["RC_KEY_RIGHT"]          = RC_KEY_RIGHT;
-    keycode_hashes["RC_KEY_LEFT"]           = RC_KEY_LEFT;
-    keycode_hashes["RC_KEY_UP"]             = RC_KEY_UP;
-    keycode_hashes["RC_KEY_DOWN"]           = RC_KEY_DOWN;
-    keycode_hashes["RC_KEY_PAGE_UP"]        = RC_KEY_PAGE_UP;
-    keycode_hashes["RC_KEY_PAGE_DOWN"]      = RC_KEY_PAGE_DOWN;
-    keycode_hashes["RC_KEY_MENU"]           = RC_KEY_MENU;
-    keycode_hashes["RC_KEY_BACK"]           = RC_KEY_BACK;
-    keycode_hashes["RC_KEY_REFRESH"]        = RC_KEY_REFRESH;
-    keycode_hashes["RC_KEY_RED"]            = RC_KEY_RED;
-    keycode_hashes["RC_KEY_GREEN"]          = RC_KEY_GREEN;
-    keycode_hashes["RC_KEY_YELLOW"]         = RC_KEY_YELLOW;
-    keycode_hashes["RC_KEY_BLUE"]           = RC_KEY_BLUE;
-    keycode_hashes["RC_KEY_CHANNEL_PLUS"]   = RC_KEY_CHANNEL_PLUS;
-    keycode_hashes["RC_KEY_CHANNEL_MINUS"]  = RC_KEY_CHANNEL_MINUS;
-    keycode_hashes["RC_KEY_SERVICE"]        = RC_KEY_SERVICE;
-    keycode_hashes["RC_KEY_TV"]             = RC_KEY_TV;
-    keycode_hashes["RC_KEY_PHONE"]          = RC_KEY_PHONE;
-    keycode_hashes["RC_KEY_WEB"]            = RC_KEY_WEB;
-    keycode_hashes["RC_KEY_FRAME"]          = RC_KEY_FRAME;
-    keycode_hashes["RC_KEY_VOLUME_PLUS"]    = RC_KEY_VOLUME_UP;
-    keycode_hashes["RC_KEY_VOLUME_MINUS"]   = RC_KEY_VOLUME_DOWN;
-    keycode_hashes["RC_KEY_REWIND"]         = RC_KEY_REWIND;
-    keycode_hashes["RC_KEY_FAST_FORWARD"]   = RC_KEY_FAST_FORWARD;
-    keycode_hashes["RC_KEY_STOP"]           = RC_KEY_STOP;
-    keycode_hashes["RC_KEY_PLAY_PAUSE"]     = RC_KEY_PLAY_PAUSE;
-    keycode_hashes["RC_KEY_PLAY"]           = RC_KEY_PLAY;
-    keycode_hashes["RC_KEY_REC"]            = RC_KEY_REC;
-    keycode_hashes["RC_KEY_MIC"]            = RC_KEY_MIC;
-    keycode_hashes["RC_KEY_MUTE"]           = RC_KEY_MUTE;
-    keycode_hashes["RC_KEY_POWER"]          = RC_KEY_POWER;
-    keycode_hashes["RC_KEY_INFO"]           = RC_KEY_INFO;
-    keycode_hashes["RC_KEY_NUMBER_0"]       = RC_KEY_NUMBER_0;
-    keycode_hashes["RC_KEY_NUMBER_1"]       = RC_KEY_NUMBER_1;
-    keycode_hashes["RC_KEY_NUMBER_2"]       = RC_KEY_NUMBER_2;
-    keycode_hashes["RC_KEY_NUMBER_3"]       = RC_KEY_NUMBER_3;
-    keycode_hashes["RC_KEY_NUMBER_4"]       = RC_KEY_NUMBER_4;
-    keycode_hashes["RC_KEY_NUMBER_5"]       = RC_KEY_NUMBER_5;
-    keycode_hashes["RC_KEY_NUMBER_6"]       = RC_KEY_NUMBER_6;
-    keycode_hashes["RC_KEY_NUMBER_7"]       = RC_KEY_NUMBER_7;
-    keycode_hashes["RC_KEY_NUMBER_8"]       = RC_KEY_NUMBER_8;
-    keycode_hashes["RC_KEY_NUMBER_9"]       = RC_KEY_NUMBER_9;
-    keycode_hashes["RC_KEY_EXIT"]           = RC_KEY_EXIT;
+    keycode_hashes["RC_KEY_OK"]             = SDK::RC_KEY_OK;
+    keycode_hashes["RC_KEY_RIGHT"]          = SDK::RC_KEY_RIGHT;
+    keycode_hashes["RC_KEY_LEFT"]           = SDK::RC_KEY_LEFT;
+    keycode_hashes["RC_KEY_UP"]             = SDK::RC_KEY_UP;
+    keycode_hashes["RC_KEY_DOWN"]           = SDK::RC_KEY_DOWN;
+    keycode_hashes["RC_KEY_PAGE_UP"]        = SDK::RC_KEY_PAGE_UP;
+    keycode_hashes["RC_KEY_PAGE_DOWN"]      = SDK::RC_KEY_PAGE_DOWN;
+    keycode_hashes["RC_KEY_MENU"]           = SDK::RC_KEY_MENU;
+    keycode_hashes["RC_KEY_BACK"]           = SDK::RC_KEY_BACK;
+    keycode_hashes["RC_KEY_REFRESH"]        = SDK::RC_KEY_REFRESH;
+    keycode_hashes["RC_KEY_RED"]            = SDK::RC_KEY_RED;
+    keycode_hashes["RC_KEY_GREEN"]          = SDK::RC_KEY_GREEN;
+    keycode_hashes["RC_KEY_YELLOW"]         = SDK::RC_KEY_YELLOW;
+    keycode_hashes["RC_KEY_BLUE"]           = SDK::RC_KEY_BLUE;
+    keycode_hashes["RC_KEY_CHANNEL_PLUS"]   = SDK::RC_KEY_CHANNEL_PLUS;
+    keycode_hashes["RC_KEY_CHANNEL_MINUS"]  = SDK::RC_KEY_CHANNEL_MINUS;
+    keycode_hashes["RC_KEY_SERVICE"]        = SDK::RC_KEY_SERVICE;
+    keycode_hashes["RC_KEY_TV"]             = SDK::RC_KEY_TV;
+    keycode_hashes["RC_KEY_PHONE"]          = SDK::RC_KEY_PHONE;
+    keycode_hashes["RC_KEY_WEB"]            = SDK::RC_KEY_WEB;
+    keycode_hashes["RC_KEY_FRAME"]          = SDK::RC_KEY_FRAME;
+    keycode_hashes["RC_KEY_VOLUME_PLUS"]    = SDK::RC_KEY_VOLUME_UP;
+    keycode_hashes["RC_KEY_VOLUME_MINUS"]   = SDK::RC_KEY_VOLUME_DOWN;
+    keycode_hashes["RC_KEY_REWIND"]         = SDK::RC_KEY_REWIND;
+    keycode_hashes["RC_KEY_FAST_FORWARD"]   = SDK::RC_KEY_FAST_FORWARD;
+    keycode_hashes["RC_KEY_STOP"]           = SDK::RC_KEY_STOP;
+    keycode_hashes["RC_KEY_PLAY_PAUSE"]     = SDK::RC_KEY_PLAY_PAUSE;
+    keycode_hashes["RC_KEY_PLAY"]           = SDK::RC_KEY_PLAY;
+    keycode_hashes["RC_KEY_REC"]            = SDK::RC_KEY_REC;
+    keycode_hashes["RC_KEY_MIC"]            = SDK::RC_KEY_MIC;
+    keycode_hashes["RC_KEY_MUTE"]           = SDK::RC_KEY_MUTE;
+    keycode_hashes["RC_KEY_POWER"]          = SDK::RC_KEY_POWER;
+    keycode_hashes["RC_KEY_INFO"]           = SDK::RC_KEY_INFO;
+    keycode_hashes["RC_KEY_NUMBER_0"]       = SDK::RC_KEY_NUMBER_0;
+    keycode_hashes["RC_KEY_NUMBER_1"]       = SDK::RC_KEY_NUMBER_1;
+    keycode_hashes["RC_KEY_NUMBER_2"]       = SDK::RC_KEY_NUMBER_2;
+    keycode_hashes["RC_KEY_NUMBER_3"]       = SDK::RC_KEY_NUMBER_3;
+    keycode_hashes["RC_KEY_NUMBER_4"]       = SDK::RC_KEY_NUMBER_4;
+    keycode_hashes["RC_KEY_NUMBER_5"]       = SDK::RC_KEY_NUMBER_5;
+    keycode_hashes["RC_KEY_NUMBER_6"]       = SDK::RC_KEY_NUMBER_6;
+    keycode_hashes["RC_KEY_NUMBER_7"]       = SDK::RC_KEY_NUMBER_7;
+    keycode_hashes["RC_KEY_NUMBER_8"]       = SDK::RC_KEY_NUMBER_8;
+    keycode_hashes["RC_KEY_NUMBER_9"]       = SDK::RC_KEY_NUMBER_9;
+    keycode_hashes["RC_KEY_EXIT"]           = SDK::RC_KEY_EXIT;
 }
 
 QSettings *CoreImpl::settings()
@@ -152,15 +152,15 @@ QSettings *CoreImpl::settings(const QString &filename)
 void CoreImpl::onClose()
 {
     LOG() << "onClose";
-    PluginManager::instance()->deinitPlugins();
+    SDK::PluginManager::instance()->deinitPlugins();
 }
 
 void CoreImpl::initBuiltInSettingsGroup()
 {
-    ConfigTreeGroup* appearence = new ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_APPEARANCE,   tr("Appearance"));
-    ConfigTreeGroup* media      = new ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_MEDIA,        tr("Media"));
-    ConfigTreeGroup* plugins    = new ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_PLUGINS,      tr("Plugins"));
-    ConfigTreeGroup* other      = new ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_OTHER,        tr("Other"));
+    SDK::ConfigTreeGroup* appearence = new SDK::ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_APPEARANCE,   tr("Appearance"));
+    SDK::ConfigTreeGroup* media      = new SDK::ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_MEDIA,        tr("Media"));
+    SDK::ConfigTreeGroup* plugins    = new SDK::ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_PLUGINS,      tr("Plugins"));
+    SDK::ConfigTreeGroup* other      = new SDK::ConfigTreeGroup(CONFIG_NAME, SETTINGS_GROUP_OTHER,        tr("Other"));
 
     m_yasem_settings->addBuiltInConfigGroup(appearence);
     m_yasem_settings->addBuiltInConfigGroup(media);
@@ -170,34 +170,34 @@ void CoreImpl::initBuiltInSettingsGroup()
 
 void CoreImpl::initSettings()
 {
-    ConfigTreeGroup* media = m_yasem_settings->getDefaultGroup(SETTINGS_GROUP_MEDIA);
-    ConfigTreeGroup* other = m_yasem_settings->getDefaultGroup(SETTINGS_GROUP_OTHER);
+    SDK::ConfigTreeGroup* media = m_yasem_settings->getDefaultGroup(SETTINGS_GROUP_MEDIA);
+    SDK::ConfigTreeGroup* other = m_yasem_settings->getDefaultGroup(SETTINGS_GROUP_OTHER);
 
-    ConfigTreeGroup* video = new ConfigTreeGroup("video", tr("Video"));
+    SDK::ConfigTreeGroup* video = new SDK::ConfigTreeGroup("video", tr("Video"));
 
-    ListConfigItem* aspect_ratio = new ListConfigItem("aspect_ratio", tr("Default aspect ratio"), ASPECT_RATIO_16_9);
+    SDK::ListConfigItem* aspect_ratio = new SDK::ListConfigItem("aspect_ratio", tr("Default aspect ratio"), SDK::ASPECT_RATIO_16_9);
     QMap<QString, QVariant>& ar_list = aspect_ratio->options();
 
-    ar_list.insert(tr("Auto"),      ASPECT_RATIO_AUTO);
-    ar_list.insert(tr("1:1"),       ASPECT_RATIO_1_1);
-    ar_list.insert(tr("5:4"),       ASPECT_RATIO_5_4);
-    ar_list.insert(tr("4:3"),       ASPECT_RATIO_4_3);
-    ar_list.insert(tr("11:8"),      ASPECT_RATIO_11_8);
-    ar_list.insert(tr("14:10"),     ASPECT_RATIO_14_10);
-    ar_list.insert(tr("3:2"),       ASPECT_RATIO_3_2);
-    ar_list.insert(tr("14:9"),      ASPECT_RATIO_14_9);
-    ar_list.insert(tr("16:10"),     ASPECT_RATIO_16_10);
-    ar_list.insert(tr("16:9"),      ASPECT_RATIO_16_9);
-    ar_list.insert(tr("2.35:1"),    ASPECT_RATIO_2_35_1);
-    ar_list.insert(tr("20:9"),      ASPECT_RATIO_20_9);
+    ar_list.insert(tr("Auto"),      SDK::ASPECT_RATIO_AUTO);
+    ar_list.insert(tr("1:1"),       SDK::ASPECT_RATIO_1_1);
+    ar_list.insert(tr("5:4"),       SDK::ASPECT_RATIO_5_4);
+    ar_list.insert(tr("4:3"),       SDK::ASPECT_RATIO_4_3);
+    ar_list.insert(tr("11:8"),      SDK::ASPECT_RATIO_11_8);
+    ar_list.insert(tr("14:10"),     SDK::ASPECT_RATIO_14_10);
+    ar_list.insert(tr("3:2"),       SDK::ASPECT_RATIO_3_2);
+    ar_list.insert(tr("14:9"),      SDK::ASPECT_RATIO_14_9);
+    ar_list.insert(tr("16:10"),     SDK::ASPECT_RATIO_16_10);
+    ar_list.insert(tr("16:9"),      SDK::ASPECT_RATIO_16_9);
+    ar_list.insert(tr("2.35:1"),    SDK::ASPECT_RATIO_2_35_1);
+    ar_list.insert(tr("20:9"),      SDK::ASPECT_RATIO_20_9);
 
     video->addItem(aspect_ratio);
     media->addItem(video);
 
-    ConfigTreeGroup* network_statistics     = new ConfigTreeGroup(NETWORK_STATISTICS, tr("Network statistics"));
-    ConfigItem* enable_network_statistics   = new ConfigItem(NETWORK_STATISTICS_ENABLED, tr("Enable statistics"), "true", ConfigItem::BOOL);
-    ConfigItem* slow_request_timeout        = new ConfigItem(NETWORK_STATISTICS_SLOW_REQ_TIMEOUT,
-                                                             tr("Mark request as slow if it takes, ms"), "5000", ConfigItem::INT);
+    SDK::ConfigTreeGroup* network_statistics     = new SDK::ConfigTreeGroup(NETWORK_STATISTICS, tr("Network statistics"));
+    SDK::ConfigItem* enable_network_statistics   = new SDK::ConfigItem(NETWORK_STATISTICS_ENABLED, tr("Enable statistics"), "true", SDK::ConfigItem::BOOL);
+    SDK::ConfigItem* slow_request_timeout        = new SDK::ConfigItem(NETWORK_STATISTICS_SLOW_REQ_TIMEOUT,
+                                                             tr("Mark request as slow if it takes, ms"), "5000", SDK::ConfigItem::INT);
 
     network_statistics->addItem(enable_network_statistics);
     network_statistics->addItem(slow_request_timeout);
@@ -232,7 +232,7 @@ void CoreImpl::mountPointChanged()
         if(matcher.hasMatch())
         {
             //DEBUG(QString("DRIVES: ").append(result.remove(result.length()-1, 1)));
-            StorageInfo* info = new StorageInfo();
+            SDK::StorageInfo* info = new SDK::StorageInfo();
             info->index = counter;
             info->blockDevice = matcher.captured(1);
             info->size = matcher.captured(2).toLong();
@@ -258,10 +258,10 @@ void CoreImpl::mountPointChanged()
     df.waitForFinished();
     buildBlockDeviceTree();
 
-    for(StorageInfo* disk: m_disks)
+    for(SDK::StorageInfo* disk: m_disks)
     {
         QString device = disk->blockDevice;
-        for(BlockDeviceInfo* block_device: block_device_tree)
+        for(SDK::BlockDeviceInfo* block_device: block_device_tree)
         {
             if(device.startsWith(block_device->device_file))
             {
@@ -312,58 +312,58 @@ void CoreImpl::buildBlockDeviceTree()
     block_device_tree.clear();
     for(QString part_data: data)
     {
-        BlockDeviceInfo* block_device = new BlockDeviceInfo(this);
-        for(HwinfoLineTypes index: hwinfo_regex_list.keys())
+        SDK::BlockDeviceInfo* block_device = new SDK::BlockDeviceInfo(this);
+        for(SDK::HwinfoLineTypes index: hwinfo_regex_list.keys())
         {
             QRegularExpressionMatch matcher = hwinfo_regex_list.value(index).match(part_data);
             if(matcher.hasMatch())
             {
                 switch(index) {
-                    case HwinfoLineTypes::TITLE: {
+                    case SDK::HwinfoLineTypes::TITLE: {
                         block_device->index = matcher.captured(1).toInt();
                         break;
                     }
-                    case HwinfoLineTypes::HARDWARE_CLASS: {
+                    case SDK::HwinfoLineTypes::HARDWARE_CLASS: {
                         QString hw_class_name = matcher.captured(1);
                         if(hw_class_name == "disk")
-                            block_device->hardware_type = BlockDeviceType::DEVICE_TYPE_DISK;
+                            block_device->hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_DISK;
                         else if(hw_class_name == "partition")
-                            block_device->hardware_type = BlockDeviceType::DEVICE_TYPE_PARTITION;
+                            block_device->hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_PARTITION;
                         else if(hw_class_name == "cdrom")
-                            block_device->hardware_type = BlockDeviceType::DEVICE_TYPE_CD_ROM;
+                            block_device->hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_CD_ROM;
                         else
-                            block_device->hardware_type = BlockDeviceType::DEVICE_TYPE_UNKNOWN;
+                            block_device->hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_UNKNOWN;
                         break;
                     }
-                    case HwinfoLineTypes::UNIQUE_ID: {
+                    case SDK::HwinfoLineTypes::UNIQUE_ID: {
                         block_device->unique_id = matcher.captured(1);
                         break;
                     }
-                    case HwinfoLineTypes::PARENT_ID: {
+                    case SDK::HwinfoLineTypes::PARENT_ID: {
                         block_device->parent_id = matcher.captured(1);
                         break;
                     }
-                    case HwinfoLineTypes::SYS_FS_ID: {
+                    case SDK::HwinfoLineTypes::SYS_FS_ID: {
                         block_device->sys_fs_id = matcher.captured(1);
                         break;
                     }
-                    case HwinfoLineTypes::MODEL: {
+                    case SDK::HwinfoLineTypes::MODEL: {
                         block_device->model = matcher.captured(1);
                         break;
                     }
-                    case HwinfoLineTypes::VENDOR: {
+                    case SDK::HwinfoLineTypes::VENDOR: {
                         block_device->vendor = matcher.captured(1);
                         break;
                     }
-                    case HwinfoLineTypes::DEVICE: {
+                    case SDK::HwinfoLineTypes::DEVICE: {
                         block_device->device = matcher.captured(1);
                         break;
                     }
-                    case HwinfoLineTypes::REVISION: {
+                    case SDK::HwinfoLineTypes::REVISION: {
                         block_device->revision = matcher.captured(1);
                         break;
                     }
-                    case HwinfoLineTypes::DEVICE_FILE: {
+                    case SDK::HwinfoLineTypes::DEVICE_FILE: {
                         block_device->device_file = matcher.captured(1);
                         break;
                     }
@@ -372,23 +372,23 @@ void CoreImpl::buildBlockDeviceTree()
         }
 
         DEBUG() << "block device" << block_device->toString();
-        if(block_device->hardware_type == DEVICE_TYPE_DISK)
+        if(block_device->hardware_type == SDK::DEVICE_TYPE_DISK)
         {
             block_device_tree.insert(block_device->unique_id, block_device);
         }
-        else if(block_device->hardware_type == DEVICE_TYPE_PARTITION)
+        else if(block_device->hardware_type == SDK::DEVICE_TYPE_PARTITION)
         {
             block_device_tree.value(block_device->parent_id)->children.append(block_device);
         }
     }
 }
 
-QList<StorageInfo *> CoreImpl::storages()
+QList<SDK::StorageInfo *> CoreImpl::storages()
 {
     return m_disks;
 }
 
-CoreNetwork* CoreImpl::network()
+SDK::CoreNetwork* CoreImpl::network()
 {
     return m_network;
 }
@@ -398,19 +398,19 @@ QThread* CoreImpl::mainThread()
     return this->thread();
 }
 
-QHash<QString, RC_KEY> CoreImpl::getKeycodeHashes()
+QHash<QString, SDK::RC_KEY> CoreImpl::getKeycodeHashes()
 {
     return keycode_hashes;
 }
 
 
-QString yasem::CoreImpl::version()
+QString CoreImpl::version()
 {
     return MODULE_VERSION;
 }
 
 
-QString yasem::CoreImpl::revision()
+QString CoreImpl::revision()
 {
     return GIT_VERSION;
 }
@@ -425,7 +425,7 @@ QString CoreImpl::getConfigDir() const
     return m_config_dir;
 }
 
-Core::VirtualMachine CoreImpl::getVM()
+SDK::Core::VirtualMachine CoreImpl::getVM()
 {
     if(m_detected_vm != VM_NOT_SET) return m_detected_vm;
 
@@ -466,14 +466,14 @@ Core::VirtualMachine CoreImpl::getVM()
 }
 
 
-YasemSettings *yasem::CoreImpl::yasem_settings()
+SDK::YasemSettings *yasem::CoreImpl::yasem_settings()
 {
     Q_ASSERT(m_yasem_settings);
     return m_yasem_settings;
 }
 
 
-Statistics *yasem::CoreImpl::statistics()
+SDK::Statistics *CoreImpl::statistics()
 {
     Q_ASSERT(m_statistics);
     return m_statistics;

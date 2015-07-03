@@ -7,16 +7,16 @@
 namespace yasem
 {
 
-class StatisticsImpl: public Statistics
+class StatisticsImpl: public SDK::Statistics
 {
 public:
     StatisticsImpl(QObject* parent);
     virtual ~StatisticsImpl();
 
 
-    virtual NetworkStatistics *network();
+    virtual SDK::NetworkStatistics *network();
 protected:
-    NetworkStatistics* m_network;
+    SDK::NetworkStatistics* m_network;
 
     // Statistics interface
 public:

@@ -6,9 +6,11 @@
 
 namespace yasem {
 
+namespace SDK {
 class Statistics;
+}
 
-class CoreImpl : public Core
+class CoreImpl : public SDK::Core
 {
     Q_OBJECT
 public:
@@ -18,10 +20,10 @@ signals:
 
 protected:
     QSettings* m_app_settings;
-    CoreNetwork* m_network;
-    YasemSettings* m_yasem_settings;
-    Statistics* m_statistics;
-    QList<StorageInfo *> m_disks;
+    SDK::CoreNetwork* m_network;
+    SDK::YasemSettings* m_yasem_settings;
+    SDK::Statistics* m_statistics;
+    QList<SDK::StorageInfo *> m_disks;
 
     QString m_config_dir;
     VirtualMachine m_detected_vm;
@@ -42,15 +44,15 @@ public slots:
 public:
     QSettings *settings();
     QSettings* settings(const QString &filename);
-    YasemSettings *yasem_settings();
+    SDK::YasemSettings *yasem_settings();
 
-    QList<StorageInfo *> storages();
-    CoreNetwork* network();
-    Statistics* statistics();
+    QList<SDK::StorageInfo *> storages();
+    SDK::CoreNetwork* network();
+    SDK::Statistics* statistics();
     VirtualMachine getVM();
 
     // Core interface
-    QHash<QString, RC_KEY> getKeycodeHashes();
+    QHash<QString, SDK::RC_KEY> getKeycodeHashes();
     Q_INVOKABLE QString version();
     Q_INVOKABLE QString revision();
     Q_INVOKABLE QString compiler();

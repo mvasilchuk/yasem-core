@@ -16,6 +16,8 @@
 #ifndef Q_OS_ANDROID
 #include <unistd.h>
 
+using namespace yasem;
+
 void signalHandler(int signal)
 {
     //print received signal
@@ -26,12 +28,12 @@ void signalHandler(int signal)
         case SIGSTOP: printf("SIGSTOP\r\n"); break;
         case SIGTERM: printf("SIGTERM\r\n"); break;
         case SIGSEGV: printf("SIGSEGV\r\n");
-            yasem::Core::printCallStack();
+            SDK::Core::printCallStack();
             abort();
         break;
         default:
             printf("APPLICATION EXITING\r\n");
-            yasem::Core::printCallStack();
+            SDK::Core::printCallStack();
             break;
     }
     QCoreApplication::quit();
@@ -134,31 +136,31 @@ int main(int argc, char *argv[])
     #endif
     #endif //Q_OS_LINUX
 
-    Core::setInstance(new CoreImpl(qApp));
-    a.setProperty("Core", QVariant::fromValue(Core::instance()));
-    Core::instance()->init();
+    SDK::Core::setInstance(new CoreImpl(qApp));
+    a.setProperty("Core", QVariant::fromValue(SDK::Core::instance()));
+    SDK::Core::instance()->init();
 
     qDebug() << "Library paths: " << QApplication::libraryPaths();
 
-    ProfileManager::setInstance(new ProfileManageImpl());
-    a.setProperty("ProfileManager", QVariant::fromValue(ProfileManager::instance()));
+    SDK::ProfileManager::setInstance(new ProfileManageImpl());
+    a.setProperty("ProfileManager", QVariant::fromValue(SDK::ProfileManager::instance()));
 
-    Core::instance()->mountPointChanged();
+    SDK::Core::instance()->mountPointChanged();
 
     qDebug() << "Starting application...";
 
-    PluginManager::setInstance(new PluginManagerImpl());
-    a.setProperty("PluginManager", QVariant::fromValue(PluginManager::instance()));
+    SDK::PluginManager::setInstance(new PluginManagerImpl());
+    a.setProperty("PluginManager", QVariant::fromValue(SDK::PluginManager::instance()));
 
 #ifndef STATIC_BUILD
-    PluginErrorCodes listResult = PluginManager::instance()->listPlugins();
+    SDK::PluginErrorCodes listResult = SDK::PluginManager::instance()->listPlugins();
 #else
-    PLUGIN_ERROR_CODES listResult = PLUGIN_ERROR_NO_ERROR;
+    SDK::PLUGIN_ERROR_CODES listResult = SDK::PLUGIN_ERROR_NO_ERROR;
 #endif
-    if(listResult == PLUGIN_ERROR_NO_ERROR)
+    if(listResult == SDK::PLUGIN_ERROR_NO_ERROR)
     {
-        PluginErrorCodes initResult = PluginManager::instance()->initPlugins();
-        if(initResult != PLUGIN_ERROR_NO_ERROR)
+        SDK::PluginErrorCodes initResult = SDK::PluginManager::instance()->initPlugins();
+        if(initResult != SDK::PLUGIN_ERROR_NO_ERROR)
         {
             qCritical() << "Cannot initialize plugins. Error code" << initResult;
             return listResult;

@@ -79,7 +79,7 @@ QList<QNetworkInterface> NetworkImpl::getInterfaces()
 }
 
 
-Samba* yasem::NetworkImpl::samba()
+SDK::Samba* yasem::NetworkImpl::samba()
 {
     if(samba_impl == NULL)
         samba_impl = new SambaImpl(this);

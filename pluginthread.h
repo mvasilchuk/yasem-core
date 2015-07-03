@@ -1,18 +1,18 @@
 #ifndef PLUGINTHREAD_H
 #define PLUGINTHREAD_H
 
-#include "plugin.h"
-
 #include <QThread>
 
-namespace yasem
-{
+namespace yasem {
+namespace SDK {
+class Plugin;
+}
 
 class PluginThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit PluginThread(Plugin* plugin, QObject *parent = 0);
+    explicit PluginThread(SDK::Plugin* plugin, QObject *parent = 0);
 
 signals:
 public slots:
@@ -20,7 +20,7 @@ public slots:
 
     // QThread interface
 protected:
-    Plugin* plugin;
+    SDK::Plugin* plugin;
     void run();
 };
 

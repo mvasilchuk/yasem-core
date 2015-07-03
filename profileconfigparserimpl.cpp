@@ -14,7 +14,7 @@ ProfileConfigParserImpl::ProfileConfigParserImpl()
 }
 
 
-ProfileConfiguration ProfileConfigParserImpl::parseOptions(ProfileConfiguration &config, const QByteArray &data)
+SDK::ProfileConfiguration ProfileConfigParserImpl::parseOptions(SDK::ProfileConfiguration &config, const QByteArray &data)
 {
     DEBUG() << data;
 
@@ -31,27 +31,27 @@ ProfileConfiguration ProfileConfigParserImpl::parseOptions(ProfileConfiguration 
 
     for(int index = 0; index < config.groups.size(); index++)
     {
-        ProfileConfigGroup group =  config.groups.at(index);
+        SDK::ProfileConfigGroup group =  config.groups.at(index);
         config.groups.append(parseGroup(group, root.at(index).toObject()));
     }
 
     return config;
 }
 
-ProfileConfigGroup ProfileConfigParserImpl::parseGroup(ProfileConfigGroup &group, const QJsonObject &data)
+SDK::ProfileConfigGroup ProfileConfigParserImpl::parseGroup(SDK::ProfileConfigGroup &group, const QJsonObject &data)
 {
     group.title = data.value("title").toString();
     QJsonArray options = data.value("options").toArray();
     for(int index = 0; index < options.size(); index++)
     {
-        ConfigOption option = group.options.at(index);
+        SDK::ConfigOption option = group.options.at(index);
         group.options.append(parseOption(option, options.at(index).toObject()));
     }
 
     return group;
 }
 
-ConfigOption ProfileConfigParserImpl::parseOption(ConfigOption &option, const QJsonObject &data)
+SDK::ConfigOption ProfileConfigParserImpl::parseOption(SDK::ConfigOption &option, const QJsonObject &data)
 {
     option.tag = data.value("tag").toString();
     option.name = data.value("name").toString();

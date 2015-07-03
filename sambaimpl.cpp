@@ -13,8 +13,8 @@ using namespace yasem;
 
 SambaImpl::SambaImpl(QObject* parent) : Samba(parent)
 {
-    sambaTree = new SambaNode(this);
-    sambaTree->type = SAMBA_ROOT;
+    sambaTree = new SDK::SambaNode(this);
+    sambaTree->type = SDK::SAMBA_ROOT;
     sambaTree->name = "ROOT";
 }
 
@@ -26,7 +26,7 @@ SambaImpl::~SambaImpl()
 
 }
 
-QList<SambaNode*> yasem::SambaImpl::domains()
+QList<SDK::SambaNode*> SambaImpl::domains()
 {
     if(sambaTree->children.size() == 0)
         makeTree();
@@ -34,29 +34,29 @@ QList<SambaNode*> yasem::SambaImpl::domains()
     return sambaTree->children;
 }
 
-QList<SambaNode*> yasem::SambaImpl::hosts(const QString &domainName)
+QList<SDK::SambaNode*> yasem::SambaImpl::hosts(const QString &domainName)
 {
     if(sambaTree->children.size() == 0)
         makeTree();
 
-    for(SambaNode* domain: sambaTree->children)
+    for(SDK::SambaNode* domain: sambaTree->children)
     {
         if(domain->name == domainName)
         {
             return domain->children;
         }
     }
-    return QList<SambaNode*>();
+    return QList<SDK::SambaNode*>();
 }
 
-QList<SambaNode*> SambaImpl::shares(const QString &hostName)
+QList<SDK::SambaNode*> SambaImpl::shares(const QString &hostName)
 {
     if(sambaTree->children.size() == 0)
         makeTree();
 
-    for(SambaNode* domain: sambaTree->children)
+    for(SDK::SambaNode* domain: sambaTree->children)
     {
-        for(SambaNode* host: domain->children)
+        for(SDK::SambaNode* host: domain->children)
         {
             if(host->name == hostName)
             {
@@ -64,14 +64,14 @@ QList<SambaNode*> SambaImpl::shares(const QString &hostName)
             }
         }
     }
-    return QList<SambaNode*>();
+    return QList<SDK::SambaNode*>();
 }
 
 void SambaImpl::makeTree()
 {
     DEBUG() << "-----  TREE START ------";
     #ifdef Q_OS_UNIX
-    bool use_broadcasting = Core::instance()->settings()->value("samba/use_broadcasting", false).toBool();
+    bool use_broadcasting = SDK::Core::instance()->settings()->value("samba/use_broadcasting", false).toBool();
 
     QProcess smbtree;
     QStringList params;
@@ -90,45 +90,45 @@ void SambaImpl::makeTree()
     QRegularExpression nodeRegex("^(?:\\t){0,2}(?:\\\\){0,2}(?:\\t){0,2}(?<host>[\\w\\d-\\\\\\$]*)(?:\\s+(?<description>.*?))$");
     nodeRegex.setPatternOptions(QRegularExpression::MultilineOption);
 
-    SambaNode* last_node = sambaTree;
+    SDK::SambaNode* last_node = sambaTree;
 
     while(smbtree.canReadLine())
     {
-        SambaNodeType line_type = SAMBA_UNDEFINED;
+        SDK::SambaNodeType line_type = SDK::SAMBA_UNDEFINED;
 
         QString line = smbtree.readLine();
 
         if(line.startsWith("\t\t"))
-            line_type = SAMBA_SHARE;
+            line_type = SDK::SAMBA_SHARE;
         else if(line.startsWith("\t"))
-            line_type = SAMBA_HOST;
+            line_type = SDK::SAMBA_HOST;
         else
-            line_type = SAMBA_DOMAIN;
+            line_type = SDK::SAMBA_DOMAIN;
 
-        SambaNode* parent = NULL;
+        SDK::SambaNode* parent = NULL;
         switch(line_type)
         {
-            case SAMBA_SHARE:
+            case SDK::SAMBA_SHARE:
             {
                 switch(last_node->type)
                 {
-                    case SAMBA_SHARE:   parent = qobject_cast<SambaNode*>(last_node->parent());                 break;
-                    case SAMBA_HOST:    parent = last_node;                                                     break;
+                    case SDK::SAMBA_SHARE:   parent = qobject_cast<SDK::SambaNode*>(last_node->parent());                 break;
+                    case SDK::SAMBA_HOST:    parent = last_node;                                                     break;
                     default:            WARN() << "Broken share node" << line << line_type << last_node->name;  break;
                 }
                 break;
             }
-            case SAMBA_HOST:{
+            case SDK::SAMBA_HOST:{
                 switch(last_node->type)
                 {
-                    case SAMBA_SHARE:   parent = qobject_cast<SambaNode*>(last_node->parent()->parent());       break;
-                    case SAMBA_HOST:    parent = qobject_cast<SambaNode*>(last_node->parent());                 break;
-                    case SAMBA_DOMAIN:  parent = last_node;                                                     break;
+                    case SDK::SAMBA_SHARE:   parent = qobject_cast<SDK::SambaNode*>(last_node->parent()->parent());       break;
+                    case SDK::SAMBA_HOST:    parent = qobject_cast<SDK::SambaNode*>(last_node->parent());                 break;
+                    case SDK::SAMBA_DOMAIN:  parent = last_node;                                                     break;
                     default:            WARN() << "Broken host node" << line << last_node->name;                break;
                 }
                 break;
             }
-            case SAMBA_DOMAIN: {
+            case SDK::SAMBA_DOMAIN: {
                 parent = sambaTree;
             }
             default: break;
@@ -140,16 +140,16 @@ void SambaImpl::makeTree()
             continue;
         }
 
-        SambaNode* node = new SambaNode(parent);
+        SDK::SambaNode* node = new SDK::SambaNode(parent);
         node->type = line_type;
         QRegularExpressionMatch nodeMatch = nodeRegex.match(line);
         if(nodeMatch.hasMatch())
         {
             node->name = nodeMatch.captured(1);
 
-            if(line_type == SAMBA_SHARE)
+            if(line_type == SDK::SAMBA_SHARE)
             {
-                int len_to_shrink = dynamic_cast<SambaNode*>(node->parent())->name.length() + 1;
+                int len_to_shrink = dynamic_cast<SDK::SambaNode*>(node->parent())->name.length() + 1;
                 node->name = node->name.right(node->name.length() - len_to_shrink);
             }
             node->description = nodeMatch.captured(2);
@@ -158,7 +158,7 @@ void SambaImpl::makeTree()
 
     }
 
-    for(SambaNode* node: sambaTree->children)
+    for(SDK::SambaNode* node: sambaTree->children)
         node->print();
 
     smbtree.close();
