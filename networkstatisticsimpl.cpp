@@ -1,5 +1,6 @@
 #include "networkstatisticsimpl.h"
 #include "statistics.h"
+#include "macros.h"
 
 using namespace yasem;
 
@@ -18,6 +19,19 @@ NetworkStatisticsImpl::NetworkStatisticsImpl(SDK::Statistics* statistics):
 NetworkStatisticsImpl::~NetworkStatisticsImpl()
 {
 
+}
+
+void NetworkStatisticsImpl::print() const
+{
+    DEBUG() << "=============== STATISTICS ==============";
+    DEBUG() << "----------------- NETWORK ---------------";
+    DEBUG() << " Total requests:" <<totalCount();
+    DEBUG() << " Successful requests:" << successfulCount();
+    DEBUG() << " Failed requests:" << failedCount();
+    DEBUG() << " Slow requests:" << tooSlowConnectionsCount();
+    DEBUG() << " Pending requests:" << pendingConnectionsCount();
+    DEBUG() << "-----------------------------------------";
+    DEBUG() << "=========================================";
 }
 
 void yasem::NetworkStatisticsImpl::reset()

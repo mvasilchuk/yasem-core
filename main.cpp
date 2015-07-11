@@ -176,6 +176,8 @@ int main(int argc, char *argv[])
     execCode = a.exec();
     qDebug() <<  "Closing application... code:"  << execCode;
 
+    SDK::PluginManager::instance()->deinitPlugins();
+
     #ifdef Q_OS_LINUX
     //stopErrorRedirect(stdout_fd);
     #endif //Q_OS_LINUX

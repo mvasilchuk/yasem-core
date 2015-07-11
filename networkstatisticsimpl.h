@@ -16,7 +16,8 @@ public:
     virtual ~NetworkStatisticsImpl();
 
     // NetworkStatistics interface
-public:
+public slots:
+    void print() const;
     virtual void reset();
     virtual void incTotalCount();
     virtual void intSuccessfulCount();

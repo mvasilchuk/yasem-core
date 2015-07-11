@@ -9,6 +9,7 @@
 #include "stbprofile.h"
 #include "statistics.h"
 #include "abstractwebpage.h"
+#include "networkstatistics.h"
 
 #include <QFile>
 #include <QDir>
@@ -69,7 +70,7 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
 
             loadProfileKeymap(profile);
 
-            SDK::Core::instance()->statistics()->reset();
+            SDK::Core::instance()->statistics()->network()->reset();
             profile->start();
 
             SDK::MediaPlayerPluginObject* player = __get_plugin<SDK::MediaPlayerPluginObject*>(SDK::ROLE_MEDIA);

@@ -5,6 +5,7 @@
 #include "yasemsettingsimpl.h"
 #include "statisticsimpl.h"
 #include "configuration_items.h"
+#include "systemstatistics.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -17,6 +18,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QMetaEnum>
+#include <QUuid>
 
 using namespace yasem;
 
@@ -64,6 +66,17 @@ CoreImpl::CoreImpl(QObject *parent ):
 
     LOG() << qPrintable(QString("Starting YASEM... Core version: %1, rev. %2").arg(version()).arg(revision()));
     DEBUG() << "Settings directory" << QFileInfo(m_app_settings->fileName()).absoluteDir().absolutePath();
+
+    // Save app installation id for analytics
+    QString iid = m_app_settings->value("installation_id", "").toString();
+    if(iid.isEmpty())
+    {
+        iid = QUuid::createUuid().toString();
+        iid = iid.mid(1, iid.length() - 2); // Removing {}
+        m_app_settings->setValue("installation_id", iid);
+    }
+    DEBUG() << "App installation ID" << iid;
+
     fillKeymapHashTable();
 
     // Regular expressions to extract information from hwinfo's output.
@@ -483,4 +496,5 @@ SDK::Statistics *CoreImpl::statistics()
 void yasem::CoreImpl::init()
 {
     m_yasem_settings->load();
+    statistics()->system()->print();
 }

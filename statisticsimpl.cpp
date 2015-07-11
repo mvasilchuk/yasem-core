@@ -1,11 +1,19 @@
 #include "statisticsimpl.h"
 #include "macros.h"
+#include "networkstatisticsimpl.h"
+#include "systemstatisticsimpl.h"
+#include "core.h"
+
+#include <QNetworkRequest>
+#include <QUrlQuery>
+#include <QNetworkAccessManager>
 
 using namespace yasem;
 
 StatisticsImpl::StatisticsImpl(QObject* parent):
     SDK::Statistics(parent),
-    m_network(new NetworkStatisticsImpl(this))
+    m_network(new NetworkStatisticsImpl(this)),
+    m_system_statistics(new SystemStatisticsImpl(this))
 {
 
 }
@@ -15,26 +23,12 @@ StatisticsImpl::~StatisticsImpl()
 
 }
 
-SDK::NetworkStatistics *yasem::StatisticsImpl::network()
+SDK::NetworkStatistics *yasem::StatisticsImpl::network() const
 {
     return m_network;
 }
 
-
-void yasem::StatisticsImpl::reset()
+SDK::SystemStatistics *StatisticsImpl::system() const
 {
-    m_network->reset();
-}
-
-void yasem::StatisticsImpl::print()
-{
-    DEBUG() << "=============== STATISTICS ==============";
-    DEBUG() << "----------------- NETWORK ---------------";
-    DEBUG() << " Total requests:" << network()->totalCount();
-    DEBUG() << " Successful requests:" << network()->successfulCount();
-    DEBUG() << " Failed requests:" << network()->failedCount();
-    DEBUG() << " Slow requests:" << network()->tooSlowConnectionsCount();
-    DEBUG() << " Pending requests:" << network()->pendingConnectionsCount();
-    DEBUG() << "-----------------------------------------";
-    DEBUG() << "=========================================";
+    return m_system_statistics;
 }

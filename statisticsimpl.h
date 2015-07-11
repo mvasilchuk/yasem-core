@@ -2,7 +2,8 @@
 #define STATISTICSIMPL_H
 
 #include "statistics.h"
-#include "networkstatisticsimpl.h"
+
+#include <QNetworkAccessManager>
 
 namespace yasem
 {
@@ -13,15 +14,12 @@ public:
     StatisticsImpl(QObject* parent);
     virtual ~StatisticsImpl();
 
-
-    virtual SDK::NetworkStatistics *network();
+    virtual SDK::NetworkStatistics *network() const;
+    virtual SDK::SystemStatistics *system() const;
 protected:
     SDK::NetworkStatistics* m_network;
+    SDK::SystemStatistics* m_system_statistics;
 
-    // Statistics interface
-public:
-    virtual void reset();
-    virtual void print();
 };
 
 }

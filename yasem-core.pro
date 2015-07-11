@@ -39,7 +39,8 @@ SOURCES += main.cpp \
     mountpointinfo.cpp \
     yasemsettingsimpl.cpp \
     networkstatisticsimpl.cpp \
-    statisticsimpl.cpp
+    statisticsimpl.cpp \
+    systemstatisticsimpl.cpp
 
 HEADERS += \
     pluginmanagerimpl.h \
@@ -54,7 +55,8 @@ HEADERS += \
     mountpointinfo.h \
     yasemsettingsimpl.h \
     networkstatisticsimpl.h \
-    statisticsimpl.h
+    statisticsimpl.h \
+    systemstatisticsimpl.h
 
 unix:!mac{
   QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/
