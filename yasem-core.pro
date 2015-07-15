@@ -7,6 +7,12 @@
 VERSION = 0.1.0
 TARGET = yasem
 TEMPLATE = app
+QMAKE_TARGET_COMPANY =
+QMAKE_TARGET_DESCRIPTION = "Core module of YASEM project"
+QMAKE_TARGET_PRODUCT = "yasem-core"
+QMAKE_TARGET_COPYRIGHT = "2013-15 by Maxim Vasilchuk"
+RC_ICONS = resources/logo.ico
+ICON = resources/logo.ico
 
 include($${top_srcdir}/common.pri)
 
@@ -37,10 +43,10 @@ SOURCES += main.cpp \
     profileconfigparserimpl.cpp \
     sambaimpl.cpp \
     mountpointinfo.cpp \
-    yasemsettingsimpl.cpp \
     networkstatisticsimpl.cpp \
     statisticsimpl.cpp \
-    systemstatisticsimpl.cpp
+    systemstatisticsimpl.cpp \
+    configimpl.cpp
 
 HEADERS += \
     pluginmanagerimpl.h \
@@ -53,10 +59,10 @@ HEADERS += \
     profileconfigparserimpl.h \
     sambaimpl.h \
     mountpointinfo.h \
-    yasemsettingsimpl.h \
     networkstatisticsimpl.h \
     statisticsimpl.h \
-    systemstatisticsimpl.h
+    systemstatisticsimpl.h \
+    configimpl.h
 
 unix:!mac{
   QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/
@@ -68,4 +74,7 @@ unix:!mac{
 OTHER_FILES += \
     LICENSE \
     README.md
+
+RESOURCES += \
+    resources.qrc
 

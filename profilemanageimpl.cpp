@@ -4,11 +4,11 @@
 #include "datasourcepluginobject.h"
 #include "datasourceplugin.h"
 #include "stbpluginobject.h"
-#include "browserpluginobject.h"
-#include "mediaplayerpluginobject.h"
+#include "browser.h"
+#include "mediaplayer.h"
 #include "stbprofile.h"
 #include "statistics.h"
-#include "abstractwebpage.h"
+#include "webpage.h"
 #include "networkstatistics.h"
 
 #include <QFile>
@@ -57,11 +57,11 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
 
             qDebug() << QString("Active profile: %1").arg(profile->getName());
 
-            SDK::BrowserPluginObject* browser = __get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER);
+            SDK::Browser* browser = __get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
             if(browser != NULL)
             {
-                browser->setTopWidget(SDK::BrowserPluginObject::TOP_WIDGET_BROWSER);
-                SDK::AbstractWebPage* page = browser->getFirstPage();
+                browser->setTopWidget(SDK::Browser::TOP_WIDGET_BROWSER);
+                SDK::WebPage* page = browser->getFirstPage();
                 page->reset();
                 profile->getProfilePlugin()->initObject(page);
             }
@@ -73,7 +73,7 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
             SDK::Core::instance()->statistics()->network()->reset();
             profile->start();
 
-            SDK::MediaPlayerPluginObject* player = __get_plugin<SDK::MediaPlayerPluginObject*>(SDK::ROLE_MEDIA);
+            SDK::MediaPlayer* player = __get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA);
             if(player != NULL && player->isInitialized())
                 player->mediaStop();
             else
@@ -160,7 +160,7 @@ void ProfileManageImpl::loadProfileKeymap(SDK::Profile *profile)
     keymap.beginGroup("keymap");
     QStringList keys = keymap.allKeys();
 
-    SDK::BrowserPluginObject* browser = profile->getProfilePlugin()->browser();
+    SDK::Browser* browser = profile->getProfilePlugin()->browser();
     if(browser)
         browser->clearKeyEvents();
 

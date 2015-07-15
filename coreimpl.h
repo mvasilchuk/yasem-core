@@ -21,7 +21,7 @@ signals:
 protected:
     QSettings* m_app_settings;
     SDK::CoreNetwork* m_network;
-    SDK::YasemSettings* m_yasem_settings;
+    SDK::Config* m_yasem_settings;
     SDK::Statistics* m_statistics;
     QList<SDK::StorageInfo *> m_disks;
 
@@ -44,7 +44,7 @@ public slots:
 public:
     QSettings *settings();
     QSettings* settings(const QString &filename);
-    SDK::YasemSettings *yasem_settings();
+    SDK::Config *yasem_settings();
 
     QList<SDK::StorageInfo *> storages();
     SDK::CoreNetwork* network();

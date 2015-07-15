@@ -1,17 +1,17 @@
 #ifndef YASEMSETTINGSIMPL_H
 #define YASEMSETTINGSIMPL_H
 
-#include "yasemsettings.h"
+#include "config.h"
 
 #include <QObject>
 
 namespace yasem {
 
-class YasemSettingsImpl : public SDK::YasemSettings
+class ConfigImpl : public SDK::Config
 {
     Q_OBJECT
 public:
-    explicit YasemSettingsImpl(QObject *parent = 0);
+    explicit ConfigImpl(QObject *parent = 0);
 
 signals:
 

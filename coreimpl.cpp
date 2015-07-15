@@ -2,7 +2,7 @@
 #include "pluginmanager.h"
 #include "networkimpl.h"
 #include "macros.h"
-#include "yasemsettingsimpl.h"
+#include "configimpl.h"
 #include "statisticsimpl.h"
 #include "configuration_items.h"
 #include "systemstatistics.h"
@@ -25,7 +25,7 @@ using namespace yasem;
 CoreImpl::CoreImpl(QObject *parent ):
     Core(parent),
     m_network(new NetworkImpl(this)),
-    m_yasem_settings(new YasemSettingsImpl(this)),
+    m_yasem_settings(new ConfigImpl(this)),
     m_statistics(new StatisticsImpl(this)),
     m_detected_vm(VM_NOT_SET)
 {
@@ -191,18 +191,20 @@ void CoreImpl::initSettings()
     SDK::ListConfigItem* aspect_ratio = new SDK::ListConfigItem("aspect_ratio", tr("Default aspect ratio"), SDK::ASPECT_RATIO_16_9);
     QMap<QString, QVariant>& ar_list = aspect_ratio->options();
 
-    ar_list.insert(tr("Auto"),      SDK::ASPECT_RATIO_AUTO);
-    ar_list.insert(tr("1:1"),       SDK::ASPECT_RATIO_1_1);
-    ar_list.insert(tr("5:4"),       SDK::ASPECT_RATIO_5_4);
-    ar_list.insert(tr("4:3"),       SDK::ASPECT_RATIO_4_3);
-    ar_list.insert(tr("11:8"),      SDK::ASPECT_RATIO_11_8);
-    ar_list.insert(tr("14:10"),     SDK::ASPECT_RATIO_14_10);
-    ar_list.insert(tr("3:2"),       SDK::ASPECT_RATIO_3_2);
-    ar_list.insert(tr("14:9"),      SDK::ASPECT_RATIO_14_9);
-    ar_list.insert(tr("16:10"),     SDK::ASPECT_RATIO_16_10);
-    ar_list.insert(tr("16:9"),      SDK::ASPECT_RATIO_16_9);
-    ar_list.insert(tr("2.35:1"),    SDK::ASPECT_RATIO_2_35_1);
-    ar_list.insert(tr("20:9"),      SDK::ASPECT_RATIO_20_9);
+    ar_list.insert(tr("Auto"),          SDK::ASPECT_RATIO_AUTO);
+    ar_list.insert(tr("1:1"),           SDK::ASPECT_RATIO_1_1);
+    ar_list.insert(tr("5:4"),           SDK::ASPECT_RATIO_5_4);
+    ar_list.insert(tr("4:3"),           SDK::ASPECT_RATIO_4_3);
+    ar_list.insert(tr("11:8"),          SDK::ASPECT_RATIO_11_8);
+    ar_list.insert(tr("14:10"),         SDK::ASPECT_RATIO_14_10);
+    ar_list.insert(tr("3:2"),           SDK::ASPECT_RATIO_3_2);
+    ar_list.insert(tr("14:9"),          SDK::ASPECT_RATIO_14_9);
+    ar_list.insert(tr("16:10"),         SDK::ASPECT_RATIO_16_10);
+    ar_list.insert(tr("16:9"),          SDK::ASPECT_RATIO_16_9);
+    ar_list.insert(tr("2.35:1"),        SDK::ASPECT_RATIO_2_35_1);
+    ar_list.insert(tr("20:9"),          SDK::ASPECT_RATIO_20_9);
+    ar_list.insert(tr("Fill"),          SDK::ASPECT_RATIO_FILL);
+    ar_list.insert(tr("Zoom in"),       SDK::ASPECT_RATIO_20_9);
 
     video->addItem(aspect_ratio);
     media->addItem(video);
@@ -479,7 +481,7 @@ SDK::Core::VirtualMachine CoreImpl::getVM()
 }
 
 
-SDK::YasemSettings *yasem::CoreImpl::yasem_settings()
+SDK::Config *yasem::CoreImpl::yasem_settings()
 {
     Q_ASSERT(m_yasem_settings);
     return m_yasem_settings;

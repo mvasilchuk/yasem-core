@@ -4,8 +4,8 @@
 #include "stbpluginobject.h"
 #include "profilemanager.h"
 #include "pluginthread.h"
-#include "yasemsettings.h"
-#include "guipluginobject.h"
+#include "config.h"
+#include "gui.h"
 #include "configuration_items.h"
 
 #include <QDir>
@@ -141,7 +141,6 @@ SDK::PluginErrorCodes PluginManagerImpl::listPlugins()
                 SDK::ConfigItem* plugin_info = new SDK::ConfigItem(plugin->getId(), plugin->getName(), true, SDK::ConfigItem::BOOL);
                 m_plugins_config->addItem(plugin_info);
             }
-
         }
         else
         {
@@ -177,50 +176,17 @@ QList<SDK::Plugin*> PluginManagerImpl::getPlugins(SDK::PluginRole role, bool act
 
 SDK::AbstractPluginObject* PluginManagerImpl::getByRole(SDK::PluginRole role, bool show_warning)
 {
-    for(int index = 0; index < plugins.size(); index++)
-    {
-        SDK::Plugin *plugin = plugins.at(index);
-        if(!plugin->isActive()) continue;
-        for(SDK::PluginRole pluginRole: plugin->roles().keys())
-        {
-            if(pluginRole == role)
-            {
-                Q_ASSERT(plugin);
-                SDK::AbstractPluginObject* obj = plugin->roles().value(pluginRole);
-                if(obj->isInitialized())
-                    return obj;
-            }
-        }
-    }
+    QList<SDK::AbstractPluginObject*> list = m_plugin_objects.value(role);
+    if(!list.isEmpty())
+        return list.first(); // TODO: Add some criteria to select
     if(show_warning)
         ERROR() << qPrintable(QString("Plugin for role %1 not found!").arg(role));
     return NULL;
 }
 
-QList<SDK::AbstractPluginObject *> PluginManagerImpl::getAllByRole(SDK::PluginRole role, bool active_only)
-{
-    QList<SDK::AbstractPluginObject *> result;
-    for(int index = 0; index < plugins.size(); index++)
-    {
-        SDK::Plugin *plugin = plugins.at(index);
-        if(active_only && !plugin->isActive()) continue;
-
-        for(SDK::PluginRole pluginRole: plugin->roles().keys())
-        {
-            if(pluginRole == role)
-            {
-                SDK::AbstractPluginObject* obj = plugin->roles().value(pluginRole);
-                if(!active_only || obj->isInitialized())
-                    result.append(obj);
-            }
-        }
-    }
-    return result;
-}
 
 SDK::Plugin *PluginManagerImpl::getByIID(const QString &iid)
 {
-
     for(int index = 0; index < plugins.size(); index++)
     {
         SDK::Plugin *plugin = plugins.at(index);
@@ -288,7 +254,7 @@ bool PluginManagerImpl::pluginHasConflicts(SDK::Plugin *plugin)
         if(has_conflict)
         {
             plugin->addRuntimeConflict(pl);
-            continue; // Don't need to continue checking because we've already got a conflict
+            continue; // No need to continue checking because we've already got a conflict
         }
 
         // Next check any runtime conflicts that PluginManager registered
@@ -507,7 +473,15 @@ SDK::PluginErrorCodes PluginManagerImpl::initializePlugin(SDK::Plugin *plugin, b
         SDK::PluginErrorCodes result = plugin->initialize();
 
         if(result == SDK::PLUGIN_ERROR_NO_ERROR)
+        {
+            for(SDK::PluginRole role: plugin->roles().keys())
+            {
+                QList<SDK::AbstractPluginObject*> list = m_plugin_objects.value(role);
+                list.append(plugin->roles().value(role));
+                m_plugin_objects.insert(role, list);
+            }
             plugin->setState(SDK::PLUGIN_STATE_INITIALIZED);
+        }
         else
             plugin->setState(SDK::PLUGIN_STATE_ERROR_STATE);
         return result;

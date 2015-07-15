@@ -1,41 +1,41 @@
-#include "yasemsettingsimpl.h"
+#include "configimpl.h"
 #include "macros.h"
 
 using namespace yasem;
 
-YasemSettingsImpl::YasemSettingsImpl(QObject *parent) :
-    SDK::YasemSettings(parent)
+ConfigImpl::ConfigImpl(QObject *parent) :
+    SDK::Config(parent)
 {
 
 }
 
-bool YasemSettingsImpl::addConfigGroup(SDK::ConfigTreeGroup *group)
+bool ConfigImpl::addConfigGroup(SDK::ConfigTreeGroup *group)
 {
     if(!m_config_groups.contains(group->m_key))
         m_config_groups.insert(group->m_key, group);
     return true;
 }
 
-QHash<const QString&, SDK::ConfigTreeGroup *> YasemSettingsImpl::getConfigGroups()
+QHash<const QString&, SDK::ConfigTreeGroup *> ConfigImpl::getConfigGroups()
 {
     return m_config_groups;
 }
 
-void YasemSettingsImpl::setItemDirty(SDK::ConfigItem* item, bool value)
+void ConfigImpl::setItemDirty(SDK::ConfigItem* item, bool value)
 {
     if(item == NULL) return;
     item->m_is_dirty = value;
     setItemDirty(item->getParentItem(), value);
 }
 
-bool YasemSettingsImpl::addBuiltInConfigGroup(SDK::ConfigTreeGroup *group)
+bool ConfigImpl::addBuiltInConfigGroup(SDK::ConfigTreeGroup *group)
 {
     group->m_is_built_in = true;
     return addConfigGroup(group);
 }
 
 
-SDK::ConfigTreeGroup *YasemSettingsImpl::getDefaultGroup(const QString &id)
+SDK::ConfigTreeGroup *ConfigImpl::getDefaultGroup(const QString &id)
 {
     if(m_config_groups.contains(id))
         return m_config_groups.value(id);
@@ -45,7 +45,7 @@ SDK::ConfigTreeGroup *YasemSettingsImpl::getDefaultGroup(const QString &id)
 
 }
 
-void YasemSettingsImpl::save(SDK::ConfigContainer *container)
+void ConfigImpl::save(SDK::ConfigContainer *container)
 {    
     if(container == NULL)
     {
@@ -98,7 +98,7 @@ void YasemSettingsImpl::save(SDK::ConfigContainer *container)
     }
 }
 
-void YasemSettingsImpl::reset(SDK::ConfigContainer *container)
+void ConfigImpl::reset(SDK::ConfigContainer *container)
 {
     if(container == NULL)
     {
@@ -112,7 +112,7 @@ void YasemSettingsImpl::reset(SDK::ConfigContainer *container)
 }
 
 
-void YasemSettingsImpl::load(SDK::ConfigContainer *container)
+void ConfigImpl::load(SDK::ConfigContainer *container)
 {
     if(container == NULL)
     {
@@ -156,12 +156,12 @@ void YasemSettingsImpl::load(SDK::ConfigContainer *container)
     settings->endGroup();
 }
 
-SDK::ConfigItem *YasemSettingsImpl::findItem(const QString &path)
+SDK::ConfigItem *ConfigImpl::findItem(const QString &path)
 {
     return findItem(path.split("/"));
 }
 
-SDK::ConfigItem *YasemSettingsImpl::findItem(const QStringList &path)
+SDK::ConfigItem *ConfigImpl::findItem(const QStringList &path)
 {
     SDK::ConfigItem* result = NULL;
     if(!path.isEmpty())
