@@ -77,8 +77,6 @@ CoreImpl::CoreImpl(QObject *parent ):
     }
     DEBUG() << "App installation ID" << iid;
 
-    fillKeymapHashTable();
-
     // Regular expressions to extract information from hwinfo's output.
     hwinfo_regex_list.insert(SDK::HwinfoLineTypes::TITLE,           QRegularExpression("^(\\d+):\\s+(\\w+)\\s+\\d+\\.\\d+:\\s+\\d+\\s+\\w+\n"));
     hwinfo_regex_list.insert(SDK::HwinfoLineTypes::HARDWARE_CLASS,  QRegularExpression("Hardware Class:\\s+(\\w+)\n"));
@@ -100,56 +98,6 @@ CoreImpl::CoreImpl(QObject *parent ):
 CoreImpl::~CoreImpl()
 {
 
-}
-
-void CoreImpl::fillKeymapHashTable()
-{
-    keycode_hashes["RC_KEY_NO_KEY"]         = SDK::RC_KEY_NO_KEY;
-
-    keycode_hashes["RC_KEY_OK"]             = SDK::RC_KEY_OK;
-    keycode_hashes["RC_KEY_RIGHT"]          = SDK::RC_KEY_RIGHT;
-    keycode_hashes["RC_KEY_LEFT"]           = SDK::RC_KEY_LEFT;
-    keycode_hashes["RC_KEY_UP"]             = SDK::RC_KEY_UP;
-    keycode_hashes["RC_KEY_DOWN"]           = SDK::RC_KEY_DOWN;
-    keycode_hashes["RC_KEY_PAGE_UP"]        = SDK::RC_KEY_PAGE_UP;
-    keycode_hashes["RC_KEY_PAGE_DOWN"]      = SDK::RC_KEY_PAGE_DOWN;
-    keycode_hashes["RC_KEY_MENU"]           = SDK::RC_KEY_MENU;
-    keycode_hashes["RC_KEY_BACK"]           = SDK::RC_KEY_BACK;
-    keycode_hashes["RC_KEY_REFRESH"]        = SDK::RC_KEY_REFRESH;
-    keycode_hashes["RC_KEY_RED"]            = SDK::RC_KEY_RED;
-    keycode_hashes["RC_KEY_GREEN"]          = SDK::RC_KEY_GREEN;
-    keycode_hashes["RC_KEY_YELLOW"]         = SDK::RC_KEY_YELLOW;
-    keycode_hashes["RC_KEY_BLUE"]           = SDK::RC_KEY_BLUE;
-    keycode_hashes["RC_KEY_CHANNEL_PLUS"]   = SDK::RC_KEY_CHANNEL_PLUS;
-    keycode_hashes["RC_KEY_CHANNEL_MINUS"]  = SDK::RC_KEY_CHANNEL_MINUS;
-    keycode_hashes["RC_KEY_SERVICE"]        = SDK::RC_KEY_SERVICE;
-    keycode_hashes["RC_KEY_TV"]             = SDK::RC_KEY_TV;
-    keycode_hashes["RC_KEY_PHONE"]          = SDK::RC_KEY_PHONE;
-    keycode_hashes["RC_KEY_WEB"]            = SDK::RC_KEY_WEB;
-    keycode_hashes["RC_KEY_FRAME"]          = SDK::RC_KEY_FRAME;
-    keycode_hashes["RC_KEY_VOLUME_PLUS"]    = SDK::RC_KEY_VOLUME_UP;
-    keycode_hashes["RC_KEY_VOLUME_MINUS"]   = SDK::RC_KEY_VOLUME_DOWN;
-    keycode_hashes["RC_KEY_REWIND"]         = SDK::RC_KEY_REWIND;
-    keycode_hashes["RC_KEY_FAST_FORWARD"]   = SDK::RC_KEY_FAST_FORWARD;
-    keycode_hashes["RC_KEY_STOP"]           = SDK::RC_KEY_STOP;
-    keycode_hashes["RC_KEY_PLAY_PAUSE"]     = SDK::RC_KEY_PLAY_PAUSE;
-    keycode_hashes["RC_KEY_PLAY"]           = SDK::RC_KEY_PLAY;
-    keycode_hashes["RC_KEY_REC"]            = SDK::RC_KEY_REC;
-    keycode_hashes["RC_KEY_MIC"]            = SDK::RC_KEY_MIC;
-    keycode_hashes["RC_KEY_MUTE"]           = SDK::RC_KEY_MUTE;
-    keycode_hashes["RC_KEY_POWER"]          = SDK::RC_KEY_POWER;
-    keycode_hashes["RC_KEY_INFO"]           = SDK::RC_KEY_INFO;
-    keycode_hashes["RC_KEY_NUMBER_0"]       = SDK::RC_KEY_NUMBER_0;
-    keycode_hashes["RC_KEY_NUMBER_1"]       = SDK::RC_KEY_NUMBER_1;
-    keycode_hashes["RC_KEY_NUMBER_2"]       = SDK::RC_KEY_NUMBER_2;
-    keycode_hashes["RC_KEY_NUMBER_3"]       = SDK::RC_KEY_NUMBER_3;
-    keycode_hashes["RC_KEY_NUMBER_4"]       = SDK::RC_KEY_NUMBER_4;
-    keycode_hashes["RC_KEY_NUMBER_5"]       = SDK::RC_KEY_NUMBER_5;
-    keycode_hashes["RC_KEY_NUMBER_6"]       = SDK::RC_KEY_NUMBER_6;
-    keycode_hashes["RC_KEY_NUMBER_7"]       = SDK::RC_KEY_NUMBER_7;
-    keycode_hashes["RC_KEY_NUMBER_8"]       = SDK::RC_KEY_NUMBER_8;
-    keycode_hashes["RC_KEY_NUMBER_9"]       = SDK::RC_KEY_NUMBER_9;
-    keycode_hashes["RC_KEY_EXIT"]           = SDK::RC_KEY_EXIT;
 }
 
 QSettings *CoreImpl::settings()
@@ -413,17 +361,10 @@ QThread* CoreImpl::mainThread()
     return this->thread();
 }
 
-QHash<QString, SDK::RC_KEY> CoreImpl::getKeycodeHashes()
-{
-    return keycode_hashes;
-}
-
-
 QString CoreImpl::version()
 {
     return MODULE_VERSION;
 }
-
 
 QString CoreImpl::revision()
 {

@@ -57,7 +57,7 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
 
             qDebug() << QString("Active profile: %1").arg(profile->getName());
 
-            SDK::Browser* browser = __get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
+            SDK::Browser* browser = SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
             if(browser != NULL)
             {
                 browser->setTopWidget(SDK::Browser::TOP_WIDGET_BROWSER);
@@ -73,7 +73,7 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
             SDK::Core::instance()->statistics()->network()->reset();
             profile->start();
 
-            SDK::MediaPlayer* player = __get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA);
+            SDK::MediaPlayer* player = SDK::__get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA);
             if(player != NULL && player->isInitialized())
                 player->mediaStop();
             else
@@ -155,7 +155,8 @@ void ProfileManageImpl::loadProfileKeymap(SDK::Profile *profile)
     loadDefaultKeymapFileIfNotExists(keymap, classId);
 
     keymap.sync();
-    QHash<QString, SDK::RC_KEY> keycode_hashes = SDK::Core::instance()->getKeycodeHashes();
+
+    SDK::GUI* gui = SDK::GUI::instance();
 
     keymap.beginGroup("keymap");
     QStringList keys = keymap.allKeys();
@@ -205,9 +206,9 @@ void ProfileManageImpl::loadProfileKeymap(SDK::Profile *profile)
                 which = code;
         }
 
-        SDK::RC_KEY keycode_value = keycode_hashes.value(key);
+        SDK::GUI::RcKey keycode_value = gui->getRcKeyByName(key);
 
-        if(keycode_value == SDK::RC_KEY_NO_KEY)
+        if(keycode_value == SDK::GUI::RC_KEY_NO_KEY)
             WARN() << "Key value for" << key << "not found!";
         else
             if(browser) browser->registerKeyEvent(keycode_value, code, which, alt, ctrl, shift);
@@ -257,7 +258,7 @@ void ProfileManageImpl::loadProfiles()
 
     profilesDir.setNameFilters(QStringList() << "*.ini");
 
-    SDK::DatasourcePlugin* dsPlugin = __get_plugin<SDK::DatasourcePlugin*>(SDK::PluginRole::ROLE_DATASOURCE);
+    SDK::DatasourcePlugin* dsPlugin = SDK::__get_plugin<SDK::DatasourcePlugin*>(SDK::PluginRole::ROLE_DATASOURCE);
 
     foreach (QString fileName, profilesDir.entryList(QDir::Files | QDir::NoSymLinks | QDir::Readable))
     {
@@ -290,7 +291,7 @@ void ProfileManageImpl::loadProfiles()
 SDK::Profile* ProfileManageImpl::createProfile(const QString &classId, const QString &submodel, const QString &baseName = "", bool overwrite = false)
 {
     DEBUG() << "Creaing profile" << classId << baseName << submodel << baseName;
-    SDK::DatasourcePluginObject* dsPlugin = __get_plugin<SDK::DatasourcePluginObject*>(SDK::PluginRole::ROLE_DATASOURCE);
+    SDK::DatasourcePluginObject* dsPlugin = SDK::__get_plugin<SDK::DatasourcePluginObject*>(SDK::PluginRole::ROLE_DATASOURCE);
 
     SDK::StbPluginObject* stbPlugin = getProfilePluginByClassId(classId);
     SDK::Profile* profile = stbPlugin->createProfile();

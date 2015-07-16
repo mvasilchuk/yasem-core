@@ -62,7 +62,8 @@ HEADERS += \
     networkstatisticsimpl.h \
     statisticsimpl.h \
     systemstatisticsimpl.h \
-    configimpl.h
+    configimpl.h \
+    gui.h
 
 unix:!mac{
   QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/

@@ -21,7 +21,7 @@ public:
     virtual SDK::PluginErrorCodes deinitPlugins();
     //virtual PLUGIN_ERROR_CODES connectSlots();
     virtual QList<SDK::Plugin*> getPlugins(SDK::PluginRole role = SDK::ROLE_ANY, bool active_only = true);
-    virtual SDK::AbstractPluginObject* getByRole(SDK::PluginRole role, bool show_warning = true);
+    virtual SDK::AbstractPluginObject* getByRole(SDK::PluginRole role, bool show_warning = true) const;
     virtual SDK::Plugin* getByIID(const QString &iid);
     virtual void setPluginDir(const QString &pluginDir);
     virtual QString getPluginDir();

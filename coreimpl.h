@@ -52,7 +52,6 @@ public:
     VirtualMachine getVM();
 
     // Core interface
-    QHash<QString, SDK::RC_KEY> getKeycodeHashes();
     Q_INVOKABLE QString version();
     Q_INVOKABLE QString revision();
     Q_INVOKABLE QString compiler();

@@ -174,7 +174,7 @@ QList<SDK::Plugin*> PluginManagerImpl::getPlugins(SDK::PluginRole role, bool act
     return result;
 }
 
-SDK::AbstractPluginObject* PluginManagerImpl::getByRole(SDK::PluginRole role, bool show_warning)
+SDK::AbstractPluginObject* PluginManagerImpl::getByRole(SDK::PluginRole role, bool show_warning) const
 {
     QList<SDK::AbstractPluginObject*> list = m_plugin_objects.value(role);
     if(!list.isEmpty())
