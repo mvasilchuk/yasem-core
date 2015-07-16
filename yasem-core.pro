@@ -63,7 +63,7 @@ HEADERS += \
     statisticsimpl.h \
     systemstatisticsimpl.h \
     configimpl.h \
-    gui.h
+    $${SDK_DIR}/gui.h
 
 unix:!mac{
   QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/
