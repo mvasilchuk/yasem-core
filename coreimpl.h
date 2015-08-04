@@ -3,6 +3,8 @@
 
 #include "core.h"
 #include <QObject>
+#include <QPointer>
+#include <QScopedPointer>
 
 namespace yasem {
 
@@ -20,9 +22,9 @@ signals:
 
 protected:
     QSettings* m_app_settings;
-    SDK::CoreNetwork* m_network;
-    SDK::Config* m_yasem_settings;
-    SDK::Statistics* m_statistics;
+    QScopedPointer<SDK::CoreNetwork> m_network;
+    QPointer<SDK::Config> m_yasem_settings;
+    QPointer<SDK::Statistics> m_statistics;
     QList<SDK::StorageInfo *> m_disks;
 
     QString m_config_dir;

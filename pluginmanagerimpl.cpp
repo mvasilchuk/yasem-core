@@ -4,7 +4,7 @@
 #include "stbpluginobject.h"
 #include "profilemanager.h"
 #include "pluginthread.h"
-#include "config.h"
+#include "yasemsettings.h"
 #include "gui.h"
 #include "configuration_items.h"
 
@@ -27,7 +27,8 @@ static const QString PLUGIN_FLAG_NAME_SYSTEM = "system";
 static const QString PLUGIN_FLAG_NAME_HIDDEN = "hidden";
 static const QString PLUGIN_FLAG_NAME_GUI    = "gui";
 
-PluginManagerImpl::PluginManagerImpl():
+PluginManagerImpl::PluginManagerImpl(SDK::Core* core):
+    PluginManager(core),
     m_plugins_config(SDK::__get_config_item<SDK::ConfigContainer*>(SETTINGS_GROUP_PLUGINS))
 {
    this->setObjectName("PluginManager");
@@ -66,13 +67,18 @@ PluginManagerImpl::PluginManagerImpl():
                                                                   QList<SDK::PluginRole>() << SDK::ROLE_WEB_SERVER));
 }
 
+PluginManagerImpl::~PluginManagerImpl()
+{
+    STUB();
+}
+
 SDK::PluginErrorCodes PluginManagerImpl::listPlugins()
 {
     DEBUG() << "Looking for plugins...";
 
     DEBUG() << "PluginManager::listPlugins()";
     QStringList pluginIds;
-    plugins.clear();
+    m_plugins.clear();
 
     QDir pluginsDir(qApp->applicationDirPath());
     #if defined(Q_OS_WIN)
@@ -129,7 +135,7 @@ SDK::PluginErrorCodes PluginManagerImpl::listPlugins()
                 plugin->register_dependencies();
 
                 pluginIds.append(id);
-                plugins.append(plugin);
+                m_plugins.append(QSharedPointer<SDK::Plugin>(plugin));
 
                 DEBUG() << "....Plugin loaded:" << plugin->getName();
 
@@ -152,12 +158,12 @@ SDK::PluginErrorCodes PluginManagerImpl::listPlugins()
 }
 
 
-QList<SDK::Plugin*> PluginManagerImpl::getPlugins(SDK::PluginRole role, bool active_only)
+QList<QSharedPointer<SDK::Plugin>> PluginManagerImpl::getPlugins(SDK::PluginRole role, bool active_only)
 {
     DEBUG() << QString("getPlugins(role: %1, active only: %2)").arg(role).arg(active_only);
 
-    QList<SDK::Plugin*> result;
-    foreach(SDK::Plugin* plugin, plugins)
+    QList<QSharedPointer<SDK::Plugin>> result;
+    foreach(QSharedPointer<SDK::Plugin> plugin, m_plugins)
     {
         bool add_this = false;
         foreach(SDK::PluginRole pluginRole, plugin->roles().keys())
@@ -174,29 +180,29 @@ QList<SDK::Plugin*> PluginManagerImpl::getPlugins(SDK::PluginRole role, bool act
     return result;
 }
 
-SDK::AbstractPluginObject* PluginManagerImpl::getByRole(SDK::PluginRole role, bool show_warning) const
+QSharedPointer<SDK::AbstractPluginObject> PluginManagerImpl::getByRole(SDK::PluginRole role, bool show_warning) const
 {
-    QList<SDK::AbstractPluginObject*> list = m_plugin_objects.value(role);
+    QList<QSharedPointer<SDK::AbstractPluginObject>> list = m_plugin_objects.value(role);
     if(!list.isEmpty())
         return list.first(); // TODO: Add some criteria to select
     if(show_warning)
         ERROR() << qPrintable(QString("Plugin for role %1 not found!").arg(role));
-    return NULL;
+    return QSharedPointer<SDK::AbstractPluginObject>(NULL);
 }
 
 
-SDK::Plugin *PluginManagerImpl::getByIID(const QString &iid)
+QSharedPointer<SDK::Plugin> PluginManagerImpl::getByIID(const QString &iid)
 {
-    for(int index = 0; index < plugins.size(); index++)
+    for(int index = 0; index < m_plugins.size(); index++)
     {
-        SDK::Plugin *plugin = plugins.at(index);
+        QSharedPointer<SDK::Plugin> plugin = m_plugins.at(index);
         if(!plugin->isActive()) continue;
         if(plugin->getIID() == iid)
         {
             return plugin;
         }
     }
-    return NULL;
+    return QSharedPointer<SDK::Plugin>(NULL);
 }
 
 SDK::PluginFlag PluginManagerImpl::parseFlags(const QString &flagsStr)
@@ -219,13 +225,13 @@ SDK::PluginFlag PluginManagerImpl::parseFlags(const QString &flagsStr)
 
 bool PluginManagerImpl::pluginHasConflicts(SDK::Plugin *plugin)
 {
-    QHash<SDK::Plugin*, QList<SDK::PluginRoleData>> conflict_list;
-    for(SDK::Plugin* pl: plugins)
+    QHash<QSharedPointer<SDK::Plugin>, QList<SDK::PluginRoleData>> conflict_list;
+    for(QSharedPointer<SDK::Plugin> pl: m_plugins)
     {
         QList<SDK::PluginRoleData> conflicts;
 
         // Skip itself and plugins that hasn't been loaded yet
-        if(pl == plugin || pl->getState() != SDK::PLUGIN_STATE_INITIALIZED) continue;
+        if(pl.data() == plugin || pl->getState() != SDK::PLUGIN_STATE_INITIALIZED) continue;
 
         // First check static conflicts that has been registered by plugin
         // @see: registerPluginRole()
@@ -278,7 +284,7 @@ bool PluginManagerImpl::pluginHasConflicts(SDK::Plugin *plugin)
     if(conflict_list.isEmpty()) return false;
 
     WARN() << "Plugin" << plugin->getName() << "conflicts with the following plugins:";
-    for(SDK::Plugin* pl: conflict_list.keys())
+    for(QSharedPointer<SDK::Plugin> pl: conflict_list.keys())
     {
         plugin->addRuntimeConflict(pl);
 
@@ -298,41 +304,41 @@ SDK::PluginErrorCodes PluginManagerImpl::initPlugins()
 {
     DEBUG() << "initPlugins()";
 
-    if(plugins.size() == 0)
+    if(m_plugins.size() == 0)
         return SDK::PLUGIN_ERROR_NOT_INITIALIZED;
 
-    for(SDK::Plugin* plugin: plugins)
+    for(QSharedPointer<SDK::Plugin> plugin: m_plugins)
     {
         for(SDK::PluginDependency dep: plugin->dependencies())
         {
-            for(SDK::Plugin* pl: plugins)
+            for(QSharedPointer<SDK::Plugin> pl: m_plugins)
             {
                 if(pl == plugin) continue;
 
                 if(pl->has_role(dep.getRole()))
                 {
-                    connect(pl, &SDK::Plugin::initialized, [=]() {
-                        initializePlugin(plugin, true);
+                    connect(pl.data(), &SDK::Plugin::initialized, [=]() {
+                        initializePlugin(plugin.data(), true);
                     });
-                    connect(pl, &SDK::Plugin::deinitialized, [=]() {
-                        deinitializePlugin(plugin);
+                    connect(pl.data(), &SDK::Plugin::deinitialized, [=]() {
+                        deinitializePlugin(plugin.data());
                     });
-                    connect(pl, &SDK::Plugin::error_happened, [=, &dep]() {
+                    connect(pl.data(), &SDK::Plugin::error_happened, [=, &dep]() {
                         if(dep.isRequired())
-                            deinitializePlugin(plugin);
+                            deinitializePlugin(plugin.data());
                         else if(dep.doSkipIfFailed())
-                            initializePlugin(plugin);
+                            initializePlugin(plugin.data());
                     });
                 }
             }
         }
     }
 
-    for(SDK::Plugin* plugin: plugins)
+    for(QSharedPointer<SDK::Plugin> plugin: m_plugins)
     {
         if(plugin->isActive() && plugin->getState() == SDK::PLUGIN_STATE_NOT_INITIALIZED)
         {
-            initializePlugin(plugin, false);
+            initializePlugin(plugin.data(), false);
         }
     }
 
@@ -346,7 +352,7 @@ SDK::PluginErrorCodes PluginManagerImpl::initPlugins()
                           .arg(QString("STATUS").leftJustified(16)));
     LOG() << qPrintable(QString(66, '-')) ;
 
-    for(SDK::Plugin* plugin: plugins)
+    for(QSharedPointer<SDK::Plugin> plugin: m_plugins)
     {
         LOG() << qPrintable(QString("|%1|%2|%3|%4|")
                               .arg(plugin->getName().leftJustified(30))
@@ -362,22 +368,22 @@ SDK::PluginErrorCodes PluginManagerImpl::initPlugins()
 SDK::PluginErrorCodes PluginManagerImpl::deinitPlugins()
 {
     DEBUG() << "deinitPlugins()";
-    for(SDK::Plugin* plugin: plugins)
+    for(QSharedPointer<SDK::Plugin> plugin: m_plugins)
     {
         if(plugin->isActive() && plugin->getState() == SDK::PLUGIN_STATE_INITIALIZED)
-            deinitializePlugin(plugin);
+            deinitializePlugin(plugin.data());
     }
     return SDK::PLUGIN_ERROR_NO_ERROR;
 }
 
 void PluginManagerImpl::setPluginDir(const QString &pluginDir)
 {
-    this->pluginDir = pluginDir;
+    this->m_plugin_dir = pluginDir;
 }
 
 QString PluginManagerImpl::getPluginDir()
 {
-    return this->pluginDir;
+    return this->m_plugin_dir;
 }
 
 
@@ -403,9 +409,9 @@ void PluginManagerImpl::onPluginInitialized()
 {
     SDK::Plugin* plugin = qobject_cast<SDK::Plugin*>(sender());
     STUB() << plugin->getName();
-    for(SDK::Plugin* plugin: plugins)
+    for(QSharedPointer<SDK::Plugin> plugin: m_plugins)
     {
-        initializePlugin(plugin);
+        initializePlugin(plugin.data());
     }
 }
 
@@ -476,7 +482,7 @@ SDK::PluginErrorCodes PluginManagerImpl::initializePlugin(SDK::Plugin *plugin, b
         {
             for(SDK::PluginRole role: plugin->roles().keys())
             {
-                QList<SDK::AbstractPluginObject*> list = m_plugin_objects.value(role);
+                QList<QSharedPointer<SDK::AbstractPluginObject>> list = m_plugin_objects.value(role);
                 list.append(plugin->roles().value(role));
                 m_plugin_objects.insert(role, list);
             }
@@ -489,7 +495,7 @@ SDK::PluginErrorCodes PluginManagerImpl::initializePlugin(SDK::Plugin *plugin, b
     }
     else if(go_deeper)
     {
-        for(SDK::Plugin* pl: plugins)
+        for(QSharedPointer<SDK::Plugin> pl: m_plugins)
         {
             if(pl == plugin) continue;
             for(SDK::PluginDependency dep: unresolved_dependencies)

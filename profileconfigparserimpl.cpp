@@ -40,12 +40,12 @@ SDK::ProfileConfiguration ProfileConfigParserImpl::parseOptions(SDK::ProfileConf
 
 SDK::ProfileConfigGroup ProfileConfigParserImpl::parseGroup(SDK::ProfileConfigGroup &group, const QJsonObject &data)
 {
-    group.title = data.value("title").toString();
+    group.m_title = data.value("title").toString();
     QJsonArray options = data.value("options").toArray();
     for(int index = 0; index < options.size(); index++)
     {
-        SDK::ConfigOption option = group.options.at(index);
-        group.options.append(parseOption(option, options.at(index).toObject()));
+        SDK::ConfigOption option = group.m_options.at(index);
+        group.m_options.append(parseOption(option, options.at(index).toObject()));
     }
 
     return group;
@@ -53,13 +53,13 @@ SDK::ProfileConfigGroup ProfileConfigParserImpl::parseGroup(SDK::ProfileConfigGr
 
 SDK::ConfigOption ProfileConfigParserImpl::parseOption(SDK::ConfigOption &option, const QJsonObject &data)
 {
-    option.tag = data.value("tag").toString();
-    option.name = data.value("name").toString();
-    option.type = data.value("type").toString();
-    option.defaultValue = data.value("default").toString();
-    option.title = data.value("title").toString();
-    option.comment = data.value("comment").toString();
-    option.options = parseSubOptions(data.value("options").toObject());
+    option.m_tag = data.value("tag").toString();
+    option.m_name = data.value("name").toString();
+    option.m_type = data.value("type").toString();
+    option.m_default_value = data.value("default").toString();
+    option.m_title = data.value("title").toString();
+    option.m_comment = data.value("comment").toString();
+    option.m_options = parseSubOptions(data.value("options").toObject());
 
     return option;
 }

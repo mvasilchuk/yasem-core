@@ -97,7 +97,7 @@ CoreImpl::CoreImpl(QObject *parent ):
 
 CoreImpl::~CoreImpl()
 {
-
+    qDeleteAll(m_disks);
 }
 
 QSettings *CoreImpl::settings()
@@ -353,7 +353,7 @@ QList<SDK::StorageInfo *> CoreImpl::storages()
 
 SDK::CoreNetwork* CoreImpl::network()
 {
-    return m_network;
+    return m_network.data();
 }
 
 QThread* CoreImpl::mainThread()

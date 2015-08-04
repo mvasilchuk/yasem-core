@@ -1,7 +1,7 @@
 #ifndef YASEMSETTINGSIMPL_H
 #define YASEMSETTINGSIMPL_H
 
-#include "config.h"
+#include "yasemsettings.h"
 
 #include <QObject>
 

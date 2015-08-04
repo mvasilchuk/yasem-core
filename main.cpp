@@ -136,20 +136,21 @@ int main(int argc, char *argv[])
     #endif
     #endif //Q_OS_LINUX
 
-    SDK::Core::setInstance(new CoreImpl(qApp));
-    a.setProperty("Core", QVariant::fromValue(SDK::Core::instance()));
+    SDK::Core* core = new CoreImpl(qApp);
+    SDK::Core::setInstance(core);
+    a.setProperty("Core", QVariant::fromValue(core));
     SDK::Core::instance()->init();
 
     qDebug() << "Library paths: " << QApplication::libraryPaths();
 
-    SDK::ProfileManager::setInstance(new ProfileManageImpl());
+    SDK::ProfileManager::setInstance(new ProfileManageImpl(core));
     a.setProperty("ProfileManager", QVariant::fromValue(SDK::ProfileManager::instance()));
 
     SDK::Core::instance()->mountPointChanged();
 
     qDebug() << "Starting application...";
 
-    SDK::PluginManager::setInstance(new PluginManagerImpl());
+    SDK::PluginManager::setInstance(new PluginManagerImpl(core));
     a.setProperty("PluginManager", QVariant::fromValue(SDK::PluginManager::instance()));
 
 #ifndef STATIC_BUILD

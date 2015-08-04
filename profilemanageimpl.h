@@ -16,7 +16,8 @@ class ProfileManageImpl : public SDK::ProfileManager
 {
     Q_OBJECT
 public:
-    explicit ProfileManageImpl(QObject *parent = 0);
+    explicit ProfileManageImpl(QObject *parent);
+    virtual ~ProfileManageImpl();
 
 signals:
 

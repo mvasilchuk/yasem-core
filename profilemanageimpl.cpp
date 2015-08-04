@@ -17,15 +17,23 @@
 
 using namespace yasem;
 
-ProfileManageImpl::ProfileManageImpl(QObject *parent): SDK::ProfileManager(parent)
+ProfileManageImpl::ProfileManageImpl(QObject *parent):
+    SDK::ProfileManager(parent)
 {
     activeProfile = NULL;
     profilesDir = QFileInfo(SDK::Core::instance()->settings()->fileName()).absoluteDir();
 }
 
+ProfileManageImpl::~ProfileManageImpl()
+{
+    STUB();
+    m_profiles_stack.clear();
+    qDeleteAll(m_profiles_list);
+}
+
 QSet<SDK::Profile *> ProfileManageImpl::getProfiles()
 {
-    return profilesList;
+    return m_profiles_list;
 }
 
 SDK::Profile *ProfileManageImpl::getActiveProfile()
@@ -36,9 +44,9 @@ SDK::Profile *ProfileManageImpl::getActiveProfile()
 void ProfileManageImpl::addProfile(SDK::Profile *profile)
 {
     Q_ASSERT(profile);
-    if(!profilesList.contains(profile))
+    if(!m_profiles_list.contains(profile))
     {
-        profilesList.insert(profile);
+        m_profiles_list.insert(profile);
         emit profileAdded(profile);
     }
 }
@@ -49,7 +57,7 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
         activeProfile->stop();
 
     Q_ASSERT(profile);
-    foreach (SDK::Profile* item, profilesList) {
+    foreach (SDK::Profile* item, m_profiles_list) {
         if(item == profile)
         {
             activeProfile = profile;
@@ -63,7 +71,8 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
                 browser->setTopWidget(SDK::Browser::TOP_WIDGET_BROWSER);
                 SDK::WebPage* page = browser->getFirstPage();
                 page->reset();
-                profile->getProfilePlugin()->initObject(page);
+                SDK::StbPluginObject* stb_object = profile->getProfilePlugin();
+                stb_object->initObject(page);
             }
             else
                 qDebug() << "[V] No browser found!";
@@ -79,7 +88,7 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
             else
                 qDebug() << "[V] No player found!";
 
-            profileStack.push(profile);
+            m_profiles_stack.push(profile);
 
             emit profileChanged(profile);
             return;
@@ -228,7 +237,7 @@ bool ProfileManageImpl::removeProfile(SDK::Profile *profile)
     DEBUG() << "Removing profile file" << file.fileName();
     bool is_removed = file.remove();
     emit profileRemoved(is_removed);
-    return is_removed && profilesList.remove(profile);
+    return is_removed && m_profiles_list.remove(profile);
 }
 
 void ProfileManageImpl::loadProfiles()
@@ -284,7 +293,7 @@ void ProfileManageImpl::loadProfiles()
 
         s.endGroup();
 
-        profilesList.insert(profile);
+        m_profiles_list.insert(profile);
     }
 }
 
@@ -337,7 +346,7 @@ SDK::StbPluginObject *ProfileManageImpl::getProfilePluginByClassId(const QString
 
 SDK::Profile *ProfileManageImpl::findById(const QString &id)
 {
-    foreach (SDK::Profile* profile, profilesList) {
+    foreach (SDK::Profile* profile, m_profiles_list) {
         if(id == profile->getId())
         {
             DEBUG() << "PROFILE: " << profile;
@@ -351,7 +360,7 @@ SDK::Profile *ProfileManageImpl::findById(const QString &id)
 
 SDK::Profile *ProfileManageImpl::findByName(const QString &id)
 {
-    foreach (SDK::Profile* profile, profilesList) {
+    foreach (SDK::Profile* profile, m_profiles_list) {
         if(id == profile->getName())
         {
             DEBUG() << "PROFILE: " << profile;
@@ -365,14 +374,14 @@ SDK::Profile *ProfileManageImpl::findByName(const QString &id)
 
 SDK::Profile *ProfileManageImpl::backToPreviousProfile()
 {
-    qDebug() << "profiles:" << profileStack.size();
-    if(profileStack.size() < 1)
+    qDebug() << "profiles:" << m_profiles_stack.size();
+    if(m_profiles_stack.size() < 1)
         return NULL;
 
-    SDK::Profile* currentProfile = profileStack.pop();
-    if(profileStack.size() < 1) return currentProfile;
+    SDK::Profile* currentProfile = m_profiles_stack.pop();
+    if(m_profiles_stack.size() < 1) return currentProfile;
 
-    SDK::Profile* profile = profileStack.pop();
+    SDK::Profile* profile = m_profiles_stack.pop();
     Q_ASSERT(profile);
     setActiveProfile(profile);
     return profile;
@@ -380,17 +389,17 @@ SDK::Profile *ProfileManageImpl::backToPreviousProfile()
 
 void ProfileManageImpl::backToMainPage()
 {
-    if(profileStack.size() < 1)
+    if(m_profiles_stack.size() < 1)
         return;
 
-    profileStack.resize(1);
-    SDK::Profile* profile = profileStack.at(0);
+    m_profiles_stack.resize(1);
+    SDK::Profile* profile = m_profiles_stack.at(0);
     setActiveProfile(profile);
 }
 
 bool ProfileManageImpl::canGoBack()
 {
-    return profileStack.size() > 1;
+    return m_profiles_stack.size() > 1;
 }
 
 

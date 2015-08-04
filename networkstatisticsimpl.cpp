@@ -70,8 +70,8 @@ void NetworkStatisticsImpl::incPendingConnection()
 
 void NetworkStatisticsImpl::decPendingConnections()
 {
+    Q_ASSERT(m_pending_connections > 0);
     m_pending_connections--;
-    Q_ASSERT(m_pending_connections >= 0);
     emit pendingCountDecreased();
 }
 

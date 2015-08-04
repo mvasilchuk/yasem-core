@@ -2,7 +2,7 @@
 #define PLUGINMANAGER_H
 
 #include "pluginmanager.h"
-#include "config.h"
+#include "yasemsettings.h"
 #include "plugindependency.h"
 
 #include <QObject>
@@ -13,16 +13,17 @@ class PluginManagerImpl : public SDK::PluginManager
 {
     Q_OBJECT
 public:
-    PluginManagerImpl();
+    PluginManagerImpl(SDK::Core* core);
+    virtual ~PluginManagerImpl();
 
 // PluginManager interface
     virtual SDK::PluginErrorCodes listPlugins();
     virtual SDK::PluginErrorCodes initPlugins();
     virtual SDK::PluginErrorCodes deinitPlugins();
     //virtual PLUGIN_ERROR_CODES connectSlots();
-    virtual QList<SDK::Plugin*> getPlugins(SDK::PluginRole role = SDK::ROLE_ANY, bool active_only = true);
-    virtual SDK::AbstractPluginObject* getByRole(SDK::PluginRole role, bool show_warning = true) const;
-    virtual SDK::Plugin* getByIID(const QString &iid);
+    virtual QList<QSharedPointer<SDK::Plugin>> getPlugins(SDK::PluginRole role = SDK::ROLE_ANY, bool active_only = true);
+    virtual QSharedPointer<SDK::AbstractPluginObject> getByRole(SDK::PluginRole role, bool show_warning = true) const;
+    virtual QSharedPointer<SDK::Plugin> getByIID(const QString &iid);
     virtual void setPluginDir(const QString &pluginDir);
     virtual QString getPluginDir();
 
