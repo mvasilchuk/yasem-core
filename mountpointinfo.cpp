@@ -11,7 +11,7 @@ MountPointInfo::MountPointInfo(QObject *parent) :
 {
     is_mounted = false;
     s_host = "-";
-    m_point = "-";
+    m_mount_point = "-";
 }
 
 MountPointInfo::~MountPointInfo()
@@ -19,21 +19,21 @@ MountPointInfo::~MountPointInfo()
     this->unmount();
 }
 
-bool MountPointInfo::mount(const QString &host, const QString &m_point, const QString &options, bool force)
+bool MountPointInfo::mount(const QString &host, const QString &mount_point, const QString &options, bool force)
 {
     is_mounted = true;
     #ifdef Q_OS_UNIX
-    DEBUG() << "Mounting" << host << "to" << m_point << is_mounted;
+    DEBUG() << "Mounting" << host << "to" << mount_point << is_mounted;
     if(is_mounted && !force)
     {
-        WARN() << "Share" << this->s_host << "is already mounted to" << this->m_point;
+        WARN() << "Share" << this->s_host << "is already mounted to" << this->m_mount_point;
         return true;
     }
 
     this->s_host = host;
-    this->m_point = m_point;
+    this->m_mount_point = mount_point;
 
-    QDir tmpdir(m_point);
+    QDir tmpdir(mount_point);
     if(!tmpdir.exists())
     {
         if(!tmpdir.mkpath(tmpdir.path()))
@@ -54,13 +54,13 @@ bool MountPointInfo::mount(const QString &host, const QString &m_point, const QS
     else
         params << "guest";
     params << host;
-    params << m_point;
+    params << mount_point;
 
     cmd.start("sudo", params);
 
     if (!cmd.waitForStarted())
     {
-        ERROR() << "Cannot mount point" << s_host << "to" << m_point;
+        ERROR() << "Cannot mount point" << s_host << "to" << mount_point;
         is_mounted = false;
     }
 
@@ -86,21 +86,21 @@ bool MountPointInfo::unmount(bool force)
     #ifdef Q_OS_UNIX
     if(!this->is_mounted && !force)
     {
-        WARN() << "Share" << this->s_host << "is not mounted to" << this->m_point;
+        WARN() << "Share" << this->s_host << "is not mounted to" << this->m_mount_point;
         return false;
     }
 
     QProcess cmd;
     QStringList params;
     params << "umount";
-    params << this->m_point;
+    params << this->m_mount_point;
 
     cmd.start("sudo", params);
 
     is_mounted = false;
     if (!cmd.waitForStarted())
     {
-        ERROR() << "Cannot unmount point" << s_host << "from" << m_point;
+        ERROR() << "Cannot unmount point" << s_host << "from" << m_mount_point;
         is_mounted = true;
     }
 
@@ -129,5 +129,5 @@ QString MountPointInfo::host()
 
 QString MountPointInfo::mountPoint()
 {
-    return m_point;
+    return m_mount_point;
 }

@@ -70,6 +70,19 @@ PluginManagerImpl::PluginManagerImpl(SDK::Core* core):
 PluginManagerImpl::~PluginManagerImpl()
 {
     STUB();
+    QMutableHashIterator<SDK::PluginRole, QList<SDK::AbstractPluginObject*>> iter(m_plugin_objects);
+    while(iter.hasNext())
+    {
+        iter.next();
+        QMutableListIterator<SDK::AbstractPluginObject*> list_it(iter.value());
+        while(list_it.hasNext())
+        {
+            list_it.next();
+            delete list_it.value();
+            list_it.remove();
+        }
+        iter.remove();
+    }
 }
 
 SDK::PluginErrorCodes PluginManagerImpl::listPlugins()
@@ -180,14 +193,14 @@ QList<QSharedPointer<SDK::Plugin>> PluginManagerImpl::getPlugins(SDK::PluginRole
     return result;
 }
 
-QSharedPointer<SDK::AbstractPluginObject> PluginManagerImpl::getByRole(SDK::PluginRole role, bool show_warning) const
+SDK::AbstractPluginObject* PluginManagerImpl::getByRole(SDK::PluginRole role, bool show_warning) const
 {
-    QList<QSharedPointer<SDK::AbstractPluginObject>> list = m_plugin_objects.value(role);
+    QList<SDK::AbstractPluginObject*> list = m_plugin_objects.value(role);
     if(!list.isEmpty())
         return list.first(); // TODO: Add some criteria to select
     if(show_warning)
         ERROR() << qPrintable(QString("Plugin for role %1 not found!").arg(role));
-    return QSharedPointer<SDK::AbstractPluginObject>(NULL);
+    return NULL;
 }
 
 
@@ -307,11 +320,11 @@ SDK::PluginErrorCodes PluginManagerImpl::initPlugins()
     if(m_plugins.size() == 0)
         return SDK::PLUGIN_ERROR_NOT_INITIALIZED;
 
-    for(QSharedPointer<SDK::Plugin> plugin: m_plugins)
+    for(QSharedPointer<SDK::Plugin>& plugin: m_plugins)
     {
         for(SDK::PluginDependency dep: plugin->dependencies())
         {
-            for(QSharedPointer<SDK::Plugin> pl: m_plugins)
+            for(QSharedPointer<SDK::Plugin>& pl: m_plugins)
             {
                 if(pl == plugin) continue;
 
@@ -334,7 +347,7 @@ SDK::PluginErrorCodes PluginManagerImpl::initPlugins()
         }
     }
 
-    for(QSharedPointer<SDK::Plugin> plugin: m_plugins)
+    for(QSharedPointer<SDK::Plugin>& plugin: m_plugins)
     {
         if(plugin->isActive() && plugin->getState() == SDK::PLUGIN_STATE_NOT_INITIALIZED)
         {
@@ -352,7 +365,7 @@ SDK::PluginErrorCodes PluginManagerImpl::initPlugins()
                           .arg(QString("STATUS").leftJustified(16)));
     LOG() << qPrintable(QString(66, '-')) ;
 
-    for(QSharedPointer<SDK::Plugin> plugin: m_plugins)
+    for(const QSharedPointer<SDK::Plugin>& plugin: m_plugins)
     {
         LOG() << qPrintable(QString("|%1|%2|%3|%4|")
                               .arg(plugin->getName().leftJustified(30))
@@ -407,8 +420,8 @@ void PluginManagerImpl::onPluginUnloaded()
 
 void PluginManagerImpl::onPluginInitialized()
 {
-    SDK::Plugin* plugin = qobject_cast<SDK::Plugin*>(sender());
-    STUB() << plugin->getName();
+    SDK::Plugin* pl = qobject_cast<SDK::Plugin*>(sender());
+    STUB() << pl->getName();
     for(QSharedPointer<SDK::Plugin> plugin: m_plugins)
     {
         initializePlugin(plugin.data());
@@ -482,7 +495,7 @@ SDK::PluginErrorCodes PluginManagerImpl::initializePlugin(SDK::Plugin *plugin, b
         {
             for(SDK::PluginRole role: plugin->roles().keys())
             {
-                QList<QSharedPointer<SDK::AbstractPluginObject>> list = m_plugin_objects.value(role);
+                QList<SDK::AbstractPluginObject*> list = m_plugin_objects.value(role);
                 list.append(plugin->roles().value(role));
                 m_plugin_objects.insert(role, list);
             }
@@ -555,4 +568,5 @@ QStringList PluginManagerImpl::getDependencyNames(QList<SDK::PluginDependency> l
         result.append(item.roleName());
     return result;
 }
+
 

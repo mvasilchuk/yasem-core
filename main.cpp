@@ -2,6 +2,7 @@
 #include "coreimpl.h"
 #include "pluginmanagerimpl.h"
 #include "profilemanageimpl.h"
+#include "datasourcefactoryimpl.h"
 #include "loggercore.h"
 #include "yasemapplication.h"
 #include "profileconfigparserimpl.h"
@@ -152,6 +153,9 @@ int main(int argc, char *argv[])
 
     SDK::PluginManager::setInstance(new PluginManagerImpl(core));
     a.setProperty("PluginManager", QVariant::fromValue(SDK::PluginManager::instance()));
+
+    SDK::DatasourceFactory::instance(new DatasourceFactoryImpl(core));
+    a.setProperty("DatasourceFactory", QVariant::fromValue(SDK::DatasourceFactory::instance()));
 
 #ifndef STATIC_BUILD
     SDK::PluginErrorCodes listResult = SDK::PluginManager::instance()->listPlugins();

@@ -46,7 +46,8 @@ SOURCES += main.cpp \
     networkstatisticsimpl.cpp \
     statisticsimpl.cpp \
     systemstatisticsimpl.cpp \
-    configimpl.cpp
+    configimpl.cpp \
+    datasourcefactoryimpl.cpp
 
 HEADERS += \
     pluginmanagerimpl.h \
@@ -63,7 +64,7 @@ HEADERS += \
     statisticsimpl.h \
     systemstatisticsimpl.h \
     configimpl.h \
-    $${SDK_DIR}/gui.h
+    datasourcefactoryimpl.h
 
 unix:!mac{
   QMAKE_LFLAGS += -Wl,--rpath=\\\$\$ORIGIN/

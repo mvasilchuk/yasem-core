@@ -1,8 +1,6 @@
 #include "profilemanageimpl.h"
 #include "core.h"
-#include "datasourcepluginobject.h"
-#include "datasourcepluginobject.h"
-#include "datasourceplugin.h"
+#include "datasourcefactory.h"
 #include "stbpluginobject.h"
 #include "browser.h"
 #include "mediaplayer.h"
@@ -10,6 +8,7 @@
 #include "statistics.h"
 #include "webpage.h"
 #include "networkstatistics.h"
+#include "datasource.h"
 
 #include <QFile>
 #include <QDir>
@@ -20,28 +19,33 @@ using namespace yasem;
 ProfileManageImpl::ProfileManageImpl(QObject *parent):
     SDK::ProfileManager(parent)
 {
-    activeProfile = NULL;
     profilesDir = QFileInfo(SDK::Core::instance()->settings()->fileName()).absoluteDir();
 }
 
 ProfileManageImpl::~ProfileManageImpl()
 {
     STUB();
-    m_profiles_stack.clear();
-    qDeleteAll(m_profiles_list);
+    QMutableSetIterator<QSharedPointer<SDK::Profile>> iter(m_profiles_list);
+    while(iter.hasNext())
+    {
+        iter.next();
+        iter.value()->clean();
+        iter.remove();
+    }
+
 }
 
-QSet<SDK::Profile *> ProfileManageImpl::getProfiles()
+QSet<QSharedPointer<SDK::Profile>> ProfileManageImpl::getProfiles()
 {
     return m_profiles_list;
 }
 
-SDK::Profile *ProfileManageImpl::getActiveProfile()
+QSharedPointer<SDK::Profile> ProfileManageImpl::getActiveProfile()
 {
     return activeProfile;
 }
 
-void ProfileManageImpl::addProfile(SDK::Profile *profile)
+void ProfileManageImpl::addProfile(QSharedPointer<SDK::Profile> profile)
 {
     Q_ASSERT(profile);
     if(!m_profiles_list.contains(profile))
@@ -51,13 +55,13 @@ void ProfileManageImpl::addProfile(SDK::Profile *profile)
     }
 }
 
-void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
+void ProfileManageImpl::setActiveProfile(QSharedPointer<SDK::Profile> profile)
 {
-    if(activeProfile != NULL)
+    if(activeProfile)
         activeProfile->stop();
 
     Q_ASSERT(profile);
-    foreach (SDK::Profile* item, m_profiles_list) {
+    foreach (const QSharedPointer<SDK::Profile>& item, m_profiles_list) {
         if(item == profile)
         {
             activeProfile = profile;
@@ -65,8 +69,8 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
 
             qDebug() << QString("Active profile: %1").arg(profile->getName());
 
-            SDK::Browser* browser = SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
-            if(browser != NULL)
+            SDK::Browser* browser = SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER);
+            if(browser)
             {
                 browser->setTopWidget(SDK::Browser::TOP_WIDGET_BROWSER);
                 SDK::WebPage* page = browser->getFirstPage();
@@ -82,7 +86,7 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile *profile)
             SDK::Core::instance()->statistics()->network()->reset();
             profile->start();
 
-            SDK::MediaPlayer* player = SDK::__get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA);
+            SDK::MediaPlayer* player = SDK::__get_plugin<SDK::MediaPlayer>(SDK::ROLE_MEDIA);
             if(player != NULL && player->isInitialized())
                 player->mediaStop();
             else
@@ -154,7 +158,7 @@ void ProfileManageImpl::loadDefaultKeymapFileIfNotExists(QSettings& keymap, cons
     }
 }
 
-void ProfileManageImpl::loadProfileKeymap(SDK::Profile *profile)
+void ProfileManageImpl::loadProfileKeymap(QSharedPointer<SDK::Profile> profile)
 {
     DEBUG() << "Loading keymap for profile" << profile->getName();
     QString classId = profile->getProfilePlugin()->getProfileClassId();
@@ -170,7 +174,7 @@ void ProfileManageImpl::loadProfileKeymap(SDK::Profile *profile)
     keymap.beginGroup("keymap");
     QStringList keys = keymap.allKeys();
 
-    SDK::Browser* browser = profile->getProfilePlugin()->browser();
+    SDK::Browser* browser = SDK::Browser::instance();
     if(browser)
         browser->clearKeyEvents();
 
@@ -228,7 +232,7 @@ void ProfileManageImpl::loadProfileKeymap(SDK::Profile *profile)
     DEBUG() << "Keymap loaded";
 }
 
-bool ProfileManageImpl::removeProfile(SDK::Profile *profile)
+bool ProfileManageImpl::removeProfile(QSharedPointer<SDK::Profile> profile)
 {
     if(profile == activeProfile)
         return false;
@@ -267,8 +271,6 @@ void ProfileManageImpl::loadProfiles()
 
     profilesDir.setNameFilters(QStringList() << "*.ini");
 
-    SDK::DatasourcePlugin* dsPlugin = SDK::__get_plugin<SDK::DatasourcePlugin*>(SDK::PluginRole::ROLE_DATASOURCE);
-
     foreach (QString fileName, profilesDir.entryList(QDir::Files | QDir::NoSymLinks | QDir::Readable))
     {
         DEBUG() << "Loading profile from" << fileName;
@@ -286,27 +288,24 @@ void ProfileManageImpl::loadProfiles()
 
         SDK::Profile* profile = stbPlugin->createProfile(s.value("uuid").toString());
         Q_ASSERT(profile);
-        profile->datasource(dsPlugin->getDatasourceForProfile(profile));
         profile->setName(s.value("name").toString());
         profile->setSubmodel(stbPlugin->getSubmodels().at(s.value("submodel").toInt()));
         DEBUG() << "Profile" << profile->getName() << "loaded";
 
         s.endGroup();
 
-        m_profiles_list.insert(profile);
+        m_profiles_list.insert(QSharedPointer<SDK::Profile>(profile));
     }
 }
 
-SDK::Profile* ProfileManageImpl::createProfile(const QString &classId, const QString &submodel, const QString &baseName = "", bool overwrite = false)
+QSharedPointer<SDK::Profile> ProfileManageImpl::createProfile(const QString &classId, const QString &submodel, const QString &baseName = "", bool overwrite = false)
 {
     DEBUG() << "Creaing profile" << classId << baseName << submodel << baseName;
-    SDK::DatasourcePluginObject* dsPlugin = SDK::__get_plugin<SDK::DatasourcePluginObject*>(SDK::PluginRole::ROLE_DATASOURCE);
 
     SDK::StbPluginObject* stbPlugin = getProfilePluginByClassId(classId);
-    SDK::Profile* profile = stbPlugin->createProfile();
+    QSharedPointer<SDK::Profile> profile(stbPlugin->createProfile());
 
     profile->setName(createUniqueName(classId, baseName, overwrite));
-    profile->datasource(dsPlugin->getDatasourceForProfile(profile));
     profile->setSubmodel(stbPlugin->findSubmodel(submodel));
     profile->datasource()->set("profile", "uuid", profile->getId());
     profile->datasource()->set("profile", "name", profile->getName());
@@ -318,23 +317,23 @@ SDK::Profile* ProfileManageImpl::createProfile(const QString &classId, const QSt
 
 void ProfileManageImpl::registerProfileClassId(const QString &classId, SDK::StbPluginObject* profilePlugin)
 {
-    if(!profileClasses.contains(classId))
+    if(!m_profile_classes.contains(classId))
     {
         qDebug() << "Registered" << classId << "as profile class ID";
-        profileClasses.insert(classId, profilePlugin);
+        m_profile_classes.insert(classId, profilePlugin);
     }
     else
         WARN() << "Profile class ID" << classId <<  "has bee already registered!";
 }
 
-QMap<QString, SDK::StbPluginObject *> ProfileManageImpl::getRegisteredClasses()
+QMap<QString, SDK::StbPluginObject*> ProfileManageImpl::getRegisteredClasses()
 {
-    return profileClasses;
+    return m_profile_classes;
 }
 
-SDK::StbPluginObject *ProfileManageImpl::getProfilePluginByClassId(const QString &classId)
+SDK::StbPluginObject* ProfileManageImpl::getProfilePluginByClassId(const QString &classId)
 {
-    for(auto iterator = profileClasses.begin(); iterator != profileClasses.end(); iterator++)
+    for(auto iterator = m_profile_classes.begin(); iterator != m_profile_classes.end(); iterator++)
     {
         if(iterator.key() == classId)
             return iterator.value();
@@ -344,9 +343,9 @@ SDK::StbPluginObject *ProfileManageImpl::getProfilePluginByClassId(const QString
     return NULL;
 }
 
-SDK::Profile *ProfileManageImpl::findById(const QString &id)
+QSharedPointer<SDK::Profile> ProfileManageImpl::findById(const QString &id)
 {
-    foreach (SDK::Profile* profile, m_profiles_list) {
+    foreach (const QSharedPointer<SDK::Profile>& profile, m_profiles_list) {
         if(id == profile->getId())
         {
             DEBUG() << "PROFILE: " << profile;
@@ -355,12 +354,12 @@ SDK::Profile *ProfileManageImpl::findById(const QString &id)
     }
 
     ERROR() << QString("Profile '%1' not found!").arg(id);
-    return NULL;
+    return QSharedPointer<SDK::Profile>(NULL);
 }
 
-SDK::Profile *ProfileManageImpl::findByName(const QString &id)
+QSharedPointer<SDK::Profile> ProfileManageImpl::findByName(const QString &id)
 {
-    foreach (SDK::Profile* profile, m_profiles_list) {
+    foreach (const QSharedPointer<SDK::Profile>& profile, m_profiles_list) {
         if(id == profile->getName())
         {
             DEBUG() << "PROFILE: " << profile;
@@ -369,19 +368,19 @@ SDK::Profile *ProfileManageImpl::findByName(const QString &id)
     }
 
     ERROR() << QString("Profile '%1' not found!").arg(id);
-    return NULL;
+    return QSharedPointer<SDK::Profile>(NULL);
 }
 
-SDK::Profile *ProfileManageImpl::backToPreviousProfile()
+QSharedPointer<SDK::Profile> ProfileManageImpl::backToPreviousProfile()
 {
     qDebug() << "profiles:" << m_profiles_stack.size();
     if(m_profiles_stack.size() < 1)
-        return NULL;
+        return QSharedPointer<SDK::Profile>(NULL);
 
-    SDK::Profile* currentProfile = m_profiles_stack.pop();
+    QSharedPointer<SDK::Profile> currentProfile = m_profiles_stack.pop();
     if(m_profiles_stack.size() < 1) return currentProfile;
 
-    SDK::Profile* profile = m_profiles_stack.pop();
+    QSharedPointer<SDK::Profile> profile = m_profiles_stack.pop();
     Q_ASSERT(profile);
     setActiveProfile(profile);
     return profile;
@@ -393,7 +392,7 @@ void ProfileManageImpl::backToMainPage()
         return;
 
     m_profiles_stack.resize(1);
-    SDK::Profile* profile = m_profiles_stack.at(0);
+    QSharedPointer<SDK::Profile> profile = m_profiles_stack.at(0);
     setActiveProfile(profile);
 }
 
@@ -410,9 +409,8 @@ QString ProfileManageImpl::createUniqueName(const QString &classId, const QStrin
     QRegularExpression rx(QString("^%1(?:\\s\\#(\\d+))?$").arg(newProfileName));
     int maxIndex = 0;
 
-    foreach(SDK::Profile* profile, ProfileManager::instance()->getProfiles())
+    foreach(const QSharedPointer<SDK::Profile>& profile, ProfileManager::instance()->getProfiles())
     {
-
         auto match = rx.match(profile->getName());
         if(match.hasMatch())
         {

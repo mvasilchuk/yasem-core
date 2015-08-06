@@ -6,6 +6,7 @@
 #include "plugindependency.h"
 
 #include <QObject>
+#include <QHash>
 
 namespace yasem {
 
@@ -22,7 +23,7 @@ public:
     virtual SDK::PluginErrorCodes deinitPlugins();
     //virtual PLUGIN_ERROR_CODES connectSlots();
     virtual QList<QSharedPointer<SDK::Plugin>> getPlugins(SDK::PluginRole role = SDK::ROLE_ANY, bool active_only = true);
-    virtual QSharedPointer<SDK::AbstractPluginObject> getByRole(SDK::PluginRole role, bool show_warning = true) const;
+    virtual SDK::AbstractPluginObject* getByRole(SDK::PluginRole role, bool show_warning = true) const;
     virtual QSharedPointer<SDK::Plugin> getByIID(const QString &iid);
     virtual void setPluginDir(const QString &pluginDir);
     virtual QString getPluginDir();
@@ -37,6 +38,10 @@ protected:
     void registerPluginRole(const SDK::PluginRole &role, const SDK::PluginRoleData &data);
 
     SDK::ConfigContainer* m_plugins_config;
+    QList<QSharedPointer<SDK::Plugin>> m_plugins;
+    QHash<SDK::PluginRole, QList<SDK::AbstractPluginObject*>> m_plugin_objects;
+    QString m_plugin_dir;
+    QHash<SDK::PluginRole, SDK::PluginRoleData> m_plugin_roles;
 
 protected slots:
     void onPluginLoaded();

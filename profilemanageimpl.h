@@ -25,21 +25,21 @@ public slots:
 
     // ProfileManager interface
 public:
-    QSet<SDK::Profile *> getProfiles();
-    SDK::Profile *getActiveProfile();
-    void addProfile(SDK::Profile *profile);
-    void setActiveProfile(SDK::Profile *profile);
-    bool removeProfile(SDK::Profile *profile);
+    QSet<QSharedPointer<SDK::Profile>> getProfiles();
+    QSharedPointer<SDK::Profile> getActiveProfile();
+    void addProfile(QSharedPointer<SDK::Profile> profile);
+    void setActiveProfile(QSharedPointer<SDK::Profile> profile);
+    bool removeProfile(QSharedPointer<SDK::Profile> profile);
     void loadProfiles();
-    SDK::Profile* createProfile(const QString &classId, const QString &submodel, const QString &baseName, bool overwrite);
+    QSharedPointer<SDK::Profile> createProfile(const QString &classId, const QString &submodel, const QString &baseName, bool overwrite);
     void registerProfileClassId(const QString &classId, SDK::StbPluginObject* profilePlugin);
     QMap<QString, SDK::StbPluginObject*> getRegisteredClasses();
-    SDK::StbPluginObject *getProfilePluginByClassId(const QString &idclassId);
-    SDK::Profile *findById(const QString &id);
-    SDK::Profile *findByName(const QString &id);
-    SDK::Profile* backToPreviousProfile();
+    SDK::StbPluginObject* getProfilePluginByClassId(const QString &idclassId);
+    QSharedPointer<SDK::Profile> findById(const QString &id);
+    QSharedPointer<SDK::Profile> findByName(const QString &id);
+    QSharedPointer<SDK::Profile> backToPreviousProfile();
 
-    void loadProfileKeymap(SDK::Profile *profile);
+    void loadProfileKeymap(QSharedPointer<SDK::Profile> profile);
 protected:
     QDir profilesDir;
     QString createUniqueName(const QString &classId, const QString &baseName, bool overwrite);

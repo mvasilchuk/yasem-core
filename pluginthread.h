@@ -12,7 +12,7 @@ class PluginThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit PluginThread(SDK::Plugin* plugin, QObject *parent = 0);
+    explicit PluginThread(SDK::Plugin* m_plugin, QObject *parent = 0);
 
 signals:
 public slots:
@@ -20,7 +20,7 @@ public slots:
 
     // QThread interface
 protected:
-    SDK::Plugin* plugin;
+    SDK::Plugin* m_plugin;
     void run();
 };
 

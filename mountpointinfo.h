@@ -14,7 +14,7 @@ public:
     explicit MountPointInfo(QObject *parent = 0);
     virtual ~MountPointInfo();
 
-    bool mount(const QString &host, const QString &m_point, const QString &options = "", bool force = false);
+    bool mount(const QString &host, const QString &m_mount_point, const QString &options = "", bool force = false);
     bool unmount(bool force = false);
     bool mounted();
     QString host();
@@ -23,7 +23,7 @@ public:
 
 protected:
     QString s_host;
-    QString m_point;
+    QString m_mount_point;
     bool is_mounted;
 
 };

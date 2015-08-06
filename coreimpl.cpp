@@ -353,7 +353,7 @@ QList<SDK::StorageInfo *> CoreImpl::storages()
 
 SDK::CoreNetwork* CoreImpl::network()
 {
-    return m_network.data();
+    return m_network;
 }
 
 QThread* CoreImpl::mainThread()
@@ -422,7 +422,7 @@ SDK::Core::VirtualMachine CoreImpl::getVM()
 }
 
 
-SDK::Config *yasem::CoreImpl::yasem_settings()
+SDK::Config* yasem::CoreImpl::yasem_settings() const
 {
     Q_ASSERT(m_yasem_settings);
     return m_yasem_settings;
