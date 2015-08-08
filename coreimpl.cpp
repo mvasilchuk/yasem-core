@@ -19,6 +19,10 @@
 #include <QStandardPaths>
 #include <QMetaEnum>
 #include <QUuid>
+#include <QFileInfoList>
+#if QT_VERSION >= 0x050400
+#include <QStorageInfo>
+#endif
 
 using namespace yasem;
 
@@ -168,8 +172,39 @@ void CoreImpl::initSettings()
     other->addItem(network_statistics);
 }
 
+
 void CoreImpl::mountPointChanged()
 {
+    m_disks.clear();
+    int counter = 1;
+
+#if QT_VERSION >= 0x050400
+    QList<QStorageInfo> drive_list = QStorageInfo::mountedVolumes();
+
+    for(const QStorageInfo &drive: drive_list)
+    {
+        SDK::StorageInfo* info = new SDK::StorageInfo();
+        info->index = counter;
+        info->blockDevice = drive.device();
+        info->mountPoint = drive.rootPath();
+        info->size = drive.bytesTotal();
+        info->available = drive.bytesAvailable();
+        info->used = info->size - info->available;
+        if(info->size > 0)
+            info->percentComplete = ((double)info->used / info->size) * 100;
+        else
+            info->percentComplete = 0;
+
+        info->model = drive.displayName();
+
+        m_disks.append(info);
+
+        DEBUG() << info->toString();
+
+        counter++;
+    }
+#else
+#if defined(Q_OS_LINUX) || defined(Q_OS_DARWIN)
     QProcess df;
     QRegularExpression dfRegEx("(/dev/\\w+\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+%)\\s+(.*)");
 
@@ -182,10 +217,6 @@ void CoreImpl::mountPointChanged()
         qWarning() << "Not finished!";
         return;
     }
-
-    m_disks.clear();
-
-    int counter = 1;
 
     QByteArray result;
     while(df.canReadLine())
@@ -219,6 +250,7 @@ void CoreImpl::mountPointChanged()
     }
 
     df.waitForFinished();
+
     buildBlockDeviceTree();
 
     for(SDK::StorageInfo* disk: m_disks)
@@ -234,7 +266,10 @@ void CoreImpl::mountPointChanged()
             }
         }
     }
+#endif // defined(Q_OS_LINUX) || defined(Q_OS_DARWIN)
+#endif
 }
+
 
 /**
  * @brief CoreImpl::buildBlockDeviceTree
@@ -246,6 +281,8 @@ void CoreImpl::mountPointChanged()
 void CoreImpl::buildBlockDeviceTree()
 {
     DEBUG() << "updateDisksExtraInfo";
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_DARWIN)
 
     QProcess hwinfo;
     hwinfo.start("hwinfo", QStringList() << "--block" );
@@ -283,19 +320,19 @@ void CoreImpl::buildBlockDeviceTree()
             {
                 switch(index) {
                     case SDK::HwinfoLineTypes::TITLE: {
-                        block_device->index = matcher.captured(1).toInt();
+                        block_device->m_index = matcher.captured(1).toInt();
                         break;
                     }
                     case SDK::HwinfoLineTypes::HARDWARE_CLASS: {
                         QString hw_class_name = matcher.captured(1);
                         if(hw_class_name == "disk")
-                            block_device->hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_DISK;
+                            block_device->m_hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_DISK;
                         else if(hw_class_name == "partition")
-                            block_device->hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_PARTITION;
+                            block_device->m_hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_PARTITION;
                         else if(hw_class_name == "cdrom")
-                            block_device->hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_CD_ROM;
+                            block_device->m_hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_CD_ROM;
                         else
-                            block_device->hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_UNKNOWN;
+                            block_device->m_hardware_type = SDK::BlockDeviceType::DEVICE_TYPE_UNKNOWN;
                         break;
                     }
                     case SDK::HwinfoLineTypes::UNIQUE_ID: {
@@ -335,15 +372,17 @@ void CoreImpl::buildBlockDeviceTree()
         }
 
         DEBUG() << "block device" << block_device->toString();
-        if(block_device->hardware_type == SDK::DEVICE_TYPE_DISK)
+        if(block_device->m_hardware_type == SDK::DEVICE_TYPE_DISK)
         {
             block_device_tree.insert(block_device->unique_id, block_device);
         }
-        else if(block_device->hardware_type == SDK::DEVICE_TYPE_PARTITION)
+        else if(block_device->m_hardware_type == SDK::DEVICE_TYPE_PARTITION)
         {
             block_device_tree.value(block_device->parent_id)->children.append(block_device);
         }
     }
+#endif // defined(Q_OS_LINUX) || defined(Q_OS_DARWIN)
+
 }
 
 QList<SDK::StorageInfo *> CoreImpl::storages()
