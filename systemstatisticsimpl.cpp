@@ -45,7 +45,7 @@ OsInfoImpl::~OsInfoImpl()
 
 QString OsInfoImpl::name() const
 {
-#if (QT_VERSION >= 0x05040)
+#if (QT_VERSION >= 0x050400)
     return QSysInfo::productType();
 #else
     return "-- old qt version --";
@@ -74,7 +74,7 @@ QString OsInfoImpl::version() const
         default: return QString("unknown:%1").arg(QSysInfo::MacintoshVersion);
     }
 #else
-#if (QT_VERSION >= 0x05040)
+#if (QT_VERSION >= 0x050400)
     return QSysInfo::kernelVersion();
 #else
     return  "-- old qt version --";
@@ -84,7 +84,7 @@ QString OsInfoImpl::version() const
 
 QString OsInfoImpl::description() const
 {
-#if (QT_VERSION >= 0x05040)
+#if (QT_VERSION >= 0x050400)
     return QSysInfo::prettyProductName();
 #else
     return  "-- old qt version --";
