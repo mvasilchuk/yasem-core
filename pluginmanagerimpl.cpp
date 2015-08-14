@@ -193,11 +193,31 @@ QList<QSharedPointer<SDK::Plugin>> PluginManagerImpl::getPlugins(SDK::PluginRole
     return result;
 }
 
-SDK::AbstractPluginObject* PluginManagerImpl::getByRole(SDK::PluginRole role, bool show_warning) const
+SDK::AbstractPluginObject* PluginManagerImpl::getByRole(SDK::PluginRole role, bool show_warning)
 {
     QList<SDK::AbstractPluginObject*> list = m_plugin_objects.value(role);
     if(!list.isEmpty())
         return list.first(); // TODO: Add some criteria to select
+    for(int index = 0; index < m_plugins.size(); index++)
+    {
+        QSharedPointer<SDK::Plugin> plugin = m_plugins.at(index);
+        if(!plugin->isActive()) continue;
+        for(SDK::PluginRole pluginRole: plugin->roles().keys())
+        {
+            if(pluginRole == role)
+            {
+                Q_ASSERT(plugin);
+                SDK::AbstractPluginObject* obj = plugin->roles().value(pluginRole);
+                if(obj->isInitialized())
+                {
+                    list.append(obj);
+                    m_plugin_objects.insert(role, list);
+                    return obj;
+                }
+            }
+        }
+    }
+
     if(show_warning)
         ERROR() << qPrintable(QString("Plugin for role %1 not found!").arg(role));
     return NULL;
