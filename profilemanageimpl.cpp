@@ -69,7 +69,7 @@ void ProfileManageImpl::setActiveProfile(QSharedPointer<SDK::Profile> profile)
 
             qDebug() << QString("Active profile: %1").arg(profile->getName());
 
-            SDK::Browser* browser = SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER);
+            SDK::Browser* browser = SDK::Browser::instance();
             if(browser)
             {
                 browser->setTopWidget(SDK::Browser::TOP_WIDGET_BROWSER);
@@ -86,8 +86,8 @@ void ProfileManageImpl::setActiveProfile(QSharedPointer<SDK::Profile> profile)
             SDK::Core::instance()->statistics()->network()->reset();
             profile->start();
 
-            SDK::MediaPlayer* player = SDK::__get_plugin<SDK::MediaPlayer>(SDK::ROLE_MEDIA);
-            if(player != NULL && player->isInitialized())
+            SDK::MediaPlayer* player = SDK::MediaPlayer::instance();
+            if(player && player->isInitialized())
                 player->mediaStop();
             else
                 qDebug() << "[V] No player found!";
