@@ -14,13 +14,6 @@ DatasourceFactoryImpl::DatasourceFactoryImpl(QObject* parent):
 DatasourceFactoryImpl::~DatasourceFactoryImpl()
 {
     STUB();
-    /*QMutableHashIterator<const SDK::Profile*, SDK::Datasource*> iter(m_plugin_datasources);
-    while(iter.hasNext())
-    {
-        iter.next();
-        delete iter.value();
-        iter.remove();
-    }*/
 }
 
 SDK::Datasource* DatasourceFactoryImpl::forProfile(const SDK::Profile *profile)

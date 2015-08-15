@@ -70,19 +70,6 @@ PluginManagerImpl::PluginManagerImpl(SDK::Core* core):
 PluginManagerImpl::~PluginManagerImpl()
 {
     STUB();
-    QMutableHashIterator<SDK::PluginRole, QList<SDK::AbstractPluginObject*>> iter(m_plugin_objects);
-    while(iter.hasNext())
-    {
-        iter.next();
-        QMutableListIterator<SDK::AbstractPluginObject*> list_it(iter.value());
-        while(list_it.hasNext())
-        {
-            list_it.next();
-            delete list_it.value();
-            list_it.remove();
-        }
-        iter.remove();
-    }
 }
 
 SDK::PluginErrorCodes PluginManagerImpl::listPlugins()
