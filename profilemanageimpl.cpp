@@ -25,27 +25,22 @@ ProfileManageImpl::ProfileManageImpl(QObject *parent):
 ProfileManageImpl::~ProfileManageImpl()
 {
     STUB();
-    QMutableSetIterator<QSharedPointer<SDK::Profile>> iter(m_profiles_list);
-    while(iter.hasNext())
-    {
-        iter.next();
-        iter.value()->clean();
-        iter.remove();
-    }
+    qDeleteAll(m_profiles_list);
+    qDeleteAll(m_profile_classes);
 
 }
 
-QSet<QSharedPointer<SDK::Profile>> ProfileManageImpl::getProfiles()
+QSet<SDK::Profile*> ProfileManageImpl::getProfiles()
 {
     return m_profiles_list;
 }
 
-QSharedPointer<SDK::Profile> ProfileManageImpl::getActiveProfile()
+SDK::Profile* ProfileManageImpl::getActiveProfile()
 {
-    return activeProfile;
+    return m_active_profile;
 }
 
-void ProfileManageImpl::addProfile(QSharedPointer<SDK::Profile> profile)
+void ProfileManageImpl::addProfile(SDK::Profile* profile)
 {
     Q_ASSERT(profile);
     if(!m_profiles_list.contains(profile))
@@ -55,16 +50,20 @@ void ProfileManageImpl::addProfile(QSharedPointer<SDK::Profile> profile)
     }
 }
 
-void ProfileManageImpl::setActiveProfile(QSharedPointer<SDK::Profile> profile)
+void ProfileManageImpl::setActiveProfile(SDK::Profile* profile)
 {
-    if(activeProfile)
-        activeProfile->stop();
+    STUB() << profile;
+    if(m_active_profile)
+    {
+        m_active_profile->stop();
+        m_active_profile->cleanApi();
+    }
 
     Q_ASSERT(profile);
-    foreach (const QSharedPointer<SDK::Profile>& item, m_profiles_list) {
+    foreach (const SDK::Profile* item, m_profiles_list) {
         if(item == profile)
         {
-            activeProfile = profile;
+            m_active_profile = profile;
             SDK::Core::instance()->settings()->setValue("active_profile", profile->getId());
 
             qDebug() << QString("Active profile: %1").arg(profile->getName());
@@ -158,7 +157,7 @@ void ProfileManageImpl::loadDefaultKeymapFileIfNotExists(QSettings& keymap, cons
     }
 }
 
-void ProfileManageImpl::loadProfileKeymap(QSharedPointer<SDK::Profile> profile)
+void ProfileManageImpl::loadProfileKeymap(SDK::Profile* profile)
 {
     DEBUG() << "Loading keymap for profile" << profile->getName();
     QString classId = profile->getProfilePlugin()->getProfileClassId();
@@ -232,9 +231,9 @@ void ProfileManageImpl::loadProfileKeymap(QSharedPointer<SDK::Profile> profile)
     DEBUG() << "Keymap loaded";
 }
 
-bool ProfileManageImpl::removeProfile(QSharedPointer<SDK::Profile> profile)
+bool ProfileManageImpl::removeProfile(SDK::Profile* profile)
 {
-    if(profile == activeProfile)
+    if(profile == m_active_profile)
         return false;
 
     QFile file(profilesDir.path().append("/").append(profile->getId()).append(".ini"));
@@ -294,16 +293,16 @@ void ProfileManageImpl::loadProfiles()
 
         s.endGroup();
 
-        m_profiles_list.insert(QSharedPointer<SDK::Profile>(profile));
+        m_profiles_list.insert(profile);
     }
 }
 
-QSharedPointer<SDK::Profile> ProfileManageImpl::createProfile(const QString &classId, const QString &submodel, const QString &baseName = "", bool overwrite = false)
+SDK::Profile* ProfileManageImpl::createProfile(const QString &classId, const QString &submodel, const QString &baseName = "", bool overwrite = false)
 {
     DEBUG() << "Creaing profile" << classId << baseName << submodel << baseName;
 
     SDK::StbPluginObject* stbPlugin = getProfilePluginByClassId(classId);
-    QSharedPointer<SDK::Profile> profile(stbPlugin->createProfile());
+    SDK::Profile* profile(stbPlugin->createProfile());
 
     profile->setName(createUniqueName(classId, baseName, overwrite));
     profile->setSubmodel(stbPlugin->findSubmodel(submodel));
@@ -343,9 +342,9 @@ SDK::StbPluginObject* ProfileManageImpl::getProfilePluginByClassId(const QString
     return NULL;
 }
 
-QSharedPointer<SDK::Profile> ProfileManageImpl::findById(const QString &id)
+SDK::Profile* ProfileManageImpl::findById(const QString &id)
 {
-    foreach (const QSharedPointer<SDK::Profile>& profile, m_profiles_list) {
+    foreach (SDK::Profile* profile, m_profiles_list) {
         if(id == profile->getId())
         {
             DEBUG() << "PROFILE: " << profile;
@@ -354,12 +353,12 @@ QSharedPointer<SDK::Profile> ProfileManageImpl::findById(const QString &id)
     }
 
     ERROR() << QString("Profile '%1' not found!").arg(id);
-    return QSharedPointer<SDK::Profile>(NULL);
+    return NULL;
 }
 
-QSharedPointer<SDK::Profile> ProfileManageImpl::findByName(const QString &id)
+SDK::Profile* ProfileManageImpl::findByName(const QString &id)
 {
-    foreach (const QSharedPointer<SDK::Profile>& profile, m_profiles_list) {
+    foreach (SDK::Profile* profile, m_profiles_list) {
         if(id == profile->getName())
         {
             DEBUG() << "PROFILE: " << profile;
@@ -368,19 +367,19 @@ QSharedPointer<SDK::Profile> ProfileManageImpl::findByName(const QString &id)
     }
 
     ERROR() << QString("Profile '%1' not found!").arg(id);
-    return QSharedPointer<SDK::Profile>(NULL);
+    return NULL;
 }
 
-QSharedPointer<SDK::Profile> ProfileManageImpl::backToPreviousProfile()
+SDK::Profile* ProfileManageImpl::backToPreviousProfile()
 {
     qDebug() << "profiles:" << m_profiles_stack.size();
     if(m_profiles_stack.size() < 1)
-        return QSharedPointer<SDK::Profile>(NULL);
+        return NULL;
 
-    QSharedPointer<SDK::Profile> currentProfile = m_profiles_stack.pop();
+    SDK::Profile* currentProfile = m_profiles_stack.pop();
     if(m_profiles_stack.size() < 1) return currentProfile;
 
-    QSharedPointer<SDK::Profile> profile = m_profiles_stack.pop();
+    SDK::Profile* profile = m_profiles_stack.pop();
     Q_ASSERT(profile);
     setActiveProfile(profile);
     return profile;
@@ -392,7 +391,7 @@ void ProfileManageImpl::backToMainPage()
         return;
 
     m_profiles_stack.resize(1);
-    QSharedPointer<SDK::Profile> profile = m_profiles_stack.at(0);
+    SDK::Profile* profile = m_profiles_stack.at(0);
     setActiveProfile(profile);
 }
 
@@ -409,7 +408,7 @@ QString ProfileManageImpl::createUniqueName(const QString &classId, const QStrin
     QRegularExpression rx(QString("^%1(?:\\s\\#(\\d+))?$").arg(newProfileName));
     int maxIndex = 0;
 
-    foreach(const QSharedPointer<SDK::Profile>& profile, ProfileManager::instance()->getProfiles())
+    foreach(const SDK::Profile* profile, ProfileManager::instance()->getProfiles())
     {
         auto match = rx.match(profile->getName());
         if(match.hasMatch())
