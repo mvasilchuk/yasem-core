@@ -44,7 +44,7 @@ protected:
     QDir profilesDir;
     QString createUniqueName(const QString &classId, const QString &baseName, bool overwrite);
 
-    void loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString &classId);
+    void loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString &classId, bool force_overwrite = false);
 
     // ProfileManager interface
 public:

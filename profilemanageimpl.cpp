@@ -68,11 +68,12 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile* profile)
 
             qDebug() << QString("Active profile: %1").arg(profile->getName());
 
+            SDK::GUI::instance()->setTopWidget(SDK::GUI::TOP_WIDGET_BROWSER);
+
             SDK::Browser* browser = SDK::Browser::instance();
             if(browser)
             {
-                browser->setTopWidget(SDK::Browser::TOP_WIDGET_BROWSER);
-                SDK::WebPage* page = browser->getFirstPage();
+                SDK::WebPage* page = browser->getMainWebPage();
                 page->reset();
                 SDK::StbPluginObject* stb_object = profile->getProfilePlugin();
                 stb_object->initObject(page);
@@ -101,10 +102,10 @@ void ProfileManageImpl::setActiveProfile(SDK::Profile* profile)
     qWarning() << QString("Cannot change profile '%1': not found!").arg(profile->getId());
 }
 
-void ProfileManageImpl::loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString &classId)
+void ProfileManageImpl::loadDefaultKeymapFileIfNotExists(QSettings& keymap, const QString &classId, bool force_overwrite)
 {
     QFile file(keymap.fileName());
-    if(!file.exists())
+    if(!file.exists() || force_overwrite)
     {
         QFileInfo fileInfo(file);
         QDir dir = fileInfo.absoluteDir();
@@ -164,7 +165,7 @@ void ProfileManageImpl::loadProfileKeymap(SDK::Profile* profile)
 
     QSettings keymap(SDK::Core::instance()->getConfigDir().append("keymaps/%1/default.ini").arg(classId), QSettings::IniFormat, this);
 
-    loadDefaultKeymapFileIfNotExists(keymap, classId);
+    loadDefaultKeymapFileIfNotExists(keymap, classId, true);
 
     keymap.sync();
 
