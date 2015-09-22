@@ -131,6 +131,11 @@ void LoggerCore::MessageHandler(QtMsgType type, const QMessageLogContext &contex
             }
             break;
         }
+        case LOG_TYPE_INFO:
+        {
+            output_line = QString("[INFO ][%1] %2%3\n").arg(current_time).arg(line).arg(message);
+            break;
+        }
         case LOG_TYPE_WARN:
         {
             output_line = QString("[WARN ][%1] %2%3\n").arg(current_time).arg(line).arg(message);
@@ -265,7 +270,6 @@ void LoggerCore::initLogFile(QObject* parent)
 {
     for(const QString& arg: qApp->arguments())
     {
-        qDebug() << "arg:" << arg;
         if(arg.startsWith("--log"))
         {
             QStringList data = arg.split('=');

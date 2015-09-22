@@ -36,6 +36,9 @@ CoreImpl::CoreImpl(QObject *parent ):
     Q_UNUSED(parent)
     setObjectName("Core");
 
+    parseCommandLineArgs();
+    checkCmdLineArgs();
+
 #ifdef USE_OSX_BUNDLE
     LOG() << "App dir" << qApp->applicationDirPath();
     QDir config_dir(qApp->applicationDirPath().append("/../../../config"));
@@ -385,12 +388,50 @@ void CoreImpl::buildBlockDeviceTree()
 
 }
 
+void CoreImpl::checkCmdLineArgs()
+{
+    if(m_cmd_line_args.contains("--help") || m_cmd_line_args.contains("-h"))
+    {
+        printHelp();
+    }
+}
+
+void CoreImpl::printHelp()
+{
+    const int width = 32;
+    INFO() << "Yasem (" << qPrintable(version()) << ")";
+    INFO() << "Available command line arguments:";
+    INFO() << "    "
+           << qPrintable(QString("--help or -h").leftJustified(width, ' '))
+           << "Print this help.";
+    INFO() << "    "
+           << qPrintable(QString("--color").leftJustified(width, ' '))
+           << "Colorize output (Linux/OS X only).";
+    INFO() << "    "
+           << qPrintable(QString("--fullscreen").leftJustified(width, ' '))
+           << "Run application in full screen mode.";
+    INFO() << "    "
+           << qPrintable(QString("--developer-tools").leftJustified(width, ' '))
+           << "Open developer tools on startup.";
+    INFO() << "    "
+           << qPrintable(QString("--verbose").leftJustified(width, ' '))
+           << "Add some more debug output if app built in release mode (Linux/OS X).";
+    INFO() << "    "
+           << qPrintable(QString("--log=<file name>").leftJustified(width, ' '))
+           << "Write log into a file.";
+    INFO() << "    "
+           << qPrintable(QString("--window-size=<size or auto>").leftJustified(width, ' '))
+           << "Set window size to WIDTHxHEIGHT (e.g. 1920x1080) or auto (fill screen). To fill the screen use with --fullscreen option.";
+
+    exit(0);
+}
+
 QList<SDK::StorageInfo *> CoreImpl::storages()
 {
     return m_disks;
 }
 
-SDK::CoreNetwork* CoreImpl::network()
+SDK::CoreNetwork* CoreImpl::network() const
 {
     return m_network;
 }
@@ -400,17 +441,17 @@ QThread* CoreImpl::mainThread()
     return this->thread();
 }
 
-QString CoreImpl::version()
+QString CoreImpl::version() const
 {
     return MODULE_VERSION;
 }
 
-QString CoreImpl::revision()
+QString CoreImpl::revision() const
 {
     return GIT_VERSION;
 }
 
-QString CoreImpl::compiler()
+QString CoreImpl::compiler() const
 {
     return __VERSION__;
 }
@@ -468,7 +509,7 @@ SDK::Config* yasem::CoreImpl::yasem_settings() const
 }
 
 
-SDK::Statistics *CoreImpl::statistics()
+SDK::Statistics *CoreImpl::statistics() const
 {
     Q_ASSERT(m_statistics);
     return m_statistics;
@@ -479,4 +520,27 @@ void yasem::CoreImpl::init()
 {
     m_yasem_settings->load();
     statistics()->system()->print();
+}
+
+
+void yasem::CoreImpl::parseCommandLineArgs()
+{
+    m_cmd_line_args.clear();
+    for(const QString& arg: qApp->arguments())
+    {
+        QStringList data = arg.split("=");
+        if(data.length() == 1)
+            m_cmd_line_args.insert(data[0], "");
+        else
+        {
+            QString name = data[0];
+            const QString& value = arg.right(arg.length() - name.length() - 1);
+            m_cmd_line_args.insert(name, value);
+        }
+    }
+}
+
+QHash<QString, QString> yasem::CoreImpl::arguments() const
+{
+    return m_cmd_line_args;
 }

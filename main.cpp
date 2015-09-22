@@ -1,4 +1,3 @@
-
 #include "coreimpl.h"
 #include "pluginmanagerimpl.h"
 #include "profilemanageimpl.h"
@@ -6,18 +5,17 @@
 #include "loggercore.h"
 #include "yasemapplication.h"
 #include "profileconfigparserimpl.h"
-
 #include "crashhandler.h"
 
 #include <QDebug>
 #include <signal.h>
 #include <stdio.h>
 
+using namespace yasem;
+
 #ifdef Q_OS_LINUX
 #ifndef Q_OS_ANDROID
 #include <unistd.h>
-
-using namespace yasem;
 
 void signalHandler(int signal)
 {
@@ -82,7 +80,6 @@ void stopErrorRedirect(int stdout_fd)
 #endif //Q_OS_ANDROID
 #endif //Q_OS_LINUX
 
-using namespace yasem;
 int main(int argc, char *argv[])
 {
     QString appPath = QFileInfo(argv[0]).dir().path();
@@ -126,7 +123,6 @@ int main(int argc, char *argv[])
 
     qInstallMessageHandler(LoggerCore::MessageHandler);
     YasemApplication a(argc, argv);
-    int execCode;
 
     LoggerCore::initLogFile(qApp);
 
@@ -178,7 +174,7 @@ int main(int argc, char *argv[])
     }
 
     qApp->setQuitOnLastWindowClosed(true);
-    execCode = a.exec();
+    const int execCode = a.exec();
     qDebug() <<  "Closing application... code:"  << execCode;
 
     SDK::PluginManager::instance()->deinitPlugins();

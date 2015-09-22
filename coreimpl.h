@@ -18,9 +18,39 @@ class CoreImpl : public SDK::Core
 public:
     explicit CoreImpl(QObject *parent = 0);
     virtual ~CoreImpl();
-signals:
+
+    virtual void init() Q_DECL_OVERRIDE;
+    QHash<QString, QString> arguments() const Q_DECL_OVERRIDE;
+    QSettings *settings() Q_DECL_OVERRIDE;
+    QSettings* settings(const QString &filename) Q_DECL_OVERRIDE;
+    virtual SDK::Config* yasem_settings() const Q_DECL_OVERRIDE;
+
+    QList<SDK::StorageInfo *> storages() Q_DECL_OVERRIDE;
+    virtual SDK::CoreNetwork* network() const Q_DECL_OVERRIDE;
+    virtual SDK::Statistics* statistics() const Q_DECL_OVERRIDE;
+    VirtualMachine getVM() Q_DECL_OVERRIDE;
+
+    // Core interface
+    Q_INVOKABLE QString version() const Q_DECL_OVERRIDE;
+    Q_INVOKABLE QString revision() const Q_DECL_OVERRIDE;
+    Q_INVOKABLE QString compiler() const Q_DECL_OVERRIDE;
+    Q_INVOKABLE QString getConfigDir() const Q_DECL_OVERRIDE;
+
+public slots:
+    void onClose() Q_DECL_OVERRIDE;
+    void mountPointChanged() Q_DECL_OVERRIDE;
+
+    QThread* mainThread() Q_DECL_OVERRIDE;
 
 protected:
+    void parseCommandLineArgs() Q_DECL_OVERRIDE;
+    void initBuiltInSettingsGroup();
+    void initSettings();
+    void fillKeymapHashTable();
+    void buildBlockDeviceTree();
+    void checkCmdLineArgs();
+    void printHelp();
+
     QSettings* m_app_settings;
     SDK::CoreNetwork* m_network;
     SDK::Config* m_yasem_settings;
@@ -29,40 +59,7 @@ protected:
 
     QString m_config_dir;
     VirtualMachine m_detected_vm;
-
-    void initBuiltInSettingsGroup();
-    void initSettings();
-
-    // Core interface
-    void fillKeymapHashTable();
-public slots:
-    void onClose();
-    void mountPointChanged();
-    void buildBlockDeviceTree();
-
-    QThread* mainThread();
-
-    // Core interface
-public:
-    QSettings *settings();
-    QSettings* settings(const QString &filename);
-    virtual SDK::Config* yasem_settings() const;
-
-    QList<SDK::StorageInfo *> storages();
-    SDK::CoreNetwork* network();
-    SDK::Statistics* statistics();
-    VirtualMachine getVM();
-
-    // Core interface
-    Q_INVOKABLE QString version();
-    Q_INVOKABLE QString revision();
-    Q_INVOKABLE QString compiler();
-    Q_INVOKABLE QString getConfigDir() const;
-
-
-    // Core interface
-public:
-    virtual void init();
+    QHash<QString, QString> m_cmd_line_args;
 };
 
 }
