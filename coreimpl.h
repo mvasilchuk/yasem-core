@@ -29,6 +29,7 @@ public:
     virtual SDK::CoreNetwork* network() const Q_DECL_OVERRIDE;
     virtual SDK::Statistics* statistics() const Q_DECL_OVERRIDE;
     VirtualMachine getVM() Q_DECL_OVERRIDE;
+    bool featureAvailable(const Feature feature) const Q_DECL_OVERRIDE;
 
     // Core interface
     Q_INVOKABLE QString version() const Q_DECL_OVERRIDE;
@@ -56,10 +57,15 @@ protected:
     SDK::Config* m_yasem_settings;
     SDK::Statistics* m_statistics;
     QList<SDK::StorageInfo *> m_disks;
+    Features m_features;
 
     QString m_config_dir;
     VirtualMachine m_detected_vm;
     QHash<QString, QString> m_cmd_line_args;
+
+    // Core interface
+public:
+
 };
 
 }

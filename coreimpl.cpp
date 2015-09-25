@@ -38,6 +38,7 @@ CoreImpl::CoreImpl(QObject *parent ):
 
     parseCommandLineArgs();
     checkCmdLineArgs();
+    getVM();
 
 #ifdef USE_OSX_BUNDLE
     LOG() << "App dir" << qApp->applicationDirPath();
@@ -422,6 +423,9 @@ void CoreImpl::printHelp()
     INFO() << "    "
            << qPrintable(QString("--window-size=<size or auto>").leftJustified(width, ' '))
            << "Set window size to WIDTHxHEIGHT (e.g. 1920x1080) or auto (fill screen). To fill the screen use with --fullscreen option.";
+    INFO() << "    "
+           << qPrintable(QString("--no-opengl").leftJustified(width, ' '))
+           << "Disable OpenGL rendering.";
 
     exit(0);
 }
@@ -498,6 +502,9 @@ SDK::Core::VirtualMachine CoreImpl::getVM()
         LOG() << "Virtual machine" << staticMetaObject.enumerator(keyEnumIndex).valueToKey(m_detected_vm) << "detected. OpenGL rendering will be disabled.";
     }
 
+    if(m_detected_vm == VM_VIRTUAL_BOX)
+        m_features ^= FEATURE_OPENGL;
+
     return m_detected_vm;
 }
 
@@ -538,9 +545,19 @@ void yasem::CoreImpl::parseCommandLineArgs()
             m_cmd_line_args.insert(name, value);
         }
     }
+
+    if(!m_cmd_line_args.contains("--no-opengl"))
+        m_features |= FEATURE_OPENGL;
+
 }
 
 QHash<QString, QString> yasem::CoreImpl::arguments() const
 {
     return m_cmd_line_args;
+}
+
+
+bool yasem::CoreImpl::featureAvailable(const SDK::Core::Feature feature) const
+{
+    return m_features.testFlag(feature);
 }
